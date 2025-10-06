@@ -1,18 +1,37 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Personal_Finance_System_BE</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PersonalFinanceSys.Domain\" />
+    <Folder Include="PersonalFinanceSys.Api\Controllers\" />
+    <Folder Include="PersonalFinanceSys.Application\Interfaces\" />
+    <Folder Include="PersonalFinanceSys.Application\DTOs\" />
+    <Folder Include="PersonalFinanceSys.Application\UseCases\" />
+    <Folder Include="PersonalFinanceSys.Domain\Entities\" />
+    <Folder Include="PersonalFinanceSys.Domain\Exceptions\" />
+    <Folder Include="PersonalFinanceSys.Infrastructure\Data\Entities\" />
+    <Folder Include="PersonalFinanceSys.Infrastructure\Mapping\" />
+    <Folder Include="PersonalFinanceSys.Infrastructure\Data\" />
+    <Folder Include="PersonalFinanceSys.Infrastructure\Repositories\" />
   </ItemGroup>
 
 </Project>
