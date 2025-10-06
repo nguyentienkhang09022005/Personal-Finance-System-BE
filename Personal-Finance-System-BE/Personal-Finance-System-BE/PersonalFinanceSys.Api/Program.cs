@@ -1,5 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
 
+DotNetEnv.Env.Load();
+
+builder.Configuration["ConnectionStrings:PostgreSQLConnection"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__PostgreSQLConnection");
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
