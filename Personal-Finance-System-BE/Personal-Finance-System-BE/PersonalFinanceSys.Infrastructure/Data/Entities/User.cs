@@ -1,4 +1,7 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 public partial class User
 {
@@ -21,4 +24,6 @@ public partial class User
     public bool? IsDarkmode { get; set; }
 
     public DateTime? CreateAt { get; set; }
+
+    public virtual ICollection<Otp> Otps { get; set; } = new List<Otp>();
 }

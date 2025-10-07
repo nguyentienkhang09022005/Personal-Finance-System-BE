@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>
@@ -23,16 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PersonalFinanceSys.Api\Controllers\" />
-    <Folder Include="PersonalFinanceSys.Application\Interfaces\" />
-    <Folder Include="PersonalFinanceSys.Application\DTOs\" />
-    <Folder Include="PersonalFinanceSys.Application\UseCases\" />
-    <Folder Include="PersonalFinanceSys.Domain\Entities\" />
-    <Folder Include="PersonalFinanceSys.Domain\Exceptions\" />
     <Folder Include="PersonalFinanceSys.Infrastructure\Data\Entities\" />
-    <Folder Include="PersonalFinanceSys.Infrastructure\Mapping\" />
     <Folder Include="PersonalFinanceSys.Infrastructure\Data\" />
-    <Folder Include="PersonalFinanceSys.Infrastructure\Repositories\" />
+    <Folder Include="PersonalFinanceSys.Infrastructure\Services\" />
   </ItemGroup>
 
 </Project>
