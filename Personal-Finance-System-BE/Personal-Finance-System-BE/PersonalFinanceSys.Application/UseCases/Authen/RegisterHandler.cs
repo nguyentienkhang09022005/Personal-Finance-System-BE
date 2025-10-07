@@ -23,6 +23,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 return ApiResponse<string>.FailResponse("Email đã tồn tại!", 409);
             }
 
+            if (registerRequest.Password != registerRequest.ConfirmPassword)
+            {
+                return ApiResponse<string>.FailResponse("Mật khẩu xác nhận không khớp!", 400);
+            }
+
             try
             {
                 // Tạo user mới
