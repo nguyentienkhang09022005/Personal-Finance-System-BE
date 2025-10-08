@@ -18,15 +18,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<OtpHandler> _logger;
+
 
 
         public AuthenHandler(IUserRepository userRepository, 
-                            ITokenService tokenService, 
-                            IMapper mapper, 
-                            IConfiguration config, 
-                            IHttpContextAccessor httpContextAccessor, 
-                            IInvalidatedTokenRepository invalidatedTokenRepository, 
-                            IRefreshTokenService refreshTokenService)
+                            ITokenService tokenService,
+                            IMapper mapper,
+                            IConfiguration config,
+                            IHttpContextAccessor httpContextAccessor,
+                            IInvalidatedTokenRepository invalidatedTokenRepository,
+                            IRefreshTokenService refreshTokenService,
+                            ILogger<OtpHandler> logger)
         {
             _userRepository = userRepository;
             _invalidatedTokenRepository = invalidatedTokenRepository;
@@ -35,6 +38,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
             _mapper = mapper;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         // Login Handle

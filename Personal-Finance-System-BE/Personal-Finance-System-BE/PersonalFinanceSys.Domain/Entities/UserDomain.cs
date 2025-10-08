@@ -22,6 +22,8 @@
 
         public DateTime? CreateAt { get; set; }
 
+        public UserDomain() { }
+
         public UserDomain(string? name, string? email, string? password)
         {
             IdUser = Guid.NewGuid();
@@ -47,7 +49,7 @@
             {
                 throw new ArgumentException("Mật khẩu phải có ít nhất 6 ký tự!");
             }
-            Password = BCrypt.Net.BCrypt.HashPassword(password);
+            Password = password;
         }
     }
 }

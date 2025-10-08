@@ -22,6 +22,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task AddUserAsync(UserDomain users)
         {
             var user = _mapper.Map<User>(users);
+            if (!string.IsNullOrEmpty(user.Password))
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            }
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
@@ -47,6 +51,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         {
             var user = await _context.Users.FindAsync(idUser);
             if (user == null) return null;
+            return _mapper.Map<UserDomain>(user);
+        }
+
+        // Update User
+        public async Task<UserDomain?> UpdateUserAsync(UserDomain userDomain)
+        {
+            var user = await _context.Users.FindAsync(userDomain.IdUser);
+            if (user == null) return null;
+
+            // Cập nhật các thuộc tính của user
+            _mapper.Map(userDomain, user);
+            await _context.SaveChangesAsync();
             return _mapper.Map<UserDomain>(user);
         }
     }

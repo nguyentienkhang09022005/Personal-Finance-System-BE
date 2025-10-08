@@ -1,26 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
+using System.Runtime.CompilerServices;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 {
     [Route("api/authen/")]
     [ApiController]
-    public class RegisterController : ControllerBase
+    public class ForgotPasswordController : ControllerBase
     {
         private readonly OtpHandler _otpHandler;
-        private readonly RegisterHandler _registerHandler;
 
-        public RegisterController(OtpHandler otpHandler, RegisterHandler registerHandler)
+        public ForgotPasswordController(OtpHandler otpHandler)
         {
             _otpHandler = otpHandler;
-            _registerHandler = registerHandler;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest forgotPasswordRequest)
         {
-            var result = await _registerHandler.SendOtpToRegisterAsync(registerRequest);
+            var result = await _otpHandler.SendOTPForForgotPasswordHandleAsync(forgotPasswordRequest);
             if (result.Success)
             {
                 return Ok(result);
@@ -28,10 +27,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPost("confirm-otp-register")]
-        public async Task<IActionResult> ConfirmOtpRegister([FromBody] ConfirmOTPRequest confirmOTPRequest)
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
-            var result = await _otpHandler.ConfirmOTPForRegisterHandleAsync(confirmOTPRequest);
+            var result = await _otpHandler.ConfirmOTPForForgotPasswordHandleAsync(changePasswordRequest);
             if (result.Success)
             {
                 return Ok(result);

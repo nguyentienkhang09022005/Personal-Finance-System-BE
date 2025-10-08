@@ -15,7 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
                     IdUser = u.IdUser
                 });
 
-            CreateMap<UserDomain, User>();
+            CreateMap<UserDomain, User>().ReverseMap();
 
             CreateMap<UserDomain, UserResponse>();
 

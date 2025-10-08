@@ -13,16 +13,21 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
         private readonly IFluentEmail _email;
         private readonly IMemoryCache _memoryCache;
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<OtpHandler> _logger;
+
 
         public RegisterHandler(PersonFinanceSysDbContext context, 
-                          IFluentEmail email, 
-                          IMemoryCache memoryCache, 
-                          IUserRepository userRepository)
+                          IFluentEmail email,
+                          IMemoryCache memoryCache,
+                          IUserRepository userRepository,
+                          ILogger<OtpHandler> logger)
         {
             _context = context;
             _email = email;
             _memoryCache = memoryCache;
             _userRepository = userRepository;
+            _logger = logger;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<string>> SendOtpToRegisterAsync(RegisterRequest registerRequest)
@@ -55,7 +60,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
 
                 _memoryCache.Set(cacheKey, cacheData , new MemoryCacheEntryOptions()
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30) // OTP hết hạn sau 2 phút
                 });
 
                 // Gửi OTP đến mail
@@ -78,6 +83,5 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
-
     }
 }
