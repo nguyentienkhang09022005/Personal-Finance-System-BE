@@ -1,81 +1,56 @@
-﻿using FluentEmail.Core;
+﻿using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.Extensions.Caching.Memory;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
+using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen
 {
     public class OtpHandler
     {
-        private readonly PersonFinanceSysDbContext _context;
-        private readonly IFluentEmail _email;
-        private readonly IMemoryCache _memoryCache;
         private readonly IUserRepository _userRepository;
+        private readonly IMemoryCache _memoryCache;
 
-        public OtpHandler(PersonFinanceSysDbContext context, 
-                          IFluentEmail email, 
-                          IMemoryCache memoryCache, 
-                          IUserRepository userRepository)
+        public OtpHandler(IUserRepository userRepository, IMemoryCache memoryCache)
         {
-            _context = context;
-            _email = email;
-            _memoryCache = memoryCache;
             _userRepository = userRepository;
+            _memoryCache = memoryCache;
         }
 
-        public async Task<ApiResponse<string>> SendOtpToRegisterAsync(RegisterRequest registerRequest)
+        public async Task<ApiResponse<string>> ConfirmOTPForRegisterHandleAsync(ConfirmOTPRequest confirmOTPRequest)
         {
-            // Nếu tồn tại email thì trả về lỗi
-            var checkEmail = await _userRepository.GetUserByEmailAsync(registerRequest.Email);
-            if (checkEmail != null)
+            var cacheKey = $"OTP_Register_{confirmOTPRequest.Email}";
+            if (!_memoryCache.TryGetValue<RegisterCacheData>(cacheKey, out var cacheData))
             {
-                return ApiResponse<string>.FailResponse("Email đã tồn tại!", 409);
-            }
+                return ApiResponse<string>.FailResponse("OTP không hợp lệ hoặc đã hết hạn!", 400);
+            }    
 
-            if (registerRequest.Password != registerRequest.ConfirmPassword)
+            // Nếu OTP đúng thì tạo user mới
+            if (cacheData.Otp != confirmOTPRequest.OTP)
             {
-                return ApiResponse<string>.FailResponse("Mật khẩu xác nhận không khớp!", 400);
+                return ApiResponse<string>.FailResponse("OTP không đúng!", 400);
             }
 
             try
             {
-                var otp = new Random().Next(100000, 999999).ToString();
+                // Tạo user mới
+                var newUser = new UserDomain
+                (
+                    name: cacheData.Name,
+                    email: cacheData.Email,
+                    password: cacheData.Password
+                );
 
-                var cacheKey = $"OTP_Register_{registerRequest.Email}";
-                _memoryCache.Set(cacheKey, new 
-                {
-                    Otp = otp,
-                    registerRequest.Name,
-                    registerRequest.Email,
-                    registerRequest.Password
-                },
-                new MemoryCacheEntryOptions()
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
-                });
+                await _userRepository.AddUserAsync(newUser);
 
-                // Gửi OTP đến mail
-                var response = await _email
-                    .To(registerRequest.Email)
-                    .Subject("Mã OTP xác thực đăng ký tài khoản")
-                    .Tag("otp-register")
-                    .Body($"<p>Mã OTP của bạn là: <strong>{otp}</strong> (hiệu lực trong 2 phút).</p>", true)
-                    .SendAsync();
+                _memoryCache.Remove(cacheKey);
 
-                if (!response.Successful)
-                {
-                    return ApiResponse<string>.FailResponse("Gửi OTP thất bại!", 500);
-                }
-
-                return ApiResponse<string>.SuccessResponse("OTP đã được gửi đến bạn!", 200, string.Empty);
-            }
-            catch (Exception ex)
+                return ApiResponse<string>.SuccessResponse("Đăng ký thành công!", 200, string.Empty);
+            } catch(Exception ex)
             {
                 return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
-
     }
 }

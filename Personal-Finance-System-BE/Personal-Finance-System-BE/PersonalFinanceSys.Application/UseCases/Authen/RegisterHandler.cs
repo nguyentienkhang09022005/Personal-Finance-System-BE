@@ -1,20 +1,31 @@
-﻿using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
+﻿using FluentEmail.Core;
+using Microsoft.Extensions.Caching.Memory;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
-using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen
 {
     public class RegisterHandler
     {
+        private readonly PersonFinanceSysDbContext _context;
+        private readonly IFluentEmail _email;
+        private readonly IMemoryCache _memoryCache;
         private readonly IUserRepository _userRepository;
 
-        public RegisterHandler(IUserRepository userRepository)
+        public RegisterHandler(PersonFinanceSysDbContext context, 
+                          IFluentEmail email, 
+                          IMemoryCache memoryCache, 
+                          IUserRepository userRepository)
         {
+            _context = context;
+            _email = email;
+            _memoryCache = memoryCache;
             _userRepository = userRepository;
         }
 
-        public async Task<ApiResponse<string>> HandleAsync(RegisterRequest registerRequest)
+        public async Task<ApiResponse<string>> SendOtpToRegisterAsync(RegisterRequest registerRequest)
         {
             // Nếu tồn tại email thì trả về lỗi
             var checkEmail = await _userRepository.GetUserByEmailAsync(registerRequest.Email);
@@ -30,21 +41,43 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
 
             try
             {
-                // Tạo user mới
-                var newUser = new UserDomain
-                (
-                    name: registerRequest.Name,
-                    email: registerRequest.Email,
-                    password: registerRequest.Password
-                );
+                var otp = new Random().Next(100000, 999999).ToString();
 
-                await _userRepository.AddUserAsync(newUser);
+                var cacheKey = $"OTP_Register_{registerRequest.Email}";
 
-                return ApiResponse<string>.SuccessResponse("Đăng ký thành công!", 200, string.Empty);
-            } catch(Exception ex)
+                var cacheData = new RegisterCacheData
+                {
+                    Otp = otp,
+                    Name = registerRequest.Name,
+                    Email = registerRequest.Email,
+                    Password = registerRequest.Password
+                };
+
+                _memoryCache.Set(cacheKey, cacheData , new MemoryCacheEntryOptions()
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
+                });
+
+                // Gửi OTP đến mail
+                var response = await _email
+                    .To(registerRequest.Email)
+                    .Subject("Mã OTP xác thực đăng ký tài khoản")
+                    .Tag("otp-register")
+                    .Body($"<p>Mã OTP của bạn là: <strong>{otp}</strong> (hiệu lực trong 2 phút).</p>", true)
+                    .SendAsync();
+
+                if (!response.Successful)
+                {
+                    return ApiResponse<string>.FailResponse("Gửi OTP thất bại!", 500);
+                }
+
+                return ApiResponse<string>.SuccessResponse("OTP đã được gửi đến bạn!", 200, string.Empty);
+            }
+            catch (Exception ex)
             {
                 return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
+
     }
 }

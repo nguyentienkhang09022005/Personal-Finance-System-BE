@@ -46,9 +46,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // Handlers
-builder.Services.AddScoped<RegisterHandler>();
-builder.Services.AddScoped<AuthenHandler>();
 builder.Services.AddScoped<OtpHandler>();
+builder.Services.AddScoped<AuthenHandler>();
+builder.Services.AddScoped<RegisterHandler>();
 
 // Mapper Registration
 builder.Services.AddAutoMapper(typeof(Program));
