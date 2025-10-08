@@ -1,12 +1,13 @@
-﻿using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
-
-namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
+﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
 {
     public class UserDomain
     {
         public Guid IdUser { get; set; }
+
         public string? Name { get; set; }
+
         public string? Email { get; set; }
+
         public string? Phone { get; set; }
 
         public string? Gender { get; set; }

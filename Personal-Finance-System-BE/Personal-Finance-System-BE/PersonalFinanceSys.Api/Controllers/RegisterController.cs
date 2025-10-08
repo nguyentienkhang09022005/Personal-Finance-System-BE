@@ -9,16 +9,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
     public class RegisterController : ControllerBase
     {
         private readonly RegisterHandler _registerHandler;
+        private readonly OtpHandler _otpHandler;
 
-        public RegisterController(RegisterHandler registerHandler)
+        public RegisterController(RegisterHandler registerHandler, OtpHandler otpHandler)
         {
             _registerHandler = registerHandler;
+            _otpHandler = otpHandler;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
-            var result = await _registerHandler.HandleAsync(registerRequest);
+            var result = await _otpHandler.SendOtpToRegisterAsync(registerRequest);
             if (result.Success)
             {
                 return Ok(result);

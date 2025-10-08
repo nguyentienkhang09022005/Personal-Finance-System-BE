@@ -10,12 +10,28 @@ public partial class PersonFinanceSysDbContext : DbContext
     {
     }
 
+    public virtual DbSet<InvalidatedToken> InvalidatedTokens { get; set; }
+
     public virtual DbSet<Otp> Otps { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<InvalidatedToken>(entity =>
+        {
+            entity.HasKey(e => e.IdToken).HasName("invalidated_token_pkey");
+
+            entity.ToTable("invalidated_token");
+
+            entity.Property(e => e.IdToken)
+                .ValueGeneratedNever()
+                .HasColumnName("id_token");
+            entity.Property(e => e.ExpiryTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("expiry_time");
+        });
+
         modelBuilder.Entity<Otp>(entity =>
         {
             entity.HasKey(e => e.IdOtp).HasName("otp_pkey");
