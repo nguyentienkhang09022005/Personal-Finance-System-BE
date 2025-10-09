@@ -14,4 +14,4 @@ COPY --from=build /app/publish .
 
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "Person_Finance_System.dll"]
+ENTRYPOINT ["dotnet", "Personal-Finance-System-BE.dll"]
