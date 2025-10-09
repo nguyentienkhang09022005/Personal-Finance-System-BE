@@ -74,11 +74,17 @@ builder.Services
 // In-Memory Cache Registration
 builder.Services.AddMemoryCache();
 
+// Configure CORS to allow any origin, header, and method
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+ policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
