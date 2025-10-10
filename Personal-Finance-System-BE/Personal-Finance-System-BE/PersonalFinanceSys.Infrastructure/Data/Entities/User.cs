@@ -1,4 +1,7 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 public partial class User
 {
@@ -22,5 +25,23 @@ public partial class User
 
     public DateTime? CreateAt { get; set; }
 
-    public virtual ICollection<Otp> Otps { get; set; } = new List<Otp>();
+    public virtual ICollection<Evaluate> Evaluates { get; set; } = new List<Evaluate>();
+
+    public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+
+    public virtual ICollection<FinanceDetail> FinanceDetails { get; set; } = new List<FinanceDetail>();
+
+    public virtual ICollection<Friendship> FriendshipIdRefNavigations { get; set; } = new List<Friendship>();
+
+    public virtual ICollection<Friendship> FriendshipIdUserNavigations { get; set; } = new List<Friendship>();
+
+    public virtual ICollection<InvestmentFund> InvestmentFunds { get; set; } = new List<InvestmentFund>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
+    public virtual ICollection<SavingGoal> SavingGoals { get; set; } = new List<SavingGoal>();
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }
