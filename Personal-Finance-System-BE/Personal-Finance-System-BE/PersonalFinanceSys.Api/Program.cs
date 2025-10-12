@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services;
@@ -40,6 +42,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInvalidatedTokenRepository, InvalidatedTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IInvestmentFundRepository, InvestmentFundRepository>();
+
 
 
 // Services
@@ -51,6 +55,8 @@ builder.Services.AddScoped<OtpHandler>();
 builder.Services.AddScoped<AuthenHandler>();
 builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<UserHandler>();
+builder.Services.AddScoped<InvestmentFundHandler>();
+
 
 // Mapper Registration
 builder.Services.AddAutoMapper(typeof(Program));

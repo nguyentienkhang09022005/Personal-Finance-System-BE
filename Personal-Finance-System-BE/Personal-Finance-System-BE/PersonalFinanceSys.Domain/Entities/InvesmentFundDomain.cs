@@ -14,6 +14,7 @@
 
         public InvesmentFundDomain() 
         {
+            IdFund = Guid.NewGuid();
         }
     }
 }

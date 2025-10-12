@@ -5,7 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using System.Text.RegularExpressions;
 
-namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users
 {
     public class UserHandler
     {

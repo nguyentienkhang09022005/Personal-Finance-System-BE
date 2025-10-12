@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
-using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 {

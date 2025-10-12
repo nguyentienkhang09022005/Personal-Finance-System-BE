@@ -6,6 +6,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
     {
         Task AddInvestmentAsync(InvesmentFundDomain invesmentFundDomain);
 
-        Task<List<InvesmentFundDomain>>  GetInvesmentFundDomains(Guid idUser);
+        Task<List<InvesmentFundDomain>>  GetListInvesmentFundDomains(Guid idUser);
     }
 }
