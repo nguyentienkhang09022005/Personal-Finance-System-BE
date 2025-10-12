@@ -60,7 +60,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
 
                 _memoryCache.Set(cacheKey, cacheData , new MemoryCacheEntryOptions()
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30) // OTP hết hạn sau 2 phút
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
                 });
 
                 // Gửi OTP đến mail

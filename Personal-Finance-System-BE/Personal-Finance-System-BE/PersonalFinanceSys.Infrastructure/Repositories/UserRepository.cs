@@ -30,9 +30,23 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             await _context.SaveChangesAsync();
         }
 
-        public Task DeleteUserAsync(Guid idUser)
+        public async Task DeleteUserAsync(Guid idUser)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.FindAsync(idUser);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<List<UserDomain?>> GetListUserAsync()
+        { 
+            var users = await _context.Users
+                .IgnoreAutoIncludes()
+                .AsNoTracking()
+                .ToListAsync();
+            return _mapper.Map<List<UserDomain?>>(users);
         }
 
         // Get User By Email

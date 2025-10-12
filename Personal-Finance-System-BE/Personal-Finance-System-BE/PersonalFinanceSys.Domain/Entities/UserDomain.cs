@@ -30,6 +30,7 @@
             Name = name;
             SetEmail(email);
             SetPassword(password);
+            TotalAmount = decimal.Zero;
         }
 
         // Phương thức kiểm tra tính hợp lệ của email

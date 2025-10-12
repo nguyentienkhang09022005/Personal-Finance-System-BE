@@ -39,6 +39,7 @@ builder.Services.AddSwaggerGen();
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInvalidatedTokenRepository, InvalidatedTokenRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 // Services
@@ -49,6 +50,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<OtpHandler>();
 builder.Services.AddScoped<AuthenHandler>();
 builder.Services.AddScoped<RegisterHandler>();
+builder.Services.AddScoped<UserHandler>();
 
 // Mapper Registration
 builder.Services.AddAutoMapper(typeof(Program));

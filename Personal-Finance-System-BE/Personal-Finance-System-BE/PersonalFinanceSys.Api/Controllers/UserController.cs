@@ -1,0 +1,62 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
+{
+    [Route("api/user/")]
+    [ApiController]
+    public class UserController : ControllerBase
+    {
+        private readonly UserHandler _userHandler;
+
+        public UserController(UserHandler userHandler)
+        {
+            _userHandler = userHandler;
+        }
+
+        [HttpGet("list-user")]
+        public async Task<IActionResult> ListUser()
+        {
+            var result = await _userHandler.GetListUserHandleAsync();
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("inf-user")]
+        public async Task<IActionResult> InfUser([FromQuery] Guid idUser)
+        {
+            var result = await _userHandler.GetInfUserHandleAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("add-user")]
+        public async Task<IActionResult> AddUser([FromBody] UserRequest userRequest)
+        {
+            var result = await _userHandler.CreateUserHandleAsync(userRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete-user")]
+        public async Task<IActionResult> DeleteUser([FromQuery] Guid idUser)
+        {
+            var result = await _userHandler.deleteUserHandleAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+    }
+}
