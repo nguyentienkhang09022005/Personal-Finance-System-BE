@@ -11,5 +11,7 @@
         public DateTime? CreateAt { get; set; }
 
         public Guid? IdUser { get; set; }
+
+        public InvestmentFundDomain() { }
     }
 }

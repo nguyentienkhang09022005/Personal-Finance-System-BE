@@ -33,7 +33,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task DeleteInvestmentFundAsync(Guid idFund)
         {
             var Fund = await _context.InvestmentFunds.FindAsync(idFund)
-                ?? throw new NotFoundException("Không tìm thấy quỹ!");
+                ?? throw new NotFoundException("Không tìm thấy quỹ cần xóa!");
 
             _context.InvestmentFunds.Remove(Fund);
             await _context.SaveChangesAsync();
@@ -47,6 +47,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .FirstOrDefaultAsync(i => i.IdFund == idFund);
 
             return fund ?? throw new NotFoundException("Không tìm thấy quỹ");
+        }
+        public async Task<bool> CheckExistInvestmentFund(Guid idFund)
+        {
+            return await _context.InvestmentFunds
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .AnyAsync(i => i.IdFund == idFund);
         }
 
         // Get Inf InvestmentFund
@@ -72,6 +79,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<InvestmentFundDomain?>>(investments);
         }
 
+        // Update InvestmentFund
         public async Task<InvestmentFundDomain> UpdateInvestmentFundAsync(InvestmentFundDomain investmentFundDomain, InvestmentFund investmentFund)
         {
             _mapper.Map(investmentFundDomain, investmentFund);

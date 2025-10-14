@@ -4,7 +4,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Investm
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 {
-    [Route("api/investment-fund")]
+    [Route("api/investment-fund/")]
     [ApiController]
     public class InvestmentFundController : ControllerBase
     {

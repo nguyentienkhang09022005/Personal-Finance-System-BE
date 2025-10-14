@@ -44,7 +44,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInvalidatedTokenRepository, InvalidatedTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInvestmentFundRepository, InvestmentFundRepository>();
-
+builder.Services.AddScoped<IInvestmentAssetRepository, InvestmentAssetRepository>();
+builder.Services.AddScoped<IInvestmentDetailRepository, InvestmentDetailRepository>();
 
 
 // Services
@@ -58,6 +59,8 @@ builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<UserHandler>();
 builder.Services.AddScoped<InvestmentFundHandler>();
 builder.Services.AddHttpClient<CryptoHandler>();
+builder.Services.AddScoped<InvestmentAssetHandler>();
+builder.Services.AddScoped<InvestmentDetailHandler>();
 
 
 // Mapper Registration
@@ -85,10 +88,21 @@ builder.Services
 builder.Services.AddMemoryCache();
 
 // Configure CORS to allow any origin, header, and method
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
- policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Allow send Cookie
+    });
+});
+
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();

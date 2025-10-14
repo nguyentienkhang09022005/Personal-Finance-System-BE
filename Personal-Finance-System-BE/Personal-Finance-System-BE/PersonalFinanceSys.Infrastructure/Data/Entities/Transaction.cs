@@ -1,4 +1,7 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 public partial class Transaction
 {

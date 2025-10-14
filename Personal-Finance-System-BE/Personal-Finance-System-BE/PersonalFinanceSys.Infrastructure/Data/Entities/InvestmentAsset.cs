@@ -7,6 +7,8 @@ public partial class InvestmentAsset
 {
     public Guid IdAsset { get; set; }
 
+    public string? Id { get; set; }
+
     public string? AssetName { get; set; }
 
     public string? AssetSymbol { get; set; }

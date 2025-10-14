@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -240,6 +242,9 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.CurrentPrice)
                 .HasPrecision(18, 2)
                 .HasColumnName("current_price");
+            entity.Property(e => e.Id)
+                .HasMaxLength(50)
+                .HasColumnName("id");
             entity.Property(e => e.IdFund).HasColumnName("id_fund");
             entity.Property(e => e.MarketCap)
                 .HasPrecision(18, 2)
@@ -272,16 +277,12 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("create_at");
             entity.Property(e => e.Expense)
                 .HasPrecision(18, 2)
-                .HasDefaultValueSql("0")
                 .HasColumnName("expense");
             entity.Property(e => e.IdAsset).HasColumnName("id_asset");
             entity.Property(e => e.Price)
                 .HasPrecision(18, 2)
-                .HasDefaultValueSql("0")
                 .HasColumnName("price");
-            entity.Property(e => e.Quantity)
-                .HasDefaultValue(0)
-                .HasColumnName("quantity");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Type)
                 .HasMaxLength(20)
                 .HasColumnName("type");

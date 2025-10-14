@@ -11,6 +11,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<InvestmentFund> ExistInvestmentFund(Guid idFund);
 
+        Task<bool> CheckExistInvestmentFund(Guid idFund);
+
         Task<InvestmentFundDomain> GetInfInvestmentFundAsync(Guid idFund);
 
         Task DeleteInvestmentFundAsync(Guid idFund);
