@@ -16,9 +16,54 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
         }
 
         [HttpPost("create-investment-fund")]
-        public async Task<IActionResult> AddInvestmentFund(InvestmentFundRequest investmentFundRequest)
+        public async Task<IActionResult> AddInvestmentFund(InvestmentFundCreationRequest investmentFundCreationRequest)
         {
-            var result = await _investmentFundHandler.CreateInvestmentHandleAsync(investmentFundRequest);
+            var result = await _investmentFundHandler.CreateInvestmentHandleAsync(investmentFundCreationRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("list-investment-fund")]
+        public async Task<IActionResult> GetListInvestmentFundByIdUser([FromQuery] Guid idUser)
+        {
+            var result = await _investmentFundHandler.GetListInvestmentFundHandleAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("inf-investment-fund")]
+        public async Task<IActionResult> GetInfInvestmentFundByIdUser([FromQuery] Guid idFund)
+        {
+            var result = await _investmentFundHandler.GetInfInvestmentFundHandleAsync(idFund);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPut("udpate-investment-fund")]
+        public async Task<IActionResult> UpdateInfInvestmentFundAsync([FromQuery] Guid idFund,
+                                                                      [FromBody] InvestmentFundUpdateRequest investmentFundUpdateRequest)
+        {
+            var result = await _investmentFundHandler.UpdateInvestmentFundAsync(idFund, investmentFundUpdateRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete-investment-fund")]
+        public async Task<IActionResult> DeleteInvestmentFundAsync([FromQuery] Guid idFund)
+        {
+            var result = await _investmentFundHandler.DeleteInvestmentHandleAsync(idFund);
             if (result.Success)
             {
                 return Ok(result);

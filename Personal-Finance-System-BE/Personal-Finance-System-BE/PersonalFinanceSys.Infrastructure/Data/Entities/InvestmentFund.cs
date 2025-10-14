@@ -17,5 +17,5 @@ public partial class InvestmentFund
 
     public virtual User? IdUserNavigation { get; set; }
 
-    public virtual ICollection<InvestmentDetail> InvestmentDetails { get; set; } = new List<InvestmentDetail>();
+    public virtual ICollection<InvestmentAsset> InvestmentAssets { get; set; } = new List<InvestmentAsset>();
 }

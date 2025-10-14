@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -12,7 +10,7 @@ public partial class PersonFinanceSysDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Category> Categories { get; set; }
+    public virtual DbSet<Budget> Budgets { get; set; }
 
     public virtual DbSet<Evaluate> Evaluates { get; set; }
 
@@ -25,6 +23,8 @@ public partial class PersonFinanceSysDbContext : DbContext
     public virtual DbSet<Image> Images { get; set; }
 
     public virtual DbSet<InvalidatedToken> InvalidatedTokens { get; set; }
+
+    public virtual DbSet<InvestmentAsset> InvestmentAssets { get; set; }
 
     public virtual DbSet<InvestmentDetail> InvestmentDetails { get; set; }
 
@@ -44,18 +44,30 @@ public partial class PersonFinanceSysDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Category>(entity =>
+        modelBuilder.Entity<Budget>(entity =>
         {
-            entity.HasKey(e => e.IdCategory).HasName("categories_pkey");
+            entity.HasKey(e => e.IdBudget).HasName("budgets_pkey");
 
-            entity.ToTable("categories");
+            entity.ToTable("budgets");
 
-            entity.Property(e => e.IdCategory)
+            entity.Property(e => e.IdBudget)
                 .ValueGeneratedNever()
-                .HasColumnName("id_category");
-            entity.Property(e => e.CategoryName)
-                .HasMaxLength(100)
-                .HasColumnName("category_name");
+                .HasColumnName("id_budget");
+            entity.Property(e => e.Amount)
+                .HasPrecision(15, 2)
+                .HasColumnName("amount");
+            entity.Property(e => e.BudgetGoal)
+                .HasPrecision(15, 2)
+                .HasColumnName("budget_goal");
+            entity.Property(e => e.BudgetName)
+                .HasMaxLength(80)
+                .HasColumnName("budget_name");
+            entity.Property(e => e.IdUser).HasColumnName("id_user");
+
+            entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Budgets)
+                .HasForeignKey(d => d.IdUser)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_budget_user");
         });
 
         modelBuilder.Entity<Evaluate>(entity =>
@@ -210,45 +222,74 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("expiry_time");
         });
 
+        modelBuilder.Entity<InvestmentAsset>(entity =>
+        {
+            entity.HasKey(e => e.IdAsset).HasName("investment_asset_pkey");
+
+            entity.ToTable("investment_asset");
+
+            entity.Property(e => e.IdAsset)
+                .ValueGeneratedNever()
+                .HasColumnName("id_asset");
+            entity.Property(e => e.AssetName)
+                .HasMaxLength(20)
+                .HasColumnName("asset_name");
+            entity.Property(e => e.AssetSymbol)
+                .HasMaxLength(20)
+                .HasColumnName("asset_symbol");
+            entity.Property(e => e.CurrentPrice)
+                .HasPrecision(18, 2)
+                .HasColumnName("current_price");
+            entity.Property(e => e.IdFund).HasColumnName("id_fund");
+            entity.Property(e => e.MarketCap)
+                .HasPrecision(18, 2)
+                .HasColumnName("market_cap");
+            entity.Property(e => e.PriceChangePercentage24h)
+                .HasPrecision(10, 2)
+                .HasColumnName("price_change_percentage_24h");
+            entity.Property(e => e.TotalVolume)
+                .HasPrecision(18, 2)
+                .HasColumnName("total_volume");
+
+            entity.HasOne(d => d.IdFundNavigation).WithMany(p => p.InvestmentAssets)
+                .HasForeignKey(d => d.IdFund)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_asset_fund");
+        });
+
         modelBuilder.Entity<InvestmentDetail>(entity =>
         {
-            entity.HasKey(e => e.IdInvestment).HasName("investment_detail_pkey");
+            entity.HasKey(e => e.IdDetail).HasName("investment_detail_pkey");
 
             entity.ToTable("investment_detail");
 
-            entity.Property(e => e.IdInvestment)
+            entity.Property(e => e.IdDetail)
                 .ValueGeneratedNever()
-                .HasColumnName("id_investment");
-            entity.Property(e => e.Amount)
-                .HasPrecision(18, 2)
-                .HasDefaultValueSql("0")
-                .HasColumnName("amount");
+                .HasColumnName("id_detail");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
-            entity.Property(e => e.IdCategory).HasColumnName("id_category");
-            entity.Property(e => e.IdFund).HasColumnName("id_fund");
-            entity.Property(e => e.InvestmentName)
-                .HasMaxLength(100)
-                .HasColumnName("investment_name");
-            entity.Property(e => e.InvestmentType)
-                .HasMaxLength(50)
-                .HasColumnName("investment_type");
-            entity.Property(e => e.Quantity)
+            entity.Property(e => e.Expense)
                 .HasPrecision(18, 2)
                 .HasDefaultValueSql("0")
+                .HasColumnName("expense");
+            entity.Property(e => e.IdAsset).HasColumnName("id_asset");
+            entity.Property(e => e.Price)
+                .HasPrecision(18, 2)
+                .HasDefaultValueSql("0")
+                .HasColumnName("price");
+            entity.Property(e => e.Quantity)
+                .HasDefaultValue(0)
                 .HasColumnName("quantity");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .HasColumnName("type");
 
-            entity.HasOne(d => d.IdCategoryNavigation).WithMany(p => p.InvestmentDetails)
-                .HasForeignKey(d => d.IdCategory)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("fk_investment_category");
-
-            entity.HasOne(d => d.IdFundNavigation).WithMany(p => p.InvestmentDetails)
-                .HasForeignKey(d => d.IdFund)
+            entity.HasOne(d => d.IdAssetNavigation).WithMany(p => p.InvestmentDetails)
+                .HasForeignKey(d => d.IdAsset)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("fk_investment_fund");
+                .HasConstraintName("fk_detail_asset");
         });
 
         modelBuilder.Entity<InvestmentFund>(entity =>
@@ -418,8 +459,10 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
-            entity.Property(e => e.IdCategory).HasColumnName("id_category");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
+            entity.Property(e => e.TransactionCategory)
+                .HasMaxLength(50)
+                .HasColumnName("transaction_category");
             entity.Property(e => e.TransactionDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
@@ -428,13 +471,8 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("transaction_name");
             entity.Property(e => e.TransactionType)
-                .HasMaxLength(50)
+                .HasMaxLength(20)
                 .HasColumnName("transaction_type");
-
-            entity.HasOne(d => d.IdCategoryNavigation).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.IdCategory)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("fk_transaction_category");
 
             entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.IdUser)

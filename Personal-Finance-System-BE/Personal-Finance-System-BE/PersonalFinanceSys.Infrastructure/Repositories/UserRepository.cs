@@ -4,6 +4,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories
 {
@@ -30,16 +31,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             await _context.SaveChangesAsync();
         }
 
+        // Delete User
         public async Task DeleteUserAsync(Guid idUser)
         {
-            var user = await _context.Users.FindAsync(idUser);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-            }
+            var user = await _context.Users.FindAsync(idUser) ?? throw new NotFoundException("Không tìm thấy người dùng!");
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
         }
 
+        // Check Exist User
+        public async Task<bool> ExistUserAsync(Guid idUser)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .AnyAsync(u => u.IdUser == idUser);
+        }
+
+        // Get List User
         public async Task<List<UserDomain?>> GetListUserAsync()
         { 
             var users = await _context.Users
@@ -63,8 +73,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         // Get User By Id
         public async Task<UserDomain?> GetUserByIdAsync(Guid idUser)
         {
-            var user = await _context.Users.FindAsync(idUser);
-            if (user == null) return null;
+            var user = await _context.Users
+                    .AsNoTracking()
+                    .IgnoreAutoIncludes()
+                    .FirstOrDefaultAsync(u => u.IdUser == idUser);
+
+            if (user == null)
+                throw new NotFoundException("Không tìm thấy thông tin người dùng!");
             return _mapper.Map<UserDomain>(user);
         }
 

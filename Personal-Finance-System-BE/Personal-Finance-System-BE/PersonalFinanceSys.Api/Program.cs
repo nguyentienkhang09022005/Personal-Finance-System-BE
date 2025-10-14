@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
@@ -56,6 +57,7 @@ builder.Services.AddScoped<AuthenHandler>();
 builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<UserHandler>();
 builder.Services.AddScoped<InvestmentFundHandler>();
+builder.Services.AddHttpClient<CryptoHandler>();
 
 
 // Mapper Registration

@@ -3,6 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using SendGrid.Helpers.Errors.Model;
 using System.Text.RegularExpressions;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users
@@ -29,9 +30,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
         // Hàm lấy thông tin chi tiết người dùng qua ID
         public async Task<ApiResponse<UserResponse>> GetInfUserHandleAsync(Guid idUser)
         {
-            var userDomain = await _userRepository.GetUserByIdAsync(idUser);
-            var userResponse = _mapper.Map<UserResponse>(userDomain);
-            return ApiResponse<UserResponse>.SuccessResponse("Lấy thông tin người dùng thành công", 200, userResponse);
+            try
+            {
+                var userDomain = await _userRepository.GetUserByIdAsync(idUser);
+                var userResponse = _mapper.Map<UserResponse>(userDomain);
+                return ApiResponse<UserResponse>.SuccessResponse("Lấy thông tin người dùng thành công", 200, userResponse);
+            }
+            catch (NotFoundException ex)
+            {
+                return ApiResponse<UserResponse>.FailResponse(ex.Message, 404);
+            }
         }
 
         // Tạo người dùng mới
@@ -72,13 +80,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             return ApiResponse<string>.SuccessResponse("Tạo người dùng thành công!", 200, string.Empty);
         }
 
-        //public async Task<ApiResponse<UserResponse?>> updateUserHandleAsync(UserRequest userRequest)
-
         // Hàm xóa tài khoản người dùng
         public async Task<ApiResponse<string>> deleteUserHandleAsync(Guid idUser)
         {
-            await _userRepository.DeleteUserAsync(idUser);
-            return ApiResponse<string>.SuccessResponse("Xóa người dùng thành công!", 200, string.Empty);
+            try
+            {
+                await _userRepository.DeleteUserAsync(idUser);
+                return ApiResponse<string>.SuccessResponse("Xóa người dùng thành công!", 200, string.Empty);
+            }
+            catch (NotFoundException ex)
+            {
+                return ApiResponse<string>.FailResponse(ex.Message, 404);
+            }
         }
     }
 }

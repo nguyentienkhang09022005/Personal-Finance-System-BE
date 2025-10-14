@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 public partial class Transaction
 {
@@ -9,19 +6,17 @@ public partial class Transaction
 
     public string TransactionName { get; set; } = null!;
 
+    public string? TransactionType { get; set; }
+
     public decimal Amount { get; set; }
 
-    public string? TransactionType { get; set; }
+    public string? TransactionCategory { get; set; }
 
     public DateTime? TransactionDate { get; set; }
 
     public DateTime? CreateAt { get; set; }
 
     public Guid? IdUser { get; set; }
-
-    public Guid? IdCategory { get; set; }
-
-    public virtual Category? IdCategoryNavigation { get; set; }
 
     public virtual User? IdUserNavigation { get; set; }
 }

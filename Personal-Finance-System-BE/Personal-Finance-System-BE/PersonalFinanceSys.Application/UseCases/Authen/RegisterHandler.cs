@@ -9,20 +9,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
 {
     public class RegisterHandler
     {
-        private readonly PersonFinanceSysDbContext _context;
         private readonly IFluentEmail _email;
         private readonly IMemoryCache _memoryCache;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<OtpHandler> _logger;
 
 
-        public RegisterHandler(PersonFinanceSysDbContext context, 
-                          IFluentEmail email,
+        public RegisterHandler(IFluentEmail email,
                           IMemoryCache memoryCache,
                           IUserRepository userRepository,
                           ILogger<OtpHandler> logger)
         {
-            _context = context;
             _email = email;
             _memoryCache = memoryCache;
             _userRepository = userRepository;
