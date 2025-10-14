@@ -3,7 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
+using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund
 {
@@ -22,31 +22,37 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             _mapper = mapper;
         }
 
-        //public async Task<ApiResponse<string>> CreateInvestmentDetailHandleAsync(InvestmentDetailRequest investmentDetailRequest)
-        //{
-        //    try
-        //    {
-        //        bool assetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(investmentDetailRequest.IdAsset);
-        //        if (!assetExist)
-        //            return ApiResponse<string>.FailResponse("Không tìm thấy tài sản!", 404);
+        public async Task<ApiResponse<string>> CreateInvestmentDetailHandleAsync(InvestmentDetailRequest investmentDetailRequest)
+        {
+            try
+            {
+                bool assetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(investmentDetailRequest.IdAsset);
+                if (!assetExist)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy tài sản!", 404);
 
-        //        if (investmentDetailRequest.Type == "Mua")
-        //        {
+                
+                var investmentDetailDomain = _mapper.Map<InvestmentDetailDomain>(investmentDetailRequest);
+                await _investmentDetailRepository.AddInvestmentDetailAsync(investmentDetailDomain);
 
-        //        }
-        //        else
-        //        {
+                return ApiResponse<string>.SuccessResponse("Tạo chi tiết mua bán cho tài sản thành công!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
+        }
 
-        //        }
-        //        var investmentAssetDomain = _mapper.Map<InvestmentAssetDomain>(investmentAssetRequest);
-        //        await _investmentAssetRepository.AddInvestmentAssetAsync(investmentAssetDomain);
-
-        //        return ApiResponse<string>.SuccessResponse("Tạo tài sản cho quỹ thành công!", 200, string.Empty);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
-        //    }
-        //}
+        public async Task<ApiResponse<string>> DeleteInvestmentDetailAsync(Guid idDetail)
+        {
+            try
+            {
+                await _investmentDetailRepository.DeleteInvestmentDetailAsync(idDetail);
+                return ApiResponse<string>.SuccessResponse("Xóa chi tiết thành công!", 200, string.Empty);
+            }
+            catch (NotFoundException ex)
+            {
+                return ApiResponse<string>.FailResponse(ex.Message, 404);
+            }
+        }
     }
 }
