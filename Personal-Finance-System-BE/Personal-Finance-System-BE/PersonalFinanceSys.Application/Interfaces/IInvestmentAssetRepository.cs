@@ -9,5 +9,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task DeleteInvestmentAssetAsync(Guid idAsset);
 
         Task<bool> CheckExistInvestmentAssetAsync(Guid idAsset);
+
+        Task<InvestmentAssetDomain> GetInfInvestmentAssetAsync(Guid idAsset);
     }
 }

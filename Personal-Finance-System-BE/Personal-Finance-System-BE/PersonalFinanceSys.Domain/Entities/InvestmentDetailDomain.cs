@@ -6,20 +6,23 @@
 
         public string? Type { get; set; }
 
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
 
-        public int? Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
-        public decimal? Expense { get; set; }
+        public decimal Expense { get; set; }
+
+        public decimal Fee { get; set; }
 
         public DateTime? CreateAt { get; set; }
 
         public Guid? IdAsset { get; set; }
 
-        public InvestmentDetailDomain(decimal Price, int Quantity) 
+        public InvestmentDetailDomain(decimal Price, decimal Quantity, decimal fee)
         {
             SetPrice(Price);
             SetQuantity(Quantity);
+            SetFee(fee);
         }
 
         public void SetPrice(decimal price)
@@ -31,13 +34,22 @@
             Price = price;
         }
 
-        public void SetQuantity(int quantity)
+        public void SetQuantity(decimal quantity)
         {
             if (quantity < 0)
             {
                 throw new ArgumentException("Số lượng phải > 0");
             }
             Quantity = quantity;
+        }
+
+        public void SetFee(decimal fee)
+        {
+            if (fee < 0)
+            {
+                throw new ArgumentException("Phí giao dịch phải > 0");
+            }
+            Fee = fee;
         }
     }
 }

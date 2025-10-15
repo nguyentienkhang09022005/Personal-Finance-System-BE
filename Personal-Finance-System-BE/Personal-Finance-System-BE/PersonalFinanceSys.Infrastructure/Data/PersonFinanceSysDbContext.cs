@@ -278,11 +278,16 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Expense)
                 .HasPrecision(18, 2)
                 .HasColumnName("expense");
+            entity.Property(e => e.Fee)
+                .HasPrecision(10, 2)
+                .HasColumnName("fee");
             entity.Property(e => e.IdAsset).HasColumnName("id_asset");
             entity.Property(e => e.Price)
                 .HasPrecision(18, 2)
                 .HasColumnName("price");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Quantity)
+                .HasPrecision(15, 2)
+                .HasColumnName("quantity");
             entity.Property(e => e.Type)
                 .HasMaxLength(20)
                 .HasColumnName("type");

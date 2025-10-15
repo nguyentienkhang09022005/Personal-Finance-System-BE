@@ -43,5 +43,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .IgnoreAutoIncludes()
                 .AnyAsync(i => i.IdAsset == idAsset);
         }
+
+        public async Task<InvestmentAssetDomain> GetInfInvestmentAssetAsync(Guid idAsset)
+        {
+            var investmentAsset = await _context.InvestmentAssets
+                    .AsNoTracking()
+                    .IgnoreAutoIncludes()
+                    .FirstOrDefaultAsync(i => i.IdAsset == idAsset);
+
+            if (investmentAsset == null)
+                throw new NotFoundException("Không tìm thấy thông tin tài sản!");
+            return _mapper.Map<InvestmentAssetDomain>(investmentAsset);
+        }
     }
 }

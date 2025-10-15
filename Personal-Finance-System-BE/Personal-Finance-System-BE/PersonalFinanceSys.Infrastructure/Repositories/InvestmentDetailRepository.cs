@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -33,6 +34,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
             _context.InvestmentDetails.Remove(investmentDetail);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailAsync(Guid idAsset)
+        {
+            var listInvestmentDetail = await _context.InvestmentDetails
+                .Where(x => x.IdAsset == idAsset)
+                .AsNoTracking()
+                .ToListAsync();
+            return _mapper.Map<List<InvestmentDetailDomain>>(listInvestmentDetail);
         }
     }
 }

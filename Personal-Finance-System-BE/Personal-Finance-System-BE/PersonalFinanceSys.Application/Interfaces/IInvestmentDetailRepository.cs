@@ -7,5 +7,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task AddInvestmentDetailAsync(InvestmentDetailDomain investmentDetailDomain);
 
         Task DeleteInvestmentDetailAsync(Guid idDetail);
+        Task<List<InvestmentDetailDomain>> GetListInvestmentDetailAsync(Guid idAsset);
     }
 }

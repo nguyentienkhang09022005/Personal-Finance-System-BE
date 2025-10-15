@@ -24,5 +24,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             }
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpGet("inf-crypto")]
+        public async Task<IActionResult> GetInfCryto([FromQuery] string idCrypto)
+        {
+            var result = await _cryptoHandler.GetCurrentPriceCryptoAsync(idCrypto);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

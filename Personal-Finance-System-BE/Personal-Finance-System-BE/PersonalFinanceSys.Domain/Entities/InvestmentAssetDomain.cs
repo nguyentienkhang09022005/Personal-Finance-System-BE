@@ -6,6 +6,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
     {
         public Guid IdAsset { get; set; }
 
+        public string? Id { get; set; }
+
         public string? AssetName { get; set; }
 
         public string? AssetSymbol { get; set; }
