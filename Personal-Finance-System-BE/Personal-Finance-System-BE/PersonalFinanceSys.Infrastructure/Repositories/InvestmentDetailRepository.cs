@@ -39,9 +39,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailAsync(Guid idAsset)
         {
             var listInvestmentDetail = await _context.InvestmentDetails
-                .Where(x => x.IdAsset == idAsset)
+                .Where(i => i.IdAsset == idAsset)
                 .AsNoTracking()
                 .ToListAsync();
+
+            if (listInvestmentDetail == null)
+                throw new NotFoundException("Không tìm thấy danh sách chi tiết mua bán tài sản!");
             return _mapper.Map<List<InvestmentDetailDomain>>(listInvestmentDetail);
         }
     }

@@ -239,22 +239,10 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.AssetSymbol)
                 .HasMaxLength(20)
                 .HasColumnName("asset_symbol");
-            entity.Property(e => e.CurrentPrice)
-                .HasPrecision(18, 2)
-                .HasColumnName("current_price");
             entity.Property(e => e.Id)
                 .HasMaxLength(50)
                 .HasColumnName("id");
             entity.Property(e => e.IdFund).HasColumnName("id_fund");
-            entity.Property(e => e.MarketCap)
-                .HasPrecision(18, 2)
-                .HasColumnName("market_cap");
-            entity.Property(e => e.PriceChangePercentage24h)
-                .HasPrecision(10, 2)
-                .HasColumnName("price_change_percentage_24h");
-            entity.Property(e => e.TotalVolume)
-                .HasPrecision(18, 2)
-                .HasColumnName("total_volume");
 
             entity.HasOne(d => d.IdFundNavigation).WithMany(p => p.InvestmentAssets)
                 .HasForeignKey(d => d.IdFund)
@@ -276,17 +264,17 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Expense)
-                .HasPrecision(18, 2)
+                .HasPrecision(30, 2)
                 .HasColumnName("expense");
             entity.Property(e => e.Fee)
-                .HasPrecision(10, 2)
+                .HasPrecision(15, 2)
                 .HasColumnName("fee");
             entity.Property(e => e.IdAsset).HasColumnName("id_asset");
             entity.Property(e => e.Price)
-                .HasPrecision(18, 2)
+                .HasPrecision(30, 2)
                 .HasColumnName("price");
             entity.Property(e => e.Quantity)
-                .HasPrecision(15, 2)
+                .HasPrecision(30, 2)
                 .HasColumnName("quantity");
             entity.Property(e => e.Type)
                 .HasMaxLength(20)

@@ -26,7 +26,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             _cryptoHandler = cryptoHandler;
         }
 
-        public async Task<ApiResponse<InvestmentDetailResponse>> GetInfInvestmentDetailHandleAsync(Guid idAsset)
+        public async Task<ApiResponse<InvestmentDetailResponse>> GetInfInvestmentAssetHandleAsync(Guid idAsset)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     TotalProfitAndLoss = TotalProfitAndLoss,
                     listInvestmentDetailResponses = listResponse
                 };
-                return ApiResponse<InvestmentDetailResponse>.SuccessResponse("Thành công!", 200, response);
+                return ApiResponse<InvestmentDetailResponse>.SuccessResponse("Lấy thông tin chi tiết tài sản thành công!", 200, response);
             }
             catch (Exception ex)
             {

@@ -8,14 +8,6 @@
 
         public string? AssetSymbol { get; set; }
 
-        public decimal? CurrentPrice { get; set; }
-
-        public decimal? MarketCap { get; set; }
-
-        public decimal? TotalVolume { get; set; }
-
-        public decimal? PriceChangePercentage24h { get; set; }
-
         public Guid IdFund { get; set; }
     }
 }

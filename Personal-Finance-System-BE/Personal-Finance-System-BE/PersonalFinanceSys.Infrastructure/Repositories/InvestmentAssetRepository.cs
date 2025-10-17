@@ -19,12 +19,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             _mapper = mapper;
         }
 
-        public async Task AddInvestmentAssetAsync(InvestmentAssetDomain investmentAssetDomain)
+        public async Task<InvestmentAssetDomain> AddInvestmentAssetAsync(InvestmentAssetDomain investmentAssetDomain)
         {
             var investmentAsset = _mapper.Map<InvestmentAsset>(investmentAssetDomain);
             investmentAsset.IdAsset = Guid.NewGuid();
             await _context.InvestmentAssets.AddAsync(investmentAsset);
             await _context.SaveChangesAsync();
+            return _mapper.Map<InvestmentAssetDomain>(investmentAsset);
         }
 
         public async Task DeleteInvestmentAssetAsync(Guid idAsset)
@@ -54,6 +55,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             if (investmentAsset == null)
                 throw new NotFoundException("Không tìm thấy thông tin tài sản!");
             return _mapper.Map<InvestmentAssetDomain>(investmentAsset);
+        }
+
+        public async Task<List<InvestmentAssetDomain>> GetListInvestmentAssetAsync(Guid idFund)
+        {
+            var listInvestmentAsset = await _context.InvestmentAssets
+                .Where(i => i.IdFund == idFund)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (listInvestmentAsset == null)
+                throw new NotFoundException("Không tìm thấy danh sách tài sản!");
+            return _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAsset);
         }
     }
 }

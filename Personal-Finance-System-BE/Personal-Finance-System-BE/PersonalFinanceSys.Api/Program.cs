@@ -46,6 +46,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInvestmentFundRepository, InvestmentFundRepository>();
 builder.Services.AddScoped<IInvestmentAssetRepository, InvestmentAssetRepository>();
 builder.Services.AddScoped<IInvestmentDetailRepository, InvestmentDetailRepository>();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 
 // Services
