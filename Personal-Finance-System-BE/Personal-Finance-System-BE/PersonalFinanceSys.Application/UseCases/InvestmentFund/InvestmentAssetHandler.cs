@@ -12,7 +12,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
     {
         private readonly IInvestmentAssetRepository _investmentAssetRepository;
         private readonly IInvestmentFundRepository _investmentFundRepository;
-        private readonly IImageRepository _imageRepository;
         private readonly CryptoHandler _cryptoHandler;
         private readonly InvestmentDetailHandler _investmentDetailHandler;
         private readonly IMapper _mapper;
@@ -20,14 +19,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         public InvestmentAssetHandler(IInvestmentAssetRepository investmentAssetRepository, 
                                       IMapper mapper,
                                       IInvestmentFundRepository investmentFundRepository,
-                                      IImageRepository imageRepository,
                                       CryptoHandler cryptoHandler,
                                       InvestmentDetailHandler investmentDetailHandler)
         {
             _investmentAssetRepository = investmentAssetRepository;
             _mapper = mapper;
             _investmentFundRepository = investmentFundRepository;
-            _imageRepository = imageRepository;
             _cryptoHandler = cryptoHandler;
             _investmentDetailHandler = investmentDetailHandler;
         }

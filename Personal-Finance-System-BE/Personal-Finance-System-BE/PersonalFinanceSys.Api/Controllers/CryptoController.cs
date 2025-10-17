@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
@@ -14,6 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _cryptoHandler = cryptoHandler;
         }
 
+        [Authorize]
         [HttpGet("list-crypto")]
         public async Task<IActionResult> GetListCryto()
         {
@@ -25,6 +27,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-crypto")]
         public async Task<IActionResult> GetInfCryto([FromQuery] string idCrypto)
         {
