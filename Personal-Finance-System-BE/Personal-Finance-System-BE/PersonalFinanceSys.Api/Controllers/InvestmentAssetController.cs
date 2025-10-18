@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
 
@@ -15,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _investmentAssetHandler = investmentAssetHandler;
         }
 
+        [Authorize]
         [HttpGet("list-investment-asset")]
         public async Task<IActionResult> GetListInvestmentDetail([FromQuery] Guid idFund)
         {
@@ -26,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-investment-asset")]
         public async Task<IActionResult> AddInvestmentAsset([FromBody]InvestmentAssetRequest investmentAssetRequest)
         {
@@ -37,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-investment-asset")]
         public async Task<IActionResult> DeleteInvestmentAsset([FromQuery] Guid idAsset)
         {

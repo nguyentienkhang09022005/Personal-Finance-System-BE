@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 
@@ -15,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _userHandler = userHandler;
         }
 
+        [Authorize]
         [HttpGet("list-user")]
         public async Task<IActionResult> ListUser()
         {
@@ -26,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-user")]
         public async Task<IActionResult> InfUser([FromQuery] Guid idUser)
         {
@@ -37,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("add-user")]
         public async Task<IActionResult> AddUser([FromBody] UserRequest userRequest)
         {
@@ -48,6 +52,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-user")]
         public async Task<IActionResult> DeleteUser([FromQuery] Guid idUser)
         {
