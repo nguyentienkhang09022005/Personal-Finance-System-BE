@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -121,17 +122,34 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             return valueTotalAsset - totalNetCostRemaining;
         }
 
-
-
         public async Task<ApiResponse<string>> CreateInvestmentDetailHandleAsync(InvestmentDetailRequest investmentDetailRequest)
         {
             try
             {
+                // Check tài sản tồn tại
                 bool assetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(investmentDetailRequest.IdAsset);
                 if (!assetExist)
                     return ApiResponse<string>.FailResponse("Không tìm thấy tài sản!", 404);
 
-                
+                if (string.Equals(investmentDetailRequest.Type, ConstrantBuyAndSell.TypeSell, StringComparison.OrdinalIgnoreCase))
+                {
+                    decimal quantityToSell = investmentDetailRequest.Quantity.GetValueOrDefault();
+
+                    if (quantityToSell <= 0)
+                    {
+                        return ApiResponse<string>.FailResponse("Số lượng bán phải lớn hơn 0!", 400);
+                    }
+
+                    decimal netQuantityAvailable = await _investmentDetailRepository.GetNetQuantityForAssetAsync(investmentDetailRequest.IdAsset);
+
+                    if (netQuantityAvailable < quantityToSell)
+                    {
+                        return ApiResponse<string>.FailResponse(
+                            $"Số lượng bán ({quantityToSell}) vượt quá số lượng hiện có ({netQuantityAvailable}).",
+                            400); 
+                    }
+                }
+
                 var investmentDetailDomain = _mapper.Map<InvestmentDetailDomain>(investmentDetailRequest);
                 await _investmentDetailRepository.AddInvestmentDetailAsync(investmentDetailDomain);
 
