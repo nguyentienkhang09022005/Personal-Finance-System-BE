@@ -53,7 +53,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
         }
 
         [Authorize]
-        [HttpPut("udpate-investment-fund")]
+        [HttpPatch("udpate-investment-fund")]
         public async Task<IActionResult> UpdateInfInvestmentFundAsync([FromQuery] Guid idFund,
                                                                       [FromBody] InvestmentFundUpdateRequest investmentFundUpdateRequest)
         {
