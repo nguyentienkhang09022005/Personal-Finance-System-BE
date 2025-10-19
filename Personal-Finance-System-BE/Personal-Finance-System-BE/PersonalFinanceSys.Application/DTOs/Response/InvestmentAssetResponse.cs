@@ -8,8 +8,6 @@
 
         public decimal TotalProfitAndLoss { get; set; }
 
-        public decimal PortfolioChange24h { get; set; }
-
         public List<AverageFinanceAssetResponse> AverageFinanceAssets { get; set; }
 
         public List<ListInvestmentAssetResponse> listInvestmentAssetResponse { get; set; }
