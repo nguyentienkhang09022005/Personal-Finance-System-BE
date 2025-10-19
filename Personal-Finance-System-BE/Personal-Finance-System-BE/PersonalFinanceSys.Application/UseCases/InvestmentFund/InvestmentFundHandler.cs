@@ -69,9 +69,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         {
             try
             {
-                var checkEnvestmentFund = await _investmentFundRepository.ExistInvestmentFund(idFund);
-                var investmentDomain = _mapper.Map<InvestmentFundDomain>(investmentFundUpdateRequest);
-                var investmentFundUpdated = await _investmentFundRepository.UpdateInvestmentFundAsync(investmentDomain, checkEnvestmentFund);
+                var investmentFundEntity = await _investmentFundRepository.ExistInvestmentFund(idFund);
+                var investmentDomain = _mapper.Map<InvestmentFundDomain>(investmentFundEntity);
+
+                _mapper.Map(investmentFundUpdateRequest, investmentDomain);
+                var investmentFundUpdated = await _investmentFundRepository.UpdateInvestmentFundAsync(investmentDomain, investmentFundEntity);
 
                 var investmentFundResponse = _mapper.Map<InvestmentFundResponse>(investmentFundUpdated);
                 return ApiResponse<InvestmentFundResponse>.SuccessResponse("Cập nhật thông tin quỹ thành công", 200, investmentFundResponse);
