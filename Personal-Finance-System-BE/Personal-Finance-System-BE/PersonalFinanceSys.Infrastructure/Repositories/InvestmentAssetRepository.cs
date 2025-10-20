@@ -5,6 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 using SendGrid.Helpers.Errors.Model;
+using System.Linq;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories
 {
@@ -75,6 +76,21 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             if (listInvestmentAsset == null)
                 throw new NotFoundException("Không tìm thấy danh sách tài sản!");
             return _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAsset);
+        }
+
+        public async Task<List<InvestmentAssetDomain>> GetAssetsForMultipleFundsAsync(List<Guid> fundIds)
+        {
+            if (fundIds == null || !fundIds.Any())
+            {
+                return new List<InvestmentAssetDomain>();
+            }
+
+            var listInvestmentAssetEntity = await _context.InvestmentAssets
+                .Where(asset => fundIds.Contains(asset.IdFund))
+                .ToListAsync();
+
+            var investmentAssetMap = _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAssetEntity);
+            return investmentAssetMap;
         }
     }
 }

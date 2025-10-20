@@ -13,7 +13,7 @@ public partial class InvestmentAsset
 
     public string? AssetSymbol { get; set; }
 
-    public Guid? IdFund { get; set; }
+    public Guid IdFund { get; set; }
 
     public virtual InvestmentFund? IdFundNavigation { get; set; }
 

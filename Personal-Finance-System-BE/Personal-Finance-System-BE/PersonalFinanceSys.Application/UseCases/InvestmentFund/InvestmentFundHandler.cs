@@ -2,7 +2,9 @@
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund
@@ -12,17 +14,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         private readonly IInvestmentFundRepository _investmentFundRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IInvestmentAssetRepository _investmentAssetRepository;
+        private readonly CryptoHandler _cryptoHandler;
+        private readonly ILogger<InvestmentFundHandler> _logger;
 
         public InvestmentFundHandler(IInvestmentFundRepository investmentFundRepository, 
                                      IMapper mapper,
-                                     IUserRepository userRepository)
+                                     IUserRepository userRepository,
+                                     IInvestmentAssetRepository investmentAssetRepository,
+                                     CryptoHandler cryptoHandler,
+                                     ILogger<InvestmentFundHandler> logger)
         {
             _investmentFundRepository = investmentFundRepository;
             _mapper = mapper;
             _userRepository = userRepository;
+            _investmentAssetRepository = investmentAssetRepository;
+            _cryptoHandler = cryptoHandler;
+            _logger = logger;
         }
 
-        // Hàm lấy danh sách quỹ cá nhân qua idUser
         public async Task<ApiResponse<List<InvestmentFundResponse>>> GetListInvestmentFundHandleAsync(Guid idUser)
         {
             bool userExists = await _userRepository.ExistUserAsync(idUser);
@@ -30,25 +40,77 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 return ApiResponse<List<InvestmentFundResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
 
             var funds = await _investmentFundRepository.GetListInvesmentFundDomains(idUser);
-
-            var fundResposne = _mapper.Map<List<InvestmentFundResponse>>(funds);
-            return ApiResponse<List<InvestmentFundResponse>>.SuccessResponse("Lấy danh sách quỹ của người dùng thành công!", 200, fundResposne);
-        }
-
-        // Hàm lấy thông tin chi tiết quỹ cá nhân qua ID (còn thiếu chi tiết của quỹ)
-        public async Task<ApiResponse<InvestmentFundResponse>> GetInfInvestmentFundHandleAsync(Guid idFund)
-        {
-            try
-            {
-                var fund = await _investmentFundRepository.GetInfInvestmentFundAsync(idFund);
-
-                var fundResposne = _mapper.Map<InvestmentFundResponse>(fund);
-                return ApiResponse<InvestmentFundResponse>.SuccessResponse("Lấy thông tin chi tiết quỹ của người dùng thành công!", 200, fundResposne);
-            } catch (NotFoundException ex)
-            {
-                return ApiResponse<InvestmentFundResponse>.FailResponse(ex.Message, 404);
+            if (funds == null || !funds.Any()){
+                return ApiResponse<List<InvestmentFundResponse>>.SuccessResponse("Người dùng không có quỹ nào.", 200, new List<InvestmentFundResponse>());
             }
+
+            var fundIds = funds.Select(f => f.IdFund).ToList();
+
+            // Lấy tất cả assets cho tất cả quỹ
+            var allAssets = await _investmentAssetRepository.GetAssetsForMultipleFundsAsync(fundIds);
+
+            var listCryptoAsync = await _cryptoHandler.GetListCryptoAsync();
+            var cryptoDict = listCryptoAsync?.Data?.ToDictionary(c => c.Id, c => c)
+                             ?? new Dictionary<string, CryptoResponse>();
+
+            // Nhóm assets theo IdFund 
+            var assetsByFundIdLookup = allAssets.ToLookup(asset => asset.IdFund);
+
+            var finalFundResponses = new List<InvestmentFundResponse>();
+            foreach (var fund in funds)
+            {
+                var fundResponse = _mapper.Map<InvestmentFundResponse>(fund);
+                var assetsForThisFund = assetsByFundIdLookup[fund.IdFund];
+
+                fundResponse.listInvestmentAssetResponses = MapListInvestmentAssetResponse(assetsForThisFund, cryptoDict);
+
+                finalFundResponses.Add(fundResponse);
+            }
+
+            return ApiResponse<List<InvestmentFundResponse>>.SuccessResponse(
+                "Lấy danh sách quỹ của người dùng thành công!",
+                200,
+                finalFundResponses
+            );
         }
+
+        private List<ListInvestmentAssetResponse> MapListInvestmentAssetResponse(IEnumerable<InvestmentAssetDomain> listAssets,
+            Dictionary<string, CryptoResponse> cryptoDict)
+        {
+            if (listAssets == null)
+                return new List<ListInvestmentAssetResponse>();
+
+            return listAssets.Select(i =>
+            {
+                cryptoDict.TryGetValue(i.Id, out var matchedCrypto);
+
+                return new ListInvestmentAssetResponse
+                {
+                    IdAsset = i.IdAsset,
+                    Id = i.Id,
+                    AssetName = i.AssetName,
+                    AssetSymbol = i.AssetSymbol,
+                    CurrentPrice = matchedCrypto?.CurrentPrice ?? 0,
+                    MarketCap = matchedCrypto?.MarketCap ?? 0,
+                    TotalVolume = matchedCrypto?.TotalVolume ?? 0,
+                    PriceChangePercentage24h = matchedCrypto?.PriceChangePercentage24h ?? 0,
+                    Url = matchedCrypto?.Image
+                };
+            }).ToList();
+        }
+
+        // Hàm lấy danh sách quỹ cá nhân qua idUser
+        //public async Task<ApiResponse<List<InvestmentFundResponse>>> GetListInvestmentFundHandleAsync(Guid idUser)
+        //{
+        //    bool userExists = await _userRepository.ExistUserAsync(idUser);
+        //    if (!userExists)
+        //        return ApiResponse<List<InvestmentFundResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+
+        //    var funds = await _investmentFundRepository.GetListInvesmentFundDomains(idUser);
+
+        //    var fundResposne = _mapper.Map<List<InvestmentFundResponse>>(funds);
+        //    return ApiResponse<List<InvestmentFundResponse>>.SuccessResponse("Lấy danh sách quỹ của người dùng thành công!", 200, fundResposne);
+        //}
 
         // Hàm tạo quỹ cá nhân
         public async Task<ApiResponse<InvestmentFundResponse>> CreateInvestmentHandleAsync(InvestmentFundCreationRequest investmentFundCreationRequest)

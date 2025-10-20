@@ -9,6 +9,8 @@
         public string? Description { get; set; }
 
         public DateTime? CreateAt { get; set; }
+
+        public List<ListInvestmentAssetResponse> listInvestmentAssetResponses { get; set; }
     }
 
     public class CalculateTotalFinanceAndProfitResponse

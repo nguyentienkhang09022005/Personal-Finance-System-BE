@@ -28,23 +28,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("list-investment-fund")]
         public async Task<IActionResult> GetListInvestmentFundByIdUser([FromQuery] Guid idUser)
         {
             var result = await _investmentFundHandler.GetListInvestmentFundHandleAsync(idUser);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [Authorize]
-        [HttpGet("inf-investment-fund")]
-        public async Task<IActionResult> GetInfInvestmentFundByIdUser([FromQuery] Guid idFund)
-        {
-            var result = await _investmentFundHandler.GetInfInvestmentFundHandleAsync(idFund);
             if (result.Success)
             {
                 return Ok(result);
