@@ -88,6 +88,7 @@ builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<UserHandler>();
 builder.Services.AddScoped<InvestmentFundHandler>();
 builder.Services.AddHttpClient<CryptoHandler>();
+builder.Services.AddHttpClient<NewsHandler>();
 builder.Services.AddScoped<InvestmentAssetHandler>();
 builder.Services.AddScoped<InvestmentDetailHandler>();
 
