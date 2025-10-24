@@ -18,7 +18,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpPost("create-investment-fund")]
-        public async Task<IActionResult> AddInvestmentFund(InvestmentFundCreationRequest investmentFundCreationRequest)
+        public async Task<IActionResult> AddInvestmentFund([FromBody] InvestmentFundCreationRequest investmentFundCreationRequest)
         {
             var result = await _investmentFundHandler.CreateInvestmentHandleAsync(investmentFundCreationRequest);
             if (result.Success)

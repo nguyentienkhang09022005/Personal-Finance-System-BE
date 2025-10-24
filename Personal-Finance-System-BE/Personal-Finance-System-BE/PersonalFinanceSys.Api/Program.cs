@@ -6,11 +6,11 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services;
-using ServiceStack.Redis;
 using System.Text;
 
 
@@ -75,6 +75,8 @@ builder.Services.AddScoped<IInvestmentFundRepository, InvestmentFundRepository>(
 builder.Services.AddScoped<IInvestmentAssetRepository, InvestmentAssetRepository>();
 builder.Services.AddScoped<IInvestmentDetailRepository, InvestmentDetailRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 
 // Services
@@ -91,6 +93,7 @@ builder.Services.AddHttpClient<CryptoHandler>();
 builder.Services.AddHttpClient<NewsHandler>();
 builder.Services.AddScoped<InvestmentAssetHandler>();
 builder.Services.AddScoped<InvestmentDetailHandler>();
+builder.Services.AddScoped<TransactionHandler>();
 
 
 // Mapper Registration

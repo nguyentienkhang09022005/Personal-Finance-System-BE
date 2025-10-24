@@ -39,24 +39,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             {
                 // Kiểm tra quỹ có tài sản không
                 var listInvestmentAsset = await _investmentAssetRepository.GetListInvestmentAssetAsync(idFund);
-                if (listInvestmentAsset == null || !listInvestmentAsset.Any())
-                {
-                    _logger.LogWarning("Không tìm thấy tài sản nào cho Fund ID: {FundId}", idFund);
-                    var emptyResponse = new InvestmentAssetResponse
-                    {
-                        TotalFinanceCurrent = 0,
-                        TotalTransactionAmount = 0,
-                        TotalProfitAndLoss = 0,
-                    };
-
-                    return ApiResponse<InvestmentAssetResponse>.SuccessResponse(
-                        "Không có tài sản nào trong quỹ!",
-                        200,
-                        emptyResponse
-                    );
-                }
-                _logger.LogInformation("Tìm thấy {AssetCount} tài sản cho Fund ID: {FundId}", listInvestmentAsset.Count, idFund);
-
+                
                 // Kiểm tra danh sách crypto
                 var listCryptoAsync = await _cryptoHandler.GetListCryptoAsync();
                 if (listCryptoAsync?.Data == null)

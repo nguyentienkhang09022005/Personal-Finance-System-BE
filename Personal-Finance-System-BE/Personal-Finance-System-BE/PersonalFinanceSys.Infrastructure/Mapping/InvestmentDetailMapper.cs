@@ -16,7 +16,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             CreateMap<InvestmentDetail, InvestmentDetailDomain>();
 
             // Request -> Domain
-            CreateMap<InvestmentDetailRequest, InvestmentDetailDomain>();
+            CreateMap<InvestmentDetailRequest, InvestmentDetailDomain>()
+                .ConstructUsing(src => new InvestmentDetailDomain(src.Price, src.Quantity, src.Fee, src.Type));
         }
     }
 }

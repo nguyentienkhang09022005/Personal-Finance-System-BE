@@ -133,7 +133,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                 if (string.Equals(investmentDetailRequest.Type, ConstrantBuyAndSell.TypeSell, StringComparison.OrdinalIgnoreCase))
                 {
-                    decimal quantityToSell = investmentDetailRequest.Quantity.GetValueOrDefault();
+                    decimal quantityToSell = investmentDetailRequest.Quantity;
 
                     if (quantityToSell <= 0)
                     {

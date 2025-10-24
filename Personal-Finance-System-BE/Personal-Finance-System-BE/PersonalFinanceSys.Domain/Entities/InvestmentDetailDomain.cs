@@ -1,4 +1,6 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
+﻿using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
 {
     public class InvestmentDetailDomain
     {
@@ -18,11 +20,12 @@
 
         public Guid? IdAsset { get; set; }
 
-        public InvestmentDetailDomain(decimal Price, decimal Quantity, decimal fee)
+        public InvestmentDetailDomain(decimal price, decimal quantity, decimal fee, string type)
         {
-            SetPrice(Price);
-            SetQuantity(Quantity);
+            SetPrice(price);
+            SetQuantity(quantity);
             SetFee(fee);
+            SetType(type);
         }
 
         public void SetPrice(decimal price)
@@ -50,6 +53,15 @@
                 throw new ArgumentException("Phí giao dịch phải > 0");
             }
             Fee = fee;
+        }
+
+        public void SetType(string type)
+        {
+            if (type != ConstrantBuyAndSell.TypeBuy && type != ConstrantBuyAndSell.TypeSell)
+            {
+                throw new ArgumentException("Loại giao dịch không hợp lệ!");
+            }
+            Type = type;
         }
     }
 }
