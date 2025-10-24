@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -30,6 +31,10 @@ builder.Configuration["RedisSettings:Password"] = Environment.GetEnvironmentVari
 builder.Configuration["SendGrid:ApiKey"] = Environment.GetEnvironmentVariable("SENDER_APIKEY");
 builder.Configuration["SendGrid:Email"] = Environment.GetEnvironmentVariable("SENDER_EMAIL");
 builder.Configuration["SendGrid:Name"] = Environment.GetEnvironmentVariable("SENDER_NAME");
+builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME");
+builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
+builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
+
 
 
 // DbContext Registration
@@ -82,6 +87,7 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 // Services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 
 // Handlers
 builder.Services.AddScoped<OtpHandler>();
@@ -116,6 +122,14 @@ builder.Services
     .AddFluentEmail(builder.Configuration["SendGrid:Email"], builder.Configuration["SendGrid:Name"])
     .AddRazorRenderer()
     .AddSendGridSender(builder.Configuration["SendGrid:ApiKey"]);
+
+// Cloudinary Registration
+var account = new Account(
+    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME"),
+    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY"),
+    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET")
+);
+builder.Services.AddSingleton(new Cloudinary(account));
 
 // In-Memory Cache Registration
 builder.Services.AddMemoryCache();
