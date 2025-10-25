@@ -72,7 +72,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .IgnoreAutoIncludes()
                 .FirstOrDefaultAsync(t => t.IdTransaction == idTransaction);
 
-            return transaction ?? throw new NotFoundException("Không tìm giao dịch");
+            return transaction ?? throw new NotFoundException("Không tìm giao dịch!");
         }
     }
 }

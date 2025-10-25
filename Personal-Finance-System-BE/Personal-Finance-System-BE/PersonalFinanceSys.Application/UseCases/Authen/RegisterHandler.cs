@@ -31,13 +31,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
         {
             // Nếu tồn tại email thì trả về lỗi
             var checkEmail = await _userRepository.GetUserByEmailAsync(registerRequest.Email);
-            if (checkEmail != null)
-            {
+            if (checkEmail != null){
                 return ApiResponse<string>.FailResponse("Email đã tồn tại!", 409);
             }
 
-            if (registerRequest.Password != registerRequest.ConfirmPassword)
-            {
+            if (string.IsNullOrWhiteSpace(registerRequest.Email) || !registerRequest.Email.Contains("@")){
+                return ApiResponse<string>.FailResponse("Email không hợp lệ!", 400);
+            }
+
+            if (registerRequest.Password != registerRequest.ConfirmPassword){
                 return ApiResponse<string>.FailResponse("Mật khẩu xác nhận không khớp!", 400);
             }
 

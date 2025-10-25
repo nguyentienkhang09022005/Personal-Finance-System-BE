@@ -4,9 +4,6 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
-using System.Security.Cryptography;
-using System.Text;
 
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen
@@ -87,12 +84,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
             try
             {
                 // Tạo user mới
-                var newUser = new UserDomain
-                (
-                    name: cacheData.Name,
-                    email: cacheData.Email,
-                    password: cacheData.Password
-                );
+                var newUser = new UserDomain();
+                newUser.Name = cacheData.Name;
+                newUser.Email = cacheData.Email;
+                newUser.Password = cacheData.Password;
 
                 await _userRepository.AddUserAsync(newUser);
 
@@ -124,13 +119,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
             }
             try
             {
-                var user = await _userRepository.GetUserByEmailAsync(changePasswordRequest.Email);
-                if (user == null)
-                {
+                var userDomain = await _userRepository.GetUserByEmailAsync(changePasswordRequest.Email);
+                if (userDomain == null){
                     return ApiResponse<string>.FailResponse("Email không tồn tại!", 404);
                 }
-                user.SetPassword(BCrypt.Net.BCrypt.HashPassword(changePasswordRequest.NewPassword));
-                await _userRepository.UpdateUserAsync(user);
+                userDomain.SetPassword(BCrypt.Net.BCrypt.HashPassword(changePasswordRequest.NewPassword));
+
+                var userEntity = await _userRepository.GetExistUserAsync(userDomain.IdUser);
+
+                await _userRepository.UpdateUserAsync(userDomain, userEntity);
 
                 _memoryCache.Remove(cacheKey);
                 return ApiResponse<string>.SuccessResponse("Đổi mật khẩu thành công!", 200, string.Empty);

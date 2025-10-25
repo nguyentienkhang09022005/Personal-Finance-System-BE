@@ -4,80 +4,187 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using SendGrid.Helpers.Errors.Model;
-using System.Text.RegularExpressions;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users
 {
     public class UserHandler
     {
         private readonly IUserRepository _userRepository;
+        private readonly IImageRepository _imageRepository;
         private readonly IMapper _mapper;
         
-        public UserHandler(IUserRepository userRepository, IMapper mapper)
+        public UserHandler(IUserRepository userRepository, IImageRepository imageRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _imageRepository = imageRepository;
             _mapper = mapper;
         }
 
         // Lấy danh sách người dùng
         public async Task<ApiResponse<List<UserResponse>>> GetListUserHandleAsync()
         {
-            var userDomains = await _userRepository.GetListUserAsync();
-            var userResponse = _mapper.Map<List<UserResponse>>(userDomains);
-            return ApiResponse<List<UserResponse>>.SuccessResponse("Lấy danh sách người dùng thành công", 200, userResponse);
+            try
+            {
+                var userDomains = await _userRepository.GetListUserAsync();
+                if (userDomains == null || !userDomains.Any())
+                    return ApiResponse<List<UserResponse>>.SuccessResponse("Không có người dùng nào", 200, new List<UserResponse>());
+
+                var idUsers = userDomains.Select(u => u.IdUser).ToList();
+
+                var imageDict = await _imageRepository.GetImagesByListRefAsync(idUsers, "USERS");
+
+                var userResponses = _mapper.Map<List<UserResponse>>(userDomains);
+
+                foreach (var userResponse in userResponses)
+                {
+                    imageDict.TryGetValue(userResponse.IdUser, out var urlAvatar);
+                    userResponse.UrlAvatar = string.IsNullOrEmpty(urlAvatar) ? null : urlAvatar;
+                }
+
+                return ApiResponse<List<UserResponse>>.SuccessResponse("Lấy danh sách người dùng thành công", 200, userResponses);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<UserResponse>>.FailResponse($"Lỗi khi lấy danh sách người dùng: {ex.Message}", 500);
+            }
         }
+
 
         // Hàm lấy thông tin chi tiết người dùng qua ID
         public async Task<ApiResponse<UserResponse>> GetInfUserHandleAsync(Guid idUser)
         {
             try
             {
-                var userDomain = await _userRepository.GetUserByIdAsync(idUser);
+                // Song song lấy thông tin người dùng và ảnh đại diện
+                var userTask = _userRepository.GetUserByIdAsync(idUser);
+                var imageTask = _imageRepository.GetImageUrlByIdRefAsync(idUser, "USERS");
+
+                await Task.WhenAll(userTask, imageTask);
+
+                var userDomain = await userTask;
+                var urlAvatar = await imageTask;
+
                 var userResponse = _mapper.Map<UserResponse>(userDomain);
-                return ApiResponse<UserResponse>.SuccessResponse("Lấy thông tin người dùng thành công", 200, userResponse);
+                userResponse.UrlAvatar = string.IsNullOrEmpty(urlAvatar) ? null : urlAvatar;
+
+                return ApiResponse<UserResponse>.SuccessResponse(
+                    "Lấy thông tin người dùng thành công",
+                    200,
+                    userResponse
+                );
             }
             catch (NotFoundException ex)
             {
                 return ApiResponse<UserResponse>.FailResponse(ex.Message, 404);
             }
+            catch (Exception ex)
+            {
+                return ApiResponse<UserResponse>.FailResponse($"Lỗi khi lấy thông tin: {ex.Message}", 500);
+            }
         }
 
+
         // Tạo người dùng mới
-        public async Task<ApiResponse<string>> CreateUserHandleAsync(UserRequest userRequest)
+        public async Task<ApiResponse<string>> CreateUserHandleAsync(UserCreationRequest userCreationRequest)
         {
-            if (userRequest == null)
+            try
             {
-                return ApiResponse<string>.FailResponse("Lỗi chưa gửi request!", 500);
-            }
+                if (userCreationRequest == null){
+                    return ApiResponse<string>.FailResponse("Lỗi chưa gửi request!", 500);
+                }
 
-            // Kiểm tra định dạng email
-            if (string.IsNullOrWhiteSpace(userRequest.Email) ||
-                    !Regex.IsMatch(userRequest.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                // Kiểm tra password và confirm password
+                if (string.IsNullOrWhiteSpace(userCreationRequest.Password) ||
+                    string.IsNullOrWhiteSpace(userCreationRequest.ConfirmPassword))
+                {
+                    return ApiResponse<string>.FailResponse("Mật khẩu không được để trống!", 400);
+                }
+
+                if (userCreationRequest.Password != userCreationRequest.ConfirmPassword)
+                {
+                    return ApiResponse<string>.FailResponse(
+                        "Mật khẩu và xác nhận mật khẩu không trùng khớp!", 
+                        400);
+                }
+
+                var newUser = _mapper.Map<UserDomain>(userCreationRequest);
+                var createdUser = await _userRepository.AddUserAsync(newUser);
+
+                if (userCreationRequest.UrlAvatar != null)
+                {
+                    var avartar = new ImageDomain
+                    {
+                        Url = userCreationRequest.UrlAvatar,
+                        IdRef = createdUser.IdUser,
+                        RefType = "USERS"
+                    };
+                    await _imageRepository.AddImageAsync(avartar);
+                }
+                return ApiResponse<string>.SuccessResponse(
+                    "Tạo người dùng thành công!", 
+                    200, 
+                    string.Empty);
+            }
+            catch (Exception ex){
+                return ApiResponse<string>.FailResponse(ex.Message, 500);
+            }   
+        }
+
+        public async Task<ApiResponse<ApiResponse<UserResponse>>> UpdateUserHandleAsync(Guid idUser, UserUpdateRequest userUpdateRequest)
+        {
+            try
             {
-                return ApiResponse<string>.FailResponse("Email không hợp lệ! Phải có dạng example@gmail.com", 400);
-            }
+                var userEntity = await _userRepository.GetExistUserAsync(idUser);
+                if (userEntity == null){
+                    return ApiResponse<ApiResponse<UserResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
 
-            // Kiểm tra định dạng sđt
-            if (string.IsNullOrWhiteSpace(userRequest.Phone) || !Regex.IsMatch(userRequest.Phone, @"^[0-9]{10,12}$"))
+                var userDomain = _mapper.Map<UserDomain>(userEntity);
+
+                _mapper.Map(userUpdateRequest, userDomain);
+
+                // Cập nhật ảnh đại diện nếu có
+                if (userUpdateRequest.UrlAvatar != null)
+                {
+                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idUser, "USERS");
+                    if (existingImageUrl != null)
+                    {
+                        await _imageRepository.DeleteImageByIdRefAsync(idUser, "USERS");
+                        var updatedAvatar = new ImageDomain
+                        {
+                            Url = userUpdateRequest.UrlAvatar,
+                            IdRef = idUser,
+                            RefType = "USERS"
+                        };
+                        await _imageRepository.AddImageAsync(updatedAvatar);
+                    }
+                    else
+                    {
+                        var newAvatar = new ImageDomain
+                        {
+                            Url = userUpdateRequest.UrlAvatar,
+                            IdRef = idUser,
+                            RefType = "USERS"
+                        };
+                        await _imageRepository.AddImageAsync(newAvatar);
+                    }
+                }
+                var updatedUser = await _userRepository.UpdateUserAsync(userDomain, userEntity);
+
+                var userResponse = _mapper.Map<UserResponse>(updatedUser);
+                return ApiResponse<ApiResponse<UserResponse>>.SuccessResponse(
+                    "Cập nhật người dùng thành công!", 
+                    200, 
+                    ApiResponse<UserResponse>.SuccessResponse("Cập nhật người dùng thành công!", 200, userResponse));
+            }
+            catch (NotFoundException ex)
             {
-                return ApiResponse<string>.FailResponse("Số điện thoại phải có từ 10 đến 12 chữ số!", 400);
+                return ApiResponse<ApiResponse<UserResponse>>.FailResponse(ex.Message, 404);
             }
-
-            // Kiểm tra password và confirm password
-            if (string.IsNullOrWhiteSpace(userRequest.Password) ||
-                string.IsNullOrWhiteSpace(userRequest.ConfirmPassword))
+            catch (Exception ex)
             {
-                return ApiResponse<string>.FailResponse("Mật khẩu không được để trống!", 400);
+                return ApiResponse<ApiResponse<UserResponse>>.FailResponse($"Lỗi khi cập nhật người dùng: {ex.Message}", 500);
             }
-
-            if (userRequest.Password != userRequest.ConfirmPassword)
-            {
-                return ApiResponse<string>.FailResponse("Mật khẩu và xác nhận mật khẩu không trùng khớp!", 400);
-            }
-
-            var newUser = _mapper.Map<UserDomain>(userRequest);
-            await _userRepository.AddUserAsync(newUser);
-            return ApiResponse<string>.SuccessResponse("Tạo người dùng thành công!", 200, string.Empty);
         }
 
         // Hàm xóa tài khoản người dùng
@@ -86,7 +193,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             try
             {
                 await _userRepository.DeleteUserAsync(idUser);
-                return ApiResponse<string>.SuccessResponse("Xóa người dùng thành công!", 200, string.Empty);
+                await _imageRepository.DeleteImageByIdRefAsync(idUser, "USERS");
+                return ApiResponse<string>.SuccessResponse(
+                    "Xóa người dùng thành công!", 
+                    200, 
+                    string.Empty);
             }
             catch (NotFoundException ex)
             {

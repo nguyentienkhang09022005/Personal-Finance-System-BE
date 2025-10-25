@@ -16,7 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _userHandler = userHandler;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("list-user")]
         public async Task<IActionResult> ListUser()
         {
@@ -28,7 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("inf-user")]
         public async Task<IActionResult> InfUser([FromQuery] Guid idUser)
         {
@@ -42,9 +42,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpPost("add-user")]
-        public async Task<IActionResult> AddUser([FromBody] UserRequest userRequest)
+        public async Task<IActionResult> AddUser([FromBody] UserCreationRequest userCreationRequest)
         {
-            var result = await _userHandler.CreateUserHandleAsync(userRequest);
+            var result = await _userHandler.CreateUserHandleAsync(userCreationRequest);
             if (result.Success)
             {
                 return Ok(result);
@@ -52,11 +52,24 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpDelete("delete-user")]
         public async Task<IActionResult> DeleteUser([FromQuery] Guid idUser)
         {
             var result = await _userHandler.deleteUserHandleAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        //[Authorize]
+        [HttpPatch("update-user")]
+        public async Task<IActionResult> UpdateUser([FromQuery] Guid idUser, 
+                                                    [FromBody] UserUpdateRequest userUpdateRequest)
+        {
+            var result = await _userHandler.UpdateUserHandleAsync(idUser, userUpdateRequest);
             if (result.Success)
             {
                 return Ok(result);

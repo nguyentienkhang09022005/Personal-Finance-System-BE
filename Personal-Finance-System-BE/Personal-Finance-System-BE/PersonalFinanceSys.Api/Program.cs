@@ -41,6 +41,10 @@ builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironme
 builder.Services.AddDbContext<PersonFinanceSysDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
+builder.Services.AddDbContextFactory<PersonFinanceSysDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")),
+    ServiceLifetime.Scoped); // Use Scoped lifetime for DbContextFactory
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

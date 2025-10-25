@@ -12,13 +12,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
         {
             // User -> UserDomain
             CreateMap<User, UserDomain>()
-                .ConstructUsing(u => new UserDomain(u.Name, u.Email, u.Password)
-                {
-                    IdUser = u.IdUser
-                });
+                .ConstructUsing(src => new UserDomain());
 
-            // UserDomain <-> User
-            CreateMap<UserDomain, User>().ReverseMap();
+            // UserDomain -> User
+            CreateMap<UserDomain, User>()
+                .ForMember(dest => dest.IdUser, opt => opt.Ignore());
 
             // UserDomain -> UserResponse
             CreateMap<UserDomain, UserResponse>();
@@ -26,8 +24,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             // User -> UserResponse
             CreateMap<User, UserResponse>();
 
-            // UserRequest -> UserDomain
-            CreateMap<UserRequest, UserDomain>();
+            // UserCreationRequest -> UserDomain
+            CreateMap<UserCreationRequest, UserDomain>()
+                .ConstructUsing(src => new UserDomain(src.Email, src.Phone, src.Password))
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            // UserUpdateRequest -> UserDomain
+            CreateMap<UserUpdateRequest, UserDomain>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

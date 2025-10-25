@@ -26,13 +26,11 @@
 
         public UserDomain() { }
 
-        public UserDomain(string? name, string? email, string? password)
+        public UserDomain(string email, string phone, string password)
         {
-            IdUser = Guid.NewGuid();
-            Name = name;
             SetEmail(email);
             SetPassword(password);
-            TotalAmount = decimal.Zero;
+            SetPhone(phone);
         }
 
         // Phương thức kiểm tra tính hợp lệ của email
@@ -40,9 +38,18 @@
         {
             if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
             {
-                throw new ArgumentException("Email không hợp lệ!");
+                throw new ArgumentException("Email không hợp lệ! Phải có dạng example@gmail.com!");
             }
             Email = email;
+        }
+
+        public void SetPhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone) || phone.Length < 10 || phone.Length > 12)
+            {
+                throw new ArgumentException("Số điện thoại không hợp lệ!");
+            }
+            Phone = phone;
         }
 
         // Phương thức kiểm tra tính hợp lệ của password

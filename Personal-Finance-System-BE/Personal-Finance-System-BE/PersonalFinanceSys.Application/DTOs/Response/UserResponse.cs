@@ -18,6 +18,8 @@
 
         public bool? IsDarkmode { get; set; }
 
+        public string UrlAvatar { get; set; }
+
         public DateTime? CreateAt { get; set; }
     }
 }

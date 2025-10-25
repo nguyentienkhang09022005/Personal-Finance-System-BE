@@ -20,15 +20,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         }
 
         // Add User
-        public async Task AddUserAsync(UserDomain users)
+        public async Task<UserDomain> AddUserAsync(UserDomain users)
         {
             var user = _mapper.Map<User>(users);
-            if (!string.IsNullOrEmpty(user.Password))
-            {
+            user.IdUser = Guid.NewGuid();
+            user.TotalAmount = 0;
+
+            if (!string.IsNullOrEmpty(user.Password)){
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             }
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+            return _mapper.Map<UserDomain>(user);
         }
 
         // Delete User
@@ -41,6 +44,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         }
 
         // Check Exist User
+        public async Task<User> GetExistUserAsync(Guid idUser)
+        {
+            var user = await _context.Users
+                .IgnoreAutoIncludes()
+                .FirstOrDefaultAsync(u => u.IdUser == idUser);
+
+            return user ?? throw new NotFoundException("Không tìm người dùng!");
+        }
+
         public async Task<bool> ExistUserAsync(Guid idUser)
         {
             return await _context.Users
@@ -84,13 +96,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         }
 
         // Update User
-        public async Task<UserDomain?> UpdateUserAsync(UserDomain userDomain)
+        public async Task<UserDomain?> UpdateUserAsync(UserDomain userDomain, User user)
         {
-            var user = await _context.Users.FindAsync(userDomain.IdUser);
-            if (user == null) return null;
-
-            // Cập nhật các thuộc tính của user
             _mapper.Map(userDomain, user);
+
             await _context.SaveChangesAsync();
             return _mapper.Map<UserDomain>(user);
         }

@@ -11,7 +11,7 @@ public partial class Image
 
     public DateTime? CreateAt { get; set; }
 
-    public Guid? IdRef { get; set; }
+    public Guid IdRef { get; set; }
 
     public string? RefType { get; set; }
 }
