@@ -16,7 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _transactionHandler = transactionHandler;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("list-transaction")]
         public async Task<IActionResult> ListTransactionAsync([FromQuery] Guid idUser)
         {

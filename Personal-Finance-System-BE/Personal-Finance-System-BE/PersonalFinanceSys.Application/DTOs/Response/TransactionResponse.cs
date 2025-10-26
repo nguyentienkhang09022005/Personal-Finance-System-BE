@@ -16,4 +16,19 @@
 
         public DateTime? CreateAt { get; set; }
     }
+
+    public class TransactionChartResponse
+    {
+        public string? TransactionCategory { get; set; }
+
+        public decimal ExpensePercent { get; set; }
+
+        public decimal ExpenseAmount { get; set; }
+    }
+
+    public class TransactionSummaryResponse
+    {
+        public List<TransactionResponse> ExpenseList { get; set; } = new();
+        public List<TransactionChartResponse> ChartList { get; set; } = new();
+    }
 }

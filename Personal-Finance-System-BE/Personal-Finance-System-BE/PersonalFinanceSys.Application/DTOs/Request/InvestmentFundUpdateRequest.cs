@@ -2,8 +2,10 @@
 {
     public class InvestmentFundUpdateRequest
     {
-        public string FundName { get; set; } = null!;
+        public string? FundName { get; set; }
 
         public string? Description { get; set; }
+
+        public string? UrlImage { get; set; }
     }
 }

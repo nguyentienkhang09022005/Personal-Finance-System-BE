@@ -4,7 +4,6 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund
@@ -13,22 +12,26 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
     {
         private readonly IInvestmentFundRepository _investmentFundRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
         private readonly IInvestmentAssetRepository _investmentAssetRepository;
+        private readonly IImageRepository _imageRepository;
+        private readonly IMapper _mapper;
         private readonly CryptoHandler _cryptoHandler;
         private readonly ILogger<InvestmentFundHandler> _logger;
 
-        public InvestmentFundHandler(IInvestmentFundRepository investmentFundRepository, 
-                                     IMapper mapper,
-                                     IUserRepository userRepository,
+        public InvestmentFundHandler(IInvestmentFundRepository investmentFundRepository,
+            IUserRepository userRepository,
                                      IInvestmentAssetRepository investmentAssetRepository,
+                                     IImageRepository imageRepository,
+                                     IMapper mapper,
+                                     
                                      CryptoHandler cryptoHandler,
                                      ILogger<InvestmentFundHandler> logger)
         {
             _investmentFundRepository = investmentFundRepository;
-            _mapper = mapper;
             _userRepository = userRepository;
             _investmentAssetRepository = investmentAssetRepository;
+            _imageRepository = imageRepository;
+            _mapper = mapper;
             _cryptoHandler = cryptoHandler;
             _logger = logger;
         }
@@ -122,6 +125,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             var investmentFundDomain = _mapper.Map<InvestmentFundDomain>(investmentFundCreationRequest);
             var investmentFundCreated = await _investmentFundRepository.AddInvestmentAsync(investmentFundDomain);
 
+            if (investmentFundCreationRequest.UrlImage != null)
+            {
+                var image = new ImageDomain
+                {
+                    Url = investmentFundCreationRequest.UrlImage,
+                    IdRef = investmentFundCreated.IdFund,
+                    RefType = "INVESTMENT_FUND"
+                };
+                await _imageRepository.AddImageAsync(image);
+            }
+
             var investmentFundResponse = _mapper.Map<InvestmentFundResponse>(investmentFundCreated);
             return ApiResponse<InvestmentFundResponse>.SuccessResponse("Tạo quỹ thành công!", 200, investmentFundResponse);
         }
@@ -135,6 +149,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 var investmentDomain = _mapper.Map<InvestmentFundDomain>(investmentFundEntity);
 
                 _mapper.Map(investmentFundUpdateRequest, investmentDomain);
+
+                // Cập nhật ảnh nếu có
+                if (investmentFundUpdateRequest.UrlImage != null)
+                {
+                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idFund, "INVESTMENT_FUND");
+                    if (!string.IsNullOrEmpty(existingImageUrl))
+                    {
+                        await _imageRepository.DeleteImageByIdRefAsync(idFund, "INVESTMENT_FUND");
+                    }
+
+                    var image = new ImageDomain
+                    {
+                        Url = investmentFundUpdateRequest.UrlImage,
+                        IdRef = idFund,
+                        RefType = "INVESTMENT_FUND"
+                    };
+
+                    await _imageRepository.AddImageAsync(image);
+                }
                 var investmentFundUpdated = await _investmentFundRepository.UpdateInvestmentFundAsync(investmentDomain, investmentFundEntity);
 
                 var investmentFundResponse = _mapper.Map<InvestmentFundResponse>(investmentFundUpdated);

@@ -71,22 +71,53 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             }
         }
 
-        public async Task<ApiResponse<List<TransactionResponse>>> GetListTransactionAsync(Guid idUser)
+        public async Task<ApiResponse<TransactionSummaryResponse>> GetListTransactionAsync(Guid idUser)
         {
             try
             {
                 var checkUserExist = await _userRepository.ExistUserAsync(idUser);
-                if (!checkUserExist)
-                {
-                    return ApiResponse<List<TransactionResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+                if (!checkUserExist){
+                    return ApiResponse<TransactionSummaryResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
+
                 var transactions = await _transactionRepository.GetListTransactionAsync(idUser);
                 var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
-                return ApiResponse<List<TransactionResponse>>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, transactionResponses);
+
+                var expenseTransactions = transactionResponses // Lọc ra loại Chi
+                    .Where(t => t.TransactionType == "Chi")
+                    .ToList();
+
+                if (!expenseTransactions.Any()){
+                    return ApiResponse<TransactionSummaryResponse>.FailResponse(
+                        "Người dùng chưa có giao dịch chi tiêu nào!", 
+                        404);
+                }
+
+                var totalExpense = expenseTransactions.Sum(t => t.Amount); // Tổng chi tiêu
+
+                // Gom nhóm theo category
+                var chartData = expenseTransactions
+                    .GroupBy(t => t.TransactionCategory)
+                    .Select(group => new TransactionChartResponse
+                    {
+                        TransactionCategory = group.Key ?? "Khác",
+                        ExpenseAmount = group.Sum(t => t.Amount),
+                        ExpensePercent = totalExpense == 0 ? 0 : Math.Round(group.Sum(t => t.Amount) / totalExpense * 100, 2),
+                    })
+                    .OrderByDescending(c => c.ExpenseAmount)
+                    .ToList();
+
+                var summaryResponse = new TransactionSummaryResponse
+                {
+                    ExpenseList = transactionResponses,
+                    ChartList = chartData
+                };
+
+                return ApiResponse<TransactionSummaryResponse>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, summaryResponse);
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<TransactionResponse>>.FailResponse(ex.Message, 500);
+                return ApiResponse<TransactionSummaryResponse>.FailResponse(ex.Message, 500);
             }
         }
     }
