@@ -11,7 +11,7 @@ public partial class SavingDetail
 
     public DateTime? CreatedAt { get; set; }
 
-    public Guid? IdSaving { get; set; }
+    public Guid IdSaving { get; set; }
 
     public virtual SavingGoal? IdSavingNavigation { get; set; }
 }

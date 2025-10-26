@@ -173,5 +173,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 return ApiResponse<string>.FailResponse(ex.Message, 404);
             }
         }
+
+        public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailByUserAsync(Guid idUser)
+        {
+            return await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
+        }
     }
 }

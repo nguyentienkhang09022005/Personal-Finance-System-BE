@@ -12,12 +12,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
     public class InvestmentAssetRepository : IInvestmentAssetRepository
     {
         private readonly PersonFinanceSysDbContext _context;
+        private readonly IDbContextFactory<PersonFinanceSysDbContext> _contextFactory;
         private readonly IMapper _mapper;
 
-        public InvestmentAssetRepository(PersonFinanceSysDbContext context, IMapper mapper)
+        public InvestmentAssetRepository(PersonFinanceSysDbContext context, 
+                                         IMapper mapper, 
+                                         IDbContextFactory<PersonFinanceSysDbContext> contextFactory)
         {
             _context = context;
             _mapper = mapper;
+            _contextFactory = contextFactory;
         }
 
         public async Task<InvestmentAssetDomain> AddInvestmentAssetAsync(InvestmentAssetDomain investmentAssetDomain)
@@ -91,6 +95,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
             var investmentAssetMap = _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAssetEntity);
             return investmentAssetMap;
+        }
+
+        public async Task<List<InvestmentAssetDomain>> GetAllAssetsByUserAsync(Guid idUser)
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            return _mapper.Map<List<InvestmentAssetDomain>>(
+                await context.InvestmentAssets
+                .Include(a => a.IdFundNavigation)
+                .Where(a => a.IdFundNavigation.IdUser == idUser)
+                .AsNoTracking()
+                .ToListAsync()
+            );
         }
     }
 }

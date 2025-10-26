@@ -24,7 +24,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
             return await _cache.GetStringAsync($"refresh_token:{idUser}");
         }
 
-        // Add RefreshToken on Redis2   
+        // Add RefreshToken on Redis 
         public async Task saveRefreshToken(string idUser, string refreshToken, TimeSpan duration)
         {
             await _cache.SetStringAsync(

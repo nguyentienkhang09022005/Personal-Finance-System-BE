@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.AI;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets;
@@ -36,6 +37,8 @@ builder.Configuration["SendGrid:Name"] = Environment.GetEnvironmentVariable("SEN
 builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME");
 builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
 builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
+builder.Configuration["GeminiSettings:ApiKey"] = Environment.GetEnvironmentVariable("APIKEY__GEMINI");
+builder.Configuration["GeminiSettings:BaseUrl"] = Environment.GetEnvironmentVariable("GEMINI__APIURL");
 
 
 
@@ -97,6 +100,9 @@ builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
+builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+
 
 // Handlers
 builder.Services.AddScoped<OtpHandler>();
@@ -112,6 +118,7 @@ builder.Services.AddScoped<TransactionHandler>();
 builder.Services.AddScoped<SavingGoalHandler>();
 builder.Services.AddScoped<SavingDetailHandler>();
 builder.Services.AddScoped<BudgetHandler>();
+builder.Services.AddScoped<ChatHandler>();
 
 
 // Mapper Registration

@@ -34,7 +34,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
         public async Task<ApiResponse<InvestmentAssetResponse>> GetInfInvestmentFundHandleAsync(Guid idFund)
         {
-            _logger.LogInformation("Bắt đầu GetInfInvestmentFundHandleAsync cho Fund ID: {FundId}", idFund);
             try
             {
                 // Kiểm tra quỹ có tài sản không
@@ -77,12 +76,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     listInvestmentAssetResponse = listResponse,
                     AverageFinanceAssets = avgFinanceList
                 };
-                _logger.LogInformation("Hoàn tất GetInfInvestmentFundHandleAsync cho Fund ID: {FundId}", idFund);
                 return ApiResponse<InvestmentAssetResponse>.SuccessResponse("Lấy thông tin chi tiết quỹ thành công!", 200, response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi nghiêm trọng trong GetInfInvestmentFundHandleAsync cho Fund ID: {FundId}", idFund);
                 return ApiResponse<InvestmentAssetResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
@@ -94,7 +91,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
             foreach (var asset in listAssets)
             {
-                _logger.LogDebug("Đang gọi _investmentDetailHandler.GetInfInvestmentAssetHandleAsync cho Asset ID: {AssetId} (Tên: {AssetName})", asset.IdAsset, asset.AssetName);
 
                 try
                 {
@@ -102,7 +98,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                     if (detailResponse == null)
                     {
-                        _logger.LogWarning("ApiResponse từ GetInfInvestmentAssetHandleAsync là NULL cho Asset ID: {AssetId} (Tên: {AssetName})", asset.IdAsset, asset.AssetName);
                     }
                     else if (!detailResponse.Success || detailResponse.Data == null)
                     {
@@ -121,8 +116,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     _logger.LogError(ex, "Lỗi nghiêm trọng khi gọi GetInfInvestmentAssetHandleAsync cho Asset ID: {AssetId} (Tên: {AssetName})", asset.IdAsset, asset.AssetName);
                 }
             }
-
-            _logger.LogDebug("Tổng số chi tiết đã tải thành công: {Count}", detailsDictionary.Count);
 
             return detailsDictionary;
         }
@@ -258,6 +251,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             {
                 return ApiResponse<string>.FailResponse(ex.Message, 404);
             }
+        }
+
+        public async Task<List<InvestmentAssetDomain>> GetListInvestmentAssetByUserAsync(Guid idUser)
+        {
+            return await _investmentAssetRepository.GetAllAssetsByUserAsync(idUser);
         }
     }
 }

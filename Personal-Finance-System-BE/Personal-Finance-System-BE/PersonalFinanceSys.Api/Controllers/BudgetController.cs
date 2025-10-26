@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets;
 
@@ -15,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _budgetHandler = budgetHandler;
         }
 
+        [Authorize]
         [HttpGet("list-budget")]
         public async Task<IActionResult> ListBudgetAsync([FromQuery] Guid idUser)
         {
@@ -26,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-budget")]
         public async Task<IActionResult> AddBudgetAsync([FromBody] BudgetCreationRequest budgetCreationRequest)
         {
@@ -37,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPatch("update-budget")]
         public async Task<IActionResult> UpdateBudgetAsync([FromBody] BudgetUpdateRequest budgetUpdateRequest,
                                                            [FromQuery] Guid idBudget)
@@ -49,6 +53,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-transaction")]
         public async Task<IActionResult> DeleteBudgetAsync([FromQuery] Guid idBudget)
         {

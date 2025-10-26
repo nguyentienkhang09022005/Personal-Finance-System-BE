@@ -12,12 +12,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
     public class SavingDetailRepository : ISavingDetailRepository
     {
         private readonly PersonFinanceSysDbContext _context;
+        private readonly IDbContextFactory<PersonFinanceSysDbContext> _contextFactory;
         private readonly IMapper _mapper;
 
-        public SavingDetailRepository(PersonFinanceSysDbContext context, IMapper mapper)
+        public SavingDetailRepository(PersonFinanceSysDbContext context, 
+                                      IMapper mapper,
+                                      IDbContextFactory<PersonFinanceSysDbContext> contextFactory)
         {
             _context = context;
             _mapper = mapper;
+            _contextFactory = contextFactory;
         }
         public async Task<SavingDetailDomain> AddSavingDetailAsync(SavingDetailDomain savingDetailDomain)
         {
@@ -46,6 +50,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                                         .AsNoTracking()
                                         .ToList();
             return _mapper.Map<List<SavingDetailDomain>>(savingDetails);
+        }
+
+        public async Task<List<SavingDetailDomain>> GetSavingDetailsByUserIdAsync(Guid idUser)
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            return _mapper.Map<List<SavingDetailDomain>>(await context.SavingDetails
+                .Include(d => d.IdSavingNavigation)
+                .Where(d => d.IdSavingNavigation.IdUser == idUser)
+                .AsNoTracking()
+                .ToListAsync());
         }
     }
 }

@@ -11,5 +11,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<List<InvestmentDetailDomain>> GetListInvestmentDetailAsync(Guid idAsset);
 
         Task<decimal> GetNetQuantityForAssetAsync(Guid idAsset);
+
+        Task<List<InvestmentDetailDomain>> GetAllDetailsByUserAsync(Guid idUser);
     }
 }

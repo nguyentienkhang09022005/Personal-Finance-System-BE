@@ -1,4 +1,5 @@
 ﻿using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 {
@@ -10,5 +11,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<List<SavingDetailDomain>> GetListSavingDetailsAsync(Guid idSavingGoal);
 
+        Task<List<SavingDetailDomain>> GetSavingDetailsByUserIdAsync(Guid idUser);
     }
 }

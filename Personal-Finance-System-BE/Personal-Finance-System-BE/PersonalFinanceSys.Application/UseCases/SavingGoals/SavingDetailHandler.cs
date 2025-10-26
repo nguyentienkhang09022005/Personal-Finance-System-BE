@@ -3,6 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals
 {
@@ -68,6 +69,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
             {
                 return ApiResponse<List<SavingDetailResponse>>.FailResponse(ex.Message, 500);
             }
+        }
+
+        public async Task<List<SavingDetailDomain>> GetListSavingDetailByUserAsync(Guid idUser)
+        {
+            return await _savingDetailRepository.GetSavingDetailsByUserIdAsync(idUser);
         }
     }
 }
