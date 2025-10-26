@@ -3,6 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users
@@ -147,27 +148,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 if (userUpdateRequest.UrlAvatar != null)
                 {
                     var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idUser, "USERS");
-                    if (existingImageUrl != null)
+                    if (!string.IsNullOrEmpty(existingImageUrl))
                     {
                         await _imageRepository.DeleteImageByIdRefAsync(idUser, "USERS");
-                        var updatedAvatar = new ImageDomain
-                        {
-                            Url = userUpdateRequest.UrlAvatar,
-                            IdRef = idUser,
-                            RefType = "USERS"
-                        };
-                        await _imageRepository.AddImageAsync(updatedAvatar);
                     }
-                    else
+
+                    var image = new ImageDomain
                     {
-                        var newAvatar = new ImageDomain
-                        {
-                            Url = userUpdateRequest.UrlAvatar,
-                            IdRef = idUser,
-                            RefType = "USERS"
-                        };
-                        await _imageRepository.AddImageAsync(newAvatar);
-                    }
+                        Url = userUpdateRequest.UrlAvatar,
+                        IdRef = idUser,
+                        RefType = "USERS"
+                    };
+
+                    await _imageRepository.AddImageAsync(image);
                 }
                 var updatedUser = await _userRepository.UpdateUserAsync(userDomain, userEntity);
 
@@ -193,7 +186,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             try
             {
                 await _userRepository.DeleteUserAsync(idUser);
-                await _imageRepository.DeleteImageByIdRefAsync(idUser, "USERS");
+                var existingAvatarUrl = await _imageRepository.GetImageUrlByIdRefAsync(idUser, "USERS");
+                if (!string.IsNullOrEmpty(existingAvatarUrl)){
+                    await _imageRepository.DeleteImageByIdRefAsync(idUser, "USERS");
+                }
+                
                 return ApiResponse<string>.SuccessResponse(
                     "Xóa người dùng thành công!", 
                     200, 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
@@ -14,6 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _upLoadImageFileService = upLoadImageFileService;
         }
 
+        [Authorize]
         [HttpPost("upload-image")]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {

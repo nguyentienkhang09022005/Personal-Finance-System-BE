@@ -9,8 +9,6 @@ public partial class SavingGoal
 
     public string SavingName { get; set; } = null!;
 
-    public decimal? CurrentAmount { get; set; }
-
     public decimal? TargetAmount { get; set; }
 
     public DateOnly? TargetDate { get; set; }
@@ -24,4 +22,6 @@ public partial class SavingGoal
     public Guid? IdUser { get; set; }
 
     public virtual User? IdUserNavigation { get; set; }
+
+    public virtual ICollection<SavingDetail> SavingDetails { get; set; } = new List<SavingDetail>();
 }

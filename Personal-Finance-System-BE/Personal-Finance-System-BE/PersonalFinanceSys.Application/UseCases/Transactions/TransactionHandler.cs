@@ -40,7 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             try
             {
                 await _transactionRepository.DeleteTransactionAsync(idTransaction);
-                return ApiResponse<string>.SuccessResponse("Transaction deleted successfully.", 200, string.Empty);
+                return ApiResponse<string>.SuccessResponse("Xóa giao dịch thành công!", 200, string.Empty);
             }
             catch (Exception ex)
             {

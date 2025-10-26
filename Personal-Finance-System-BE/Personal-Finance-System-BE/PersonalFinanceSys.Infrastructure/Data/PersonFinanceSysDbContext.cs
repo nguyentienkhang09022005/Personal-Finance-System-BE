@@ -38,6 +38,8 @@ public partial class PersonFinanceSysDbContext : DbContext
 
     public virtual DbSet<Post> Posts { get; set; }
 
+    public virtual DbSet<SavingDetail> SavingDetails { get; set; }
+
     public virtual DbSet<SavingGoal> SavingGoals { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
@@ -401,6 +403,30 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasConstraintName("fk_post_user");
         });
 
+        modelBuilder.Entity<SavingDetail>(entity =>
+        {
+            entity.HasKey(e => e.IdDetail).HasName("saving_detail_pkey");
+
+            entity.ToTable("saving_detail");
+
+            entity.Property(e => e.IdDetail)
+                .ValueGeneratedNever()
+                .HasColumnName("id_detail");
+            entity.Property(e => e.Amount)
+                .HasPrecision(15, 2)
+                .HasColumnName("amount");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IdSaving).HasColumnName("id_saving");
+
+            entity.HasOne(d => d.IdSavingNavigation).WithMany(p => p.SavingDetails)
+                .HasForeignKey(d => d.IdSaving)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_detail_saving");
+        });
+
         modelBuilder.Entity<SavingGoal>(entity =>
         {
             entity.HasKey(e => e.IdSaving).HasName("saving_goals_pkey");
@@ -414,10 +440,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
-            entity.Property(e => e.CurrentAmount)
-                .HasPrecision(18, 2)
-                .HasDefaultValueSql("0")
-                .HasColumnName("current_amount");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.SavingName)
@@ -508,6 +530,7 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("phone");
             entity.Property(e => e.TotalAmount)
                 .HasPrecision(10, 2)
+                .HasDefaultValueSql("0")
                 .HasColumnName("total_amount");
         });
 

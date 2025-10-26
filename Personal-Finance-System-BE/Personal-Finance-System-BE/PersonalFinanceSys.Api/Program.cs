@@ -7,6 +7,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -86,6 +87,8 @@ builder.Services.AddScoped<IInvestmentDetailRepository, InvestmentDetailReposito
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ISavingGoalRepository, SavingGoalRepository>();
+builder.Services.AddScoped<ISavingDetailRepository, SavingDetailRepository>();
 
 
 // Services
@@ -104,6 +107,8 @@ builder.Services.AddHttpClient<NewsHandler>();
 builder.Services.AddScoped<InvestmentAssetHandler>();
 builder.Services.AddScoped<InvestmentDetailHandler>();
 builder.Services.AddScoped<TransactionHandler>();
+builder.Services.AddScoped<SavingGoalHandler>();
+builder.Services.AddScoped<SavingDetailHandler>();
 
 
 // Mapper Registration
