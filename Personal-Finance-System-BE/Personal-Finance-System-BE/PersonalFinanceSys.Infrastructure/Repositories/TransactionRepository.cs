@@ -32,7 +32,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task DeleteTransactionAsync(Guid idTransaction)
         {
             var transaction = await _context.Transactions.FindAsync(idTransaction)
-                ?? throw new NotFoundException("Không tìm giao dịch cần xóa!");
+                ?? throw new NotFoundException("Không tìm thấy giao dịch cần xóa!");
 
             _context.Transactions.Remove(transaction);
             await _context.SaveChangesAsync();
@@ -72,7 +72,27 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .IgnoreAutoIncludes()
                 .FirstOrDefaultAsync(t => t.IdTransaction == idTransaction);
 
-            return transaction ?? throw new NotFoundException("Không tìm giao dịch!");
+            return transaction ?? throw new NotFoundException("Không tìm thấy giao dịch!");
+        }
+
+        public async Task UpdateTransactionCategoryByBudgetNameAsync(Guid idUser, string oldCategoryName, string newCategoryName)
+        {
+            await _context.Transactions
+                .Where(t => t.IdUser == idUser
+                            && t.TransactionType == "Chi"
+                            && t.TransactionCategory == oldCategoryName)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(t => t.TransactionCategory, newCategoryName));
+        }
+
+        public async Task<List<TransactionDomain>> GetExpenseTransactionsByUserAsync(Guid idUser)
+        {
+            var transactionEntities = await _context.Transactions
+                .Where(t => t.IdUser == idUser && t.TransactionType == "Chi")
+                .AsNoTracking()
+                .ToListAsync();
+            
+           return _mapper.Map<List<TransactionDomain>>(transactionEntities);
         }
     }
 }

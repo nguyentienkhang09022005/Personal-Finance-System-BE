@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _savingGoalHandler = savingGoalHandler;
         }
 
+        [Authorize]
         [HttpGet("list-saving-goal")]
         public async Task<IActionResult> ListSavingGoalAsync([FromQuery] Guid idUser)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-saving-goal")]
         public async Task<IActionResult> InfSavingGoalAsync([FromQuery] Guid idSavingGoal)
         {
@@ -38,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-saving-goal")]
         public async Task<IActionResult> AddSavingGoalAsync([FromBody] SavingGoalCreationRequest savingGoalCreationRequest)
         {
@@ -49,6 +52,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPatch("update-saving-goal")]
         public async Task<IActionResult> UpdateSavingGoalAsync([FromBody] SavingGoalUpdateRequest savingGoalUpdateRequest,
                                                                 [FromQuery] Guid idSavingGoal)
@@ -61,6 +65,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-saving-goal")]
         public async Task<IActionResult> DeleteSavingGoalAsync([FromQuery] Guid idSavingGoal)
         {

@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
@@ -89,6 +90,7 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ISavingGoalRepository, SavingGoalRepository>();
 builder.Services.AddScoped<ISavingDetailRepository, SavingDetailRepository>();
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 
 
 // Services
@@ -109,6 +111,7 @@ builder.Services.AddScoped<InvestmentDetailHandler>();
 builder.Services.AddScoped<TransactionHandler>();
 builder.Services.AddScoped<SavingGoalHandler>();
 builder.Services.AddScoped<SavingDetailHandler>();
+builder.Services.AddScoped<BudgetHandler>();
 
 
 // Mapper Registration

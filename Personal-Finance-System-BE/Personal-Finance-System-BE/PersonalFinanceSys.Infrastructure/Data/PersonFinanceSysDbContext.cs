@@ -57,9 +57,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.IdBudget)
                 .ValueGeneratedNever()
                 .HasColumnName("id_budget");
-            entity.Property(e => e.Amount)
-                .HasPrecision(15, 2)
-                .HasColumnName("amount");
             entity.Property(e => e.BudgetGoal)
                 .HasPrecision(15, 2)
                 .HasColumnName("budget_goal");

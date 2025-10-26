@@ -37,7 +37,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
         public void SetTargetAmount(decimal targetAmount)
         {
             if (targetAmount < 0)
-                throw new ArgumentException("Mục tiêu số tiền không thể < 0!");
+                throw new ArgumentException("Số tiền mục tiêu không thể nhỏ hơn 0!");
 
             TargetAmount = targetAmount;
         }

@@ -34,19 +34,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task DeleteSavingGoalAsync(Guid idSavingGoal)
         {
             var savingGoal = await _context.SavingGoals.FindAsync(idSavingGoal)
-                            ?? throw new NotFoundException("Không tìm mục tiêu tiết kiệm cần xóa!");
+                            ?? throw new NotFoundException("Không tìm thấy mục tiêu tiết kiệm cần xóa!");
 
             _context.SavingGoals.Remove(savingGoal);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<SavingGoal> GetExistSavingGoalDomain(Guid idSavingGoal)
+        public async Task<SavingGoal> GetExistSavingGoal(Guid idSavingGoal)
         {
             var savingGoal = await _context.SavingGoals
                             .IgnoreAutoIncludes()
                             .FirstOrDefaultAsync(t => t.IdSaving == idSavingGoal);
 
-            return savingGoal ?? throw new NotFoundException("Không tìm mục tiêu tiết kiệm!");
+            return savingGoal ?? throw new NotFoundException("Không tìm thấy mục tiêu tiết kiệm!");
         }
 
         public async Task<bool> ExistSavingGoalDomain(Guid idSavingGoal)

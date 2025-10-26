@@ -9,11 +9,9 @@ public partial class Budget
 
     public string? BudgetName { get; set; }
 
-    public decimal? Amount { get; set; }
+    public decimal BudgetGoal { get; set; }
 
-    public decimal? BudgetGoal { get; set; }
-
-    public Guid? IdUser { get; set; }
+    public Guid IdUser { get; set; }
 
     public virtual User? IdUserNavigation { get; set; }
 }

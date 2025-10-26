@@ -60,9 +60,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                     await _imageRepository.DeleteImageByIdRefAsync(idSavingGoal, "SAVING_GOAL");
                 }
 
-                return ApiResponse<string>.SuccessResponse("Xóa mục tiêu tiết kiệm thành công!", 
-                                                            200, 
-                                                            string.Empty);
+                return ApiResponse<string>.SuccessResponse(
+                    "Xóa mục tiêu tiết kiệm thành công!", 
+                    200, 
+                    string.Empty);
             }
             catch (Exception ex)
             {
@@ -74,7 +75,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
         {
             try
             {
-                var savingGoalEntity = await _savingGoalRepository.GetExistSavingGoalDomain(idSavingGoal);
+                var savingGoalEntity = await _savingGoalRepository.GetExistSavingGoal(idSavingGoal);
                 if (savingGoalEntity == null)
                 {
                     return ApiResponse<SavingGoalResponse>.FailResponse("Không tìm thấy mục tiêu tiết kiệm!", 404);
@@ -123,9 +124,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
 
                 var savingGoalDomains = await _savingGoalRepository.GetListSavingGoalsAsync(idUser);
                 if (!savingGoalDomains.Any()){
-                    return ApiResponse<List<SavingGoalResponse>>.SuccessResponse("Người dùng chưa có mục tiêu tiết kiệm nào!", 
-                                                                                  200, 
-                                                                                  new List<SavingGoalResponse>());
+                    return ApiResponse<List<SavingGoalResponse>>.SuccessResponse(
+                        "Người dùng chưa có mục tiêu tiết kiệm nào!", 
+                        200, 
+                        new List<SavingGoalResponse>());
                 }
 
                 // Lấy danh sách id mục tiêu tiết kiệm để truy xuất ảnh

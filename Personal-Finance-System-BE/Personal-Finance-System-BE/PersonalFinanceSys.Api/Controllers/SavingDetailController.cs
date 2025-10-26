@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
 
@@ -15,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _savingDetailHandler = savingDetailHandler;
         }
 
+        [Authorize]
         [HttpGet("list-saving-detail")]
         public async Task<IActionResult> ListSavingDetailAsync([FromQuery] Guid idSavingGoal)
         {
@@ -26,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-saving-detail")]
         public async Task<IActionResult> AddSavingDetailAsync([FromBody] SavingDetailRequest savingDetailRequest)
         {
@@ -37,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-saving-detail")]
         public async Task<IActionResult> DeleteSavingDetailAsync([FromQuery] Guid idSavingDetail)
         {

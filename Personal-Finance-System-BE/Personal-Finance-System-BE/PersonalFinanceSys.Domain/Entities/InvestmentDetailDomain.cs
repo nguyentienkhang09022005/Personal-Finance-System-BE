@@ -32,7 +32,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
         {
             if (price < 0)
             {
-                throw new ArgumentException("giá không được < 0!");
+                throw new ArgumentException("Giá không được nhỏ hơn 0!");
             }
             Price = price;
         }
@@ -41,7 +41,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
         {
             if (quantity < 0)
             {
-                throw new ArgumentException("Số lượng phải > 0");
+                throw new ArgumentException("Số lượng phải lớn hơn 0");
             }
             Quantity = quantity;
         }
@@ -50,7 +50,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
         {
             if (fee < 0)
             {
-                throw new ArgumentException("Phí giao dịch phải > 0");
+                throw new ArgumentException("Phí giao dịch phải lớn hơn 0");
             }
             Fee = fee;
         }

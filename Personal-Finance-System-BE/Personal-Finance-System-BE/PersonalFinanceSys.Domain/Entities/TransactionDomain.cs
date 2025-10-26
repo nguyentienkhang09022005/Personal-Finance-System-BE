@@ -31,7 +31,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
         {
             if (amount < 0)
             {
-                throw new ArgumentException("Số tiền không được < 0!");
+                throw new ArgumentException("Số tiền không được nhỏ hơn 0!");
             }
             Amount = amount;
         }

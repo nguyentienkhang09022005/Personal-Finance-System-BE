@@ -15,7 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<SavingGoalDomain> GetSavingGoalByIdAsync(Guid idSavingGoal);
 
-        Task<SavingGoal> GetExistSavingGoalDomain(Guid idSavingGoal);
+        Task<SavingGoal> GetExistSavingGoal(Guid idSavingGoal);
 
         Task<bool> ExistSavingGoalDomain(Guid idSavingGoal);
     }
