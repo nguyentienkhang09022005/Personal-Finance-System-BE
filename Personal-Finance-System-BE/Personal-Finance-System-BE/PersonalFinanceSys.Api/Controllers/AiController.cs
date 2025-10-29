@@ -52,6 +52,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-history")]
         public async Task<IActionResult> DeleteHistoryChatWithAI([FromQuery] Guid idUser)
         {

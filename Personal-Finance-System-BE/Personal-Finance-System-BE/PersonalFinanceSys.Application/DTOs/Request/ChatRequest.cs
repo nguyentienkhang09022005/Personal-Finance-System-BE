@@ -5,8 +5,6 @@
         public Guid IdUser { get; set; }
 
         public string UserMessage { get; set; }
-
-        public List<MessageHistoryItem> History { get; set; } = new List<MessageHistoryItem>();
     }
 
     public class MessageHistoryItem

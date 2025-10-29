@@ -6,8 +6,6 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services;
 using System.Text.Json;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.AI
@@ -94,10 +92,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.AI
                 > "Hiện mình chưa thấy dữ liệu giao dịch nào, bạn có thể thêm để mình phân tích chính xác hơn nha 😊"
                 """;
 
-
+            // Lấy lịch sử trò chuyện và gửi yêu cầu đến Gemini AI
+            var history = await _chatHistoryService.GetHistoryAsync(request.IdUser);
             var aiMessage = await _geminiService.GenerateChatResponseAsync(
                 systemInstruction,
-                request.History,
+                history,
                 request.UserMessage
             );
             aiMessage = aiMessage.Replace("\\n", "\n").Replace("\\r", "");
