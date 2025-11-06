@@ -131,13 +131,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             }   
         }
 
-        public async Task<ApiResponse<ApiResponse<UserResponse>>> UpdateUserHandleAsync(Guid idUser, UserUpdateRequest userUpdateRequest)
+        public async Task<ApiResponse<UserResponse>> UpdateUserHandleAsync(Guid idUser, UserUpdateRequest userUpdateRequest)
         {
             try
             {
                 var userEntity = await _userRepository.GetExistUserAsync(idUser);
                 if (userEntity == null){
-                    return ApiResponse<ApiResponse<UserResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+                    return ApiResponse<UserResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
                 var userDomain = _mapper.Map<UserDomain>(userEntity);
@@ -165,18 +165,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 var updatedUser = await _userRepository.UpdateUserAsync(userDomain, userEntity);
 
                 var userResponse = _mapper.Map<UserResponse>(updatedUser);
-                return ApiResponse<ApiResponse<UserResponse>>.SuccessResponse(
+                return ApiResponse<UserResponse>.SuccessResponse(
                     "Cập nhật người dùng thành công!", 
                     200, 
-                    ApiResponse<UserResponse>.SuccessResponse("Cập nhật người dùng thành công!", 200, userResponse));
+                    userResponse);
             }
             catch (NotFoundException ex)
             {
-                return ApiResponse<ApiResponse<UserResponse>>.FailResponse(ex.Message, 404);
+                return ApiResponse<UserResponse>.FailResponse(ex.Message, 404);
             }
             catch (Exception ex)
             {
-                return ApiResponse<ApiResponse<UserResponse>>.FailResponse($"Lỗi khi cập nhật người dùng: {ex.Message}", 500);
+                return ApiResponse<UserResponse>.FailResponse($"Lỗi khi cập nhật người dùng: {ex.Message}", 500);
             }
         }
 

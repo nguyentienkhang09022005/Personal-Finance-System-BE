@@ -9,6 +9,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.RolePermission;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
@@ -94,6 +95,9 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ISavingGoalRepository, SavingGoalRepository>();
 builder.Services.AddScoped<ISavingDetailRepository, SavingDetailRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+
 
 
 // Services
@@ -119,6 +123,8 @@ builder.Services.AddScoped<SavingGoalHandler>();
 builder.Services.AddScoped<SavingDetailHandler>();
 builder.Services.AddScoped<BudgetHandler>();
 builder.Services.AddScoped<ChatHandler>();
+builder.Services.AddScoped<RoleHandler>();
+builder.Services.AddScoped<PermissionHandler>();
 
 
 // Mapper Registration

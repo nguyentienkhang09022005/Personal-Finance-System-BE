@@ -16,8 +16,6 @@
 
         public decimal? TotalAmount { get; set; }
 
-        public bool? IsDarkmode { get; set; }
-
         public string UrlAvatar { get; set; }
 
         public DateTime? CreateAt { get; set; }

@@ -21,8 +21,6 @@ public partial class User
 
     public decimal? TotalAmount { get; set; }
 
-    public bool? IsDarkmode { get; set; }
-
     public DateTime? CreateAt { get; set; }
 
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();

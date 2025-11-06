@@ -20,8 +20,6 @@
 
         public decimal? TotalAmount { get; set; }
 
-        public bool? IsDarkmode { get; set; }
-
         public DateTime? CreateAt { get; set; }
 
         public UserDomain() { }

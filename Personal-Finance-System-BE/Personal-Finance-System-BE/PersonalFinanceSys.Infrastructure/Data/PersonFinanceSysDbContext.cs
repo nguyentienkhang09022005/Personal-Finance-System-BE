@@ -36,7 +36,11 @@ public partial class PersonFinanceSysDbContext : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    public virtual DbSet<Permission> Permissions { get; set; }
+
     public virtual DbSet<Post> Posts { get; set; }
+
+    public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<SavingDetail> SavingDetails { get; set; }
 
@@ -371,6 +375,18 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasConstraintName("fk_notification_user");
         });
 
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.PermissionName).HasName("permission_pkey");
+
+            entity.ToTable("permission");
+
+            entity.Property(e => e.PermissionName)
+                .HasMaxLength(50)
+                .HasColumnName("permission_name");
+            entity.Property(e => e.Description).HasColumnName("description");
+        });
+
         modelBuilder.Entity<Post>(entity =>
         {
             entity.HasKey(e => e.IdPost).HasName("posts_pkey");
@@ -398,6 +414,39 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasForeignKey(d => d.IdUser)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_post_user");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.RoleName).HasName("role_pkey");
+
+            entity.ToTable("role");
+
+            entity.Property(e => e.RoleName)
+                .HasMaxLength(20)
+                .HasColumnName("role_name");
+            entity.Property(e => e.Description).HasColumnName("description");
+
+            entity.HasMany(d => d.PermissionNames).WithMany(p => p.RoleNames)
+                .UsingEntity<Dictionary<string, object>>(
+                    "RolePermission",
+                    r => r.HasOne<Permission>().WithMany()
+                        .HasForeignKey("PermissionName")
+                        .HasConstraintName("role_permission_2"),
+                    l => l.HasOne<Role>().WithMany()
+                        .HasForeignKey("RoleName")
+                        .HasConstraintName("role_permission_1"),
+                    j =>
+                    {
+                        j.HasKey("RoleName", "PermissionName").HasName("role_permission_pkey");
+                        j.ToTable("role_permission");
+                        j.IndexerProperty<string>("RoleName")
+                            .HasMaxLength(20)
+                            .HasColumnName("role_name");
+                        j.IndexerProperty<string>("PermissionName")
+                            .HasMaxLength(50)
+                            .HasColumnName("permission_name");
+                    });
         });
 
         modelBuilder.Entity<SavingDetail>(entity =>
@@ -515,9 +564,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Gender)
                 .HasMaxLength(5)
                 .HasColumnName("gender");
-            entity.Property(e => e.IsDarkmode)
-                .HasDefaultValue(false)
-                .HasColumnName("is_darkmode");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
