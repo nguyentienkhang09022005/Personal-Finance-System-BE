@@ -12,6 +12,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             CreateMap<Role, RoleDomain>();
 
             CreateMap<RoleDomain, RoleResponse>();
+
+            CreateMap<Role, ListRoleResponse>()
+                .ForMember(dest => dest.Permissions,
+                    opt => opt.MapFrom(src => src.PermissionNames));
         }
     }
 }

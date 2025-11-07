@@ -25,6 +25,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.IdUser.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -50,6 +51,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.IdUser.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

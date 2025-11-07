@@ -15,11 +15,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Rol
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<List<PermissionResposne>>> GetAllPermissionsAsync()
+        public async Task<ApiResponse<List<PermissionResponse>>> GetAllPermissionsAsync()
         {
             var permissionDomains = await _permissionRepository.GetListPermissionAsync();
-            var permissionResponses = _mapper.Map<List<PermissionResposne>>(permissionDomains);
-            return ApiResponse<List<PermissionResposne>>.SuccessResponse("Lấy danh chức năng của quyền thành công!", 200, permissionResponses);
+            var permissionResponses = _mapper.Map<List<PermissionResponse>>(permissionDomains);
+            return ApiResponse<List<PermissionResponse>>.SuccessResponse("Lấy danh chức năng của quyền thành công!", 200, permissionResponses);
         }
     }
 }

@@ -97,6 +97,7 @@ builder.Services.AddScoped<ISavingDetailRepository, SavingDetailRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
 
 
@@ -125,6 +126,7 @@ builder.Services.AddScoped<BudgetHandler>();
 builder.Services.AddScoped<ChatHandler>();
 builder.Services.AddScoped<RoleHandler>();
 builder.Services.AddScoped<PermissionHandler>();
+builder.Services.AddScoped<RolePermissionHandler>();
 
 
 // Mapper Registration

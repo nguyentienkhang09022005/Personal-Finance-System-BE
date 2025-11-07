@@ -15,9 +15,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _roleHandler = roleHandler;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("list-role")]
-        public async Task<IActionResult> ListRolesAsync()
+        public async Task<IActionResult> ListRoles()
         {
             var result = await _roleHandler.GetAllRolesAsync();
             if (result.Success)

@@ -23,6 +23,8 @@ public partial class User
 
     public DateTime? CreateAt { get; set; }
 
+    public string? RoleName { get; set; }
+
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual ICollection<Evaluate> Evaluates { get; set; } = new List<Evaluate>();
@@ -40,6 +42,8 @@ public partial class User
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
+    public virtual Role? RoleNameNavigation { get; set; }
 
     public virtual ICollection<SavingGoal> SavingGoals { get; set; } = new List<SavingGoal>();
 

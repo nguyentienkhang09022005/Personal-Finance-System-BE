@@ -20,6 +20,8 @@
 
         public decimal? TotalAmount { get; set; }
 
+        public string? RoleName { get; set; }
+
         public DateTime? CreateAt { get; set; }
 
         public UserDomain() { }

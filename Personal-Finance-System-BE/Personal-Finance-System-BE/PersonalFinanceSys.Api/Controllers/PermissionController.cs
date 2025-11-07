@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.RolePermission;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
@@ -14,9 +15,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _permissionHandler = permissionHandler;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("list-permission")]
-        public async Task<IActionResult> ListPermissionsAsync()
+        public async Task<IActionResult> ListPermissions()
         {
             var result = await _permissionHandler.GetAllPermissionsAsync();
             if (result.Success)

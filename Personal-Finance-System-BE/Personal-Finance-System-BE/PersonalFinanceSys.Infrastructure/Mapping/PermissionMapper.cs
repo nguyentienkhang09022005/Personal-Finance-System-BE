@@ -11,7 +11,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
         {
             CreateMap<Permission, PermissionDomain>();
 
-            CreateMap<PermissionDomain, PermissionResposne>();
+            CreateMap<PermissionDomain, PermissionResponse>();
+
+            CreateMap<Permission, PermissionResponse>();
         }
     }
 }

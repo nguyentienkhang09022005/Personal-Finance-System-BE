@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -24,6 +25,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         {
             var user = _mapper.Map<User>(users);
             user.IdUser = Guid.NewGuid();
+            user.RoleName = ConstantRole.UserRole;
             user.TotalAmount = 0;
 
             if (!string.IsNullOrEmpty(user.Password)){
