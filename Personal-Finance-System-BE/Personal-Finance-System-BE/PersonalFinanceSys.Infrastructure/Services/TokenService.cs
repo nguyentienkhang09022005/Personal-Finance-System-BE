@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,13 +11,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-
-        public TokenService(IConfiguration config)
+        private readonly IRolePermissionRepository _rolePermissionRepository;
+        public TokenService(IConfiguration config, IRolePermissionRepository rolePermissionRepository)
         {
             _config = config;
+            _rolePermissionRepository = rolePermissionRepository;
         }
 
-        public string generateAccessToken(UserDomain user)
+        public async Task<string> generateAccessToken(UserDomain user)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
 
@@ -28,6 +30,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            var permissions = await _rolePermissionRepository.GetPermissionNamesByRoleAsync(user.RoleName ?? "");
+
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("permission", permission));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
 
@@ -42,7 +51,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
             return new JwtSecurityTokenHandler().WriteToken(accessToken);
         }
 
-        public string generateRefreshToken(UserDomain user)
+        public async Task<string> generateRefreshToken(UserDomain user)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
 
@@ -54,6 +63,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            var permissions = await _rolePermissionRepository.GetPermissionNamesByRoleAsync(user.RoleName ?? "");
+
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("permission", permission));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
 

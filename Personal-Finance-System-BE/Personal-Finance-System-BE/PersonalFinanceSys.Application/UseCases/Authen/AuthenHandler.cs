@@ -53,8 +53,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 return ApiResponse<AuthenticationResponse>.FailResponse("Email hoặc mật khẩu không đúng!", 401);
             }
 
-            var accessToken = _tokenService.generateAccessToken(userDomain);
-            var refreshToken = _tokenService.generateRefreshToken(userDomain);
+            var accessToken = await _tokenService.generateAccessToken(userDomain);
+            var refreshToken = await _tokenService.generateRefreshToken(userDomain);
 
             // Set Refresh Token on Redis
             await _refreshTokenService.saveRefreshToken(userDomain.IdUser.ToString(),
@@ -152,7 +152,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 return ApiResponse<AuthenticationResponse>.FailResponse("Người dùng không tồn tại!", 404);
             }
 
-            var newAccessToken = _tokenService.generateAccessToken(userDomain);
+            var newAccessToken = await _tokenService.generateAccessToken(userDomain);
 
             var userReponse = _mapper.Map<UserResponse>(userDomain);
             var authenticationResponse = new AuthenticationResponse

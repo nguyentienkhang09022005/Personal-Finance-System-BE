@@ -76,5 +76,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<string>> GetPermissionNamesByRoleAsync(string roleName)
+        {
+            var role = await _context.Roles
+                .Include(r => r.PermissionNames)
+                .FirstOrDefaultAsync(r => r.RoleName == roleName);
+
+            if (role == null)
+                return new List<string>();
+
+            return role.PermissionNames.Select(p => p.PermissionName).ToList();
+        }
     }
 }
