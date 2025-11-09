@@ -11,11 +11,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-        private readonly IRolePermissionRepository _rolePermissionRepository;
-        public TokenService(IConfiguration config, IRolePermissionRepository rolePermissionRepository)
+        public TokenService(IConfiguration config)
         {
             _config = config;
-            _rolePermissionRepository = rolePermissionRepository;
         }
 
         public async Task<string> generateAccessToken(UserDomain user)
@@ -30,13 +28,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
-            var permissions = await _rolePermissionRepository.GetPermissionNamesByRoleAsync(user.RoleName ?? "");
-
-            foreach (var permission in permissions)
-            {
-                claims.Add(new Claim("permission", permission));
-            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
 
@@ -63,13 +54,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
                 new Claim(ClaimTypes.Role, user.RoleName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
-            var permissions = await _rolePermissionRepository.GetPermissionNamesByRoleAsync(user.RoleName ?? "");
-
-            foreach (var permission in permissions)
-            {
-                claims.Add(new Claim("permission", permission));
-            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
 

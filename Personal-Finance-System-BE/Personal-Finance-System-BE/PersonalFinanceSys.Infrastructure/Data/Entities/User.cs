@@ -48,4 +48,6 @@ public partial class User
     public virtual ICollection<SavingGoal> SavingGoals { get; set; } = new List<SavingGoal>();
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    public virtual ICollection<Permission> PermissionNames { get; set; } = new List<Permission>();
 }

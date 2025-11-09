@@ -9,5 +9,5 @@ public partial class Permission
 
     public string? Description { get; set; }
 
-    public virtual ICollection<Role> RoleNames { get; set; } = new List<Role>();
+    public virtual ICollection<User> IdUsers { get; set; } = new List<User>();
 }

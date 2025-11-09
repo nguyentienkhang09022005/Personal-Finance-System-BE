@@ -426,27 +426,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasMaxLength(20)
                 .HasColumnName("role_name");
             entity.Property(e => e.Description).HasColumnName("description");
-
-            entity.HasMany(d => d.PermissionNames).WithMany(p => p.RoleNames)
-                .UsingEntity<Dictionary<string, object>>(
-                    "RolePermission",
-                    r => r.HasOne<Permission>().WithMany()
-                        .HasForeignKey("PermissionName")
-                        .HasConstraintName("role_permission_2"),
-                    l => l.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleName")
-                        .HasConstraintName("role_permission_1"),
-                    j =>
-                    {
-                        j.HasKey("RoleName", "PermissionName").HasName("role_permission_pkey");
-                        j.ToTable("role_permission");
-                        j.IndexerProperty<string>("RoleName")
-                            .HasMaxLength(20)
-                            .HasColumnName("role_name");
-                        j.IndexerProperty<string>("PermissionName")
-                            .HasMaxLength(50)
-                            .HasColumnName("permission_name");
-                    });
         });
 
         modelBuilder.Entity<SavingDetail>(entity =>
@@ -583,6 +562,25 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasForeignKey(d => d.RoleName)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("user_role");
+
+            entity.HasMany(d => d.PermissionNames).WithMany(p => p.IdUsers)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserPermission",
+                    r => r.HasOne<Permission>().WithMany()
+                        .HasForeignKey("PermissionName")
+                        .HasConstraintName("fk_user_permission_permission"),
+                    l => l.HasOne<User>().WithMany()
+                        .HasForeignKey("IdUser")
+                        .HasConstraintName("fk_user_permission_user"),
+                    j =>
+                    {
+                        j.HasKey("IdUser", "PermissionName").HasName("user_permission_pkey");
+                        j.ToTable("user_permission");
+                        j.IndexerProperty<Guid>("IdUser").HasColumnName("id_user");
+                        j.IndexerProperty<string>("PermissionName")
+                            .HasMaxLength(50)
+                            .HasColumnName("permission_name");
+                    });
         });
 
         OnModelCreatingPartial(modelBuilder);
