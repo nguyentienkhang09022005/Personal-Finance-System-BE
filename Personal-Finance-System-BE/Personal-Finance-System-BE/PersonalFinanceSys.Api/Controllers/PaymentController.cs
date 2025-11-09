@@ -1,0 +1,44 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Payments;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
+{
+    [Route("api/payment/")]
+    [ApiController]
+    public class PaymentController : ControllerBase
+    {
+        private readonly PaymentHandler _paymentHandler;
+
+        public PaymentController(PaymentHandler paymentHandler)
+        {
+            _paymentHandler = paymentHandler;
+        }
+
+        //[Authorize]
+        [HttpPost("create-payment")]
+        public async Task<IActionResult> CreatePayment(PaymentRequest paymentRequest)
+        {
+            var result = await _paymentHandler.CreatePaymentIntentAsync(paymentRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("callback")]
+        public async Task<IActionResult> CallBack(ZaloPayCallBackRequest zaloPayCallBackRequest)
+        {
+            var result = await _paymentHandler.ResolveZaloPayCallbackAsync(zaloPayCallBackRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+    }
+}

@@ -36,6 +36,8 @@ public partial class PersonFinanceSysDbContext : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    public virtual DbSet<Payment> Payments { get; set; }
+
     public virtual DbSet<Permission> Permissions { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
@@ -373,6 +375,40 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasForeignKey(d => d.IdUser)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_notification_user");
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.IdPayment).HasName("payment_pkey");
+
+            entity.ToTable("payment");
+
+            entity.Property(e => e.IdPayment)
+                .ValueGeneratedNever()
+                .HasColumnName("id_payment");
+            entity.Property(e => e.Amount)
+                .HasPrecision(12, 2)
+                .HasColumnName("amount");
+            entity.Property(e => e.CreateAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("create_at");
+            entity.Property(e => e.IdAppTrans)
+                .HasMaxLength(100)
+                .HasColumnName("id_app_trans");
+            entity.Property(e => e.IdUser).HasColumnName("id_user");
+            entity.Property(e => e.IdZpTrans).HasColumnName("id_zp_trans");
+            entity.Property(e => e.Method)
+                .HasMaxLength(20)
+                .HasColumnName("method");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+
+            entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.IdUser)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_payment_user");
         });
 
         modelBuilder.Entity<Permission>(entity =>

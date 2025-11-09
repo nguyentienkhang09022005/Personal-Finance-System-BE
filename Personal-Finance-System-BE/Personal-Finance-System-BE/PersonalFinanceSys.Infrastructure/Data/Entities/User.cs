@@ -41,6 +41,8 @@ public partial class User
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public virtual Role? RoleNameNavigation { get; set; }
