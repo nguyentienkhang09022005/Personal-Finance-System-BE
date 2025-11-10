@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions
 {
@@ -88,7 +90,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                 var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
 
                 var expenseTransactions = transactionResponses // Lọc ra loại Chi
-                    .Where(t => t.TransactionType == "Chi")
+                    .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
                     .ToList();
 
                 if (!expenseTransactions.Any()){
@@ -123,6 +125,91 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             {
                 return ApiResponse<TransactionSummaryResponse>.FailResponse(ex.Message, 500);
             }
+        }
+
+        public async Task<ApiResponse<CompareTransactionByYearResponse>> CompareTransactionByYearAsync(CompareTransactionByYearRequest compareTransactionByYearRequest)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(compareTransactionByYearRequest.IdUser);
+                if (!checkUserExist)
+                {
+                    return ApiResponse<CompareTransactionByYearResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var transactions = await _transactionRepository.GetTransactionsByUserAndYearsAsync(compareTransactionByYearRequest.IdUser,
+                    new[] { compareTransactionByYearRequest.Year1, compareTransactionByYearRequest.Year2 });
+
+                if (!transactions.Any()){
+                    return ApiResponse<CompareTransactionByYearResponse>.FailResponse("Không có giao dịch trong 2 năm này!", 404);
+                }
+
+                var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
+
+                var groupByYear = transactionResponses
+                    .GroupBy(t => t.TransactionDate?.Year)
+                    .ToDictionary(g => g.Key!.Value, g => g.ToList());
+
+                // Lấy giao dịch của từng năm
+                var listYear1 = groupByYear.GetValueOrDefault(compareTransactionByYearRequest.Year1, new List<TransactionResponse>());
+                var listYear2 = groupByYear.GetValueOrDefault(compareTransactionByYearRequest.Year2, new List<TransactionResponse>());
+
+                // Tính tổng thu và chi của mỗi năm
+                var summaryYear1 = CalculateTransactionSummary(listYear1, compareTransactionByYearRequest.Year1);
+                var summaryYear2 = CalculateTransactionSummary(listYear2, compareTransactionByYearRequest.Year2);
+
+                var compareResponse = new CompareTransactionByYearResponse
+                {
+                    Year1Summary = summaryYear1,
+                    Year2Summary = summaryYear2,
+                    SpreadIncomeAndExpense = (summaryYear1.TotalIncome - summaryYear1.TotalExpense)
+                                           - (summaryYear2.TotalIncome - summaryYear2.TotalExpense)
+                };
+
+                return ApiResponse<CompareTransactionByYearResponse>.SuccessResponse("So sánh giao dịch giữa hai năm thành công!", 200, compareResponse);
+            }
+            catch (Exception ex){
+                return ApiResponse<CompareTransactionByYearResponse>.FailResponse(ex.Message, 500);
+            }
+        }
+
+        private YearlyTransactionSummary CalculateTransactionSummary(List<TransactionResponse> transactions, int year)
+        {
+            var incomeTransactions = transactions
+                .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeCollect)
+                .ToList();
+
+            var expenseTransactions = transactions
+                .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
+                .ToList();
+
+            return new YearlyTransactionSummary
+            {
+                Year = year,
+                TotalIncome = incomeTransactions.Sum(t => t.Amount),
+                TransactionIncomeDetails = incomeTransactions.Select(t => new CompareTransactionDetailResponse
+                {
+                    IdTransaction = t.IdTransaction,
+                    TransactionName = t.TransactionName,
+                    TransactionType = t.TransactionType,
+                    Amount = t.Amount,
+                    TransactionCategory = t.TransactionCategory,
+                    TransactionDate = t.TransactionDate
+                }).ToList(),
+
+                TotalExpense = expenseTransactions.Sum(t => t.Amount),
+                TransactionExpenseDetails = expenseTransactions.Select(t => new CompareTransactionDetailResponse
+                {
+                    IdTransaction = t.IdTransaction,
+                    TransactionName = t.TransactionName,
+                    TransactionType = t.TransactionType,
+                    Amount = t.Amount,
+                    TransactionCategory = t.TransactionCategory,
+                    TransactionDate = t.TransactionDate
+                }).ToList(),
+
+                SpreadIncomeAndExpenseByYear = incomeTransactions.Sum(t => t.Amount) - expenseTransactions.Sum(t => t.Amount)
+            };
         }
     }
 }

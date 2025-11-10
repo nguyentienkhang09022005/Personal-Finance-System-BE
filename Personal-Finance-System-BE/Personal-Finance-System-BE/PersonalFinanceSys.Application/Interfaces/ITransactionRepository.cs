@@ -20,5 +20,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task UpdateTransactionCategoryByBudgetNameAsync(Guid idUser, string oldCategoryName, string newCategoryName);
 
         Task<List<TransactionDomain>> GetExpenseTransactionsByUserAsync(Guid idUser);
+
+        Task<List<TransactionDomain>> GetTransactionsByUserAndYearsAsync(Guid idUser, int[] years);
     }
 }

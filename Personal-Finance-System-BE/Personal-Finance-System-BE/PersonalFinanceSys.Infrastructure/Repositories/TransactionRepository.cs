@@ -94,5 +94,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             
            return _mapper.Map<List<TransactionDomain>>(transactionEntities);
         }
+
+        public async Task<List<TransactionDomain>> GetTransactionsByUserAndYearsAsync(Guid idUser, int[] years)
+        {
+            var transaction = await _context.Transactions
+                .Where(t => t.IdUser == idUser && t.TransactionDate.HasValue
+                            && years.Contains(t.TransactionDate.Value.Year))
+                .ToListAsync();
+
+            return _mapper.Map<List<TransactionDomain>>(transaction);
+        }
+
     }
 }
