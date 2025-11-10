@@ -12,6 +12,6 @@
 
         public DateTime? TransactionDate { get; set; }
 
-        public Guid? IdUser { get; set; }
+        public Guid IdUser { get; set; }
     }
 }

@@ -29,6 +29,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
         {
             try
             {
+                bool userExists = await _userRepository.ExistUserAsync(savingGoalCreationRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy người dùng!", 404);
+
                 var savingGoalDomain = _mapper.Map<SavingGoalDomain>(savingGoalCreationRequest);
                 var createdSavingGoal = await _savingGoalRepository.AddSavingGoalAsync(savingGoalDomain);
 

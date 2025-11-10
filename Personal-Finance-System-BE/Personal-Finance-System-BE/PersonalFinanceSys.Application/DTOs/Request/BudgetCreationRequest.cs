@@ -8,6 +8,6 @@
 
         public string? UrlImage { get; set; }
 
-        public Guid? IdUser { get; set; }
+        public Guid IdUser { get; set; }
     }
 }

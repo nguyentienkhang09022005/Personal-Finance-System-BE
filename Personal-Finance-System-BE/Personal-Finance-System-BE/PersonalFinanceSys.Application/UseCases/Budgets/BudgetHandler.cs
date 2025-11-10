@@ -33,6 +33,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
         {
             try
             {
+                bool userExists = await _userRepository.ExistUserAsync(budgetCreationRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy người dùng!", 404);
+
                 var budgetDomain = _mapper.Map<BudgetDomain>(budgetCreationRequest);
                 var createdBudget = await _budgetRepository.AddBudgetAsync(budgetDomain);
 

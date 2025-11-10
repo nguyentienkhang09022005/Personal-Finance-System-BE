@@ -5,6 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -15,6 +16,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
     {
         private readonly IPaymentRepository _paymentRepository;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IUserRepository _userRepository;
+        private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
         private readonly string _AppId;
         private readonly string _Key1;
@@ -23,7 +26,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
         private readonly string _createOrderEndpoint;
 
         public PaymentHandler(IPaymentRepository paymentRepository, 
-                              IHttpClientFactory httpClientFactory, 
+                              IHttpClientFactory httpClientFactory,
+                              IUserRepository userRepository,
+                              IPackageRepository packageRepository,
                               IMapper mapper)
         {
             Env.Load();
@@ -35,6 +40,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
 
             _paymentRepository = paymentRepository;
             _httpClientFactory = httpClientFactory;
+            _userRepository = userRepository;
+            _packageRepository = packageRepository;
             _mapper = mapper;   
         }
 
@@ -43,6 +50,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
         {
             try
             {
+                bool userExists = await _userRepository.ExistUserAsync(paymentRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<PaymentResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+
+                bool packageExists = await _packageRepository.CheckExistPackage(paymentRequest.IdPackage);
+                if (!packageExists)
+                    return ApiResponse<PaymentResponse>.FailResponse("Không tìm thấy gói!", 404);
+
                 // Tạo IdAppTrans
                 var vnNow = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "SE Asia Standard Time");
                 var prefix = vnNow.ToString("yyMMdd");

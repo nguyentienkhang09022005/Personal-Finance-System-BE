@@ -18,7 +18,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _paymentHandler = paymentHandler;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("create-payment")]
         public async Task<IActionResult> CreatePayment(PaymentRequest paymentRequest)
         {

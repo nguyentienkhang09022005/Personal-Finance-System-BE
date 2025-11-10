@@ -25,6 +25,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
         {
             try
             {
+                bool userExists = await _userRepository.ExistUserAsync(transactionCreationRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy người dùng!", 404);
+
                 var transactionDomain = _mapper.Map<TransactionDomain>(transactionCreationRequest);
                 await _transactionRepository.AddTransactionAsync(transactionDomain);
                 return ApiResponse<string>.SuccessResponse("Tạo giao dịch thành công!", 201, string.Empty);
