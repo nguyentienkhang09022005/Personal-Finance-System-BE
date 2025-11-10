@@ -225,10 +225,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 if (!fundExist)
                     return ApiResponse<string>.FailResponse("Không tìm thấy quỹ!", 404);
 
-                bool assetExist = await _investmentAssetRepository.CheckExistAssetAsync(investmentAssetRequest.Id);
-                if (assetExist)
-                    return ApiResponse<string>.FailResponse("Tài sản đã tồn tại vui lòng chọn tài sản khác!", 400);
-
                 var investmentAssetDomain = _mapper.Map<InvestmentAssetDomain>(investmentAssetRequest);
                 var savedInvestmentAsset = await _investmentAssetRepository.AddInvestmentAssetAsync(investmentAssetDomain);
 

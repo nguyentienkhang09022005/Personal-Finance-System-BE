@@ -50,14 +50,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .AnyAsync(i => i.IdAsset == idAsset);
         }
 
-        public async Task<bool> CheckExistAssetAsync(string id)
-        {
-            return await _context.InvestmentAssets
-                .AsNoTracking()
-                .IgnoreAutoIncludes()
-                .AnyAsync(i => i.Id == id);
-        }
-
         public async Task<InvestmentAssetDomain> GetInfInvestmentAssetAsync(Guid idAsset)
         {
             var investmentAsset = await _context.InvestmentAssets
