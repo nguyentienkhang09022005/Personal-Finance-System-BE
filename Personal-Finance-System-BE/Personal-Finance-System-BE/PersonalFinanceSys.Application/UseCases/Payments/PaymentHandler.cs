@@ -27,15 +27,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                               IMapper mapper)
         {
             Env.Load();
-            _AppId = Env.GetString("ZALOPAY__APPID") ?? throw new Exception("Không tìm thấy key trong .env!");
-            _Key1 = Env.GetString("ZALOPAY__KEY1") ?? throw new Exception("Không tìm thấy key trong .env!");
-            _Key2 = Env.GetString("ZALOPAY__KEY2") ?? throw new Exception("Không tìm thấy key trong .env!");
-            _urlServer = Env.GetString("URL__SERVER") ?? throw new Exception("Không tìm thấy key trong .env!");
-            _createOrderEndpoint = Env.GetString("ZALOPAY__CREATE_ORDER_ENDPOINT") ?? throw new Exception("Không tìm thấy key trong .env!");
+            _AppId = Env.GetString("ZALOPAY__APPID")?.Trim() ?? throw new Exception("Không tìm thấy ZALOPAY__APPID trong .env!");
+            _Key1 = Env.GetString("ZALOPAY__KEY1")?.Trim() ?? throw new Exception("Không tìm thấy ZALOPAY__KEY1 trong .env!");
+            _Key2 = Env.GetString("ZALOPAY__KEY2")?.Trim() ?? throw new Exception("Không tìm thấy ZALOPAY__KEY2 trong .env!");
+            _urlServer = Env.GetString("URL__SERVER")?.Trim() ?? throw new Exception("Không tìm thấy URL__SERVER trong .env!");
+            _createOrderEndpoint = Env.GetString("ZALOPAY__CREATEORDERENDPOINT")?.Trim() ?? throw new Exception("Không tìm thấy ZALOPAY__CREATEORDERENDPOINT trong .env!");
 
             _paymentRepository = paymentRepository;
             _httpClientFactory = httpClientFactory;
-            _mapper = mapper;
+            _mapper = mapper;   
         }
 
 
@@ -56,26 +56,29 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
 
                 PaymentResponse paymentResponse = await _paymentRepository.CreatePaymentAsync(paymentDomain);
 
-                // 4Chuẩn bị dữ liệu gọi ZaloPay
+                // Chuẩn bị dữ liệu gọi ZaloPay
                 var appTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                var embedData = JsonSerializer.Serialize(new { redirecturl = "http://localhost:3000/profile" });
-                var items = JsonSerializer.Serialize(Array.Empty<object>());
                 var appUser = paymentRequest.IdUser.ToString();
+                int amount = (int)Math.Round(paymentRequest.Amount);
+                var embedDataJson = JsonSerializer.Serialize(new { 
+                    redirecturl = "http://localhost:3000/profile" 
+                });
+                var itemsJson = JsonSerializer.Serialize(Array.Empty<object>());
 
-                string dataToSign = $"{_AppId}|{idAppTrans}|{appUser}|{paymentRequest.Amount}|{appTime}|{embedData}|{items}";
+                var dataToSign = $"{int.Parse(_AppId)}|{idAppTrans}|{appUser}|{amount}|{appTime}|{embedDataJson}|{itemsJson}";
                 string mac = ComputeHmacSha256(dataToSign, _Key1);
 
                 string urlCallBack = $"{_urlServer}/api/payment/callback";
                 var orderData = new
                 {
-                    app_id = _AppId,
+                    app_id = int.Parse(_AppId),
                     app_user = appUser,
                     app_trans_id = idAppTrans,
                     app_time = appTime,
-                    amount = paymentRequest.Amount,
-                    item = items,
-                    description = "Thanh Toán Đơn Gói Nâng Cấp Hệ Thống",
-                    embed_data = embedData,
+                    amount = amount,
+                    item = itemsJson,
+                    description = "Thanh Toán Gói Nâng Cấp Hệ Thống",
+                    embed_data = embedDataJson,
                     mac = mac,
                     bank_code = "zalopayapp",
                     callback_url = urlCallBack
@@ -88,11 +91,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
 
                 var response = await client.PostAsync(_createOrderEndpoint, content);
                 var body = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(body);
 
                 var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(body);
 
-                // Kiểm tra phản hồi
                 if (!result.ContainsKey("return_code") || result["return_code"].GetInt32() != 1)
                 {
                     await _paymentRepository.UpdateStatusPaymentAsync(paymentResponse.IdPayment, ConstantStatusPayment.PaymentFailed);
@@ -111,10 +112,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
             }
         }
 
+
         public async Task<ApiResponse<string>> ResolveZaloPayCallbackAsync(ZaloPayCallBackRequest zaloPayCallBackRequest)
         {
             try
             {
+                Console.WriteLine("==== CALLBACK DATA RAW ====");
+                Console.WriteLine($"Data: {zaloPayCallBackRequest.Data}");
+                Console.WriteLine($"Mac: {zaloPayCallBackRequest.Mac}");
+                Console.WriteLine("===========================");
+
                 // Kiểm tra MAC với Key2
                 string mac = ComputeHmacSha256(zaloPayCallBackRequest.Data, _Key2);
                 if (!mac.Equals(zaloPayCallBackRequest.Mac, StringComparison.OrdinalIgnoreCase))
@@ -136,6 +143,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 return ApiResponse<string>.SuccessResponse("Xử lý callback thành công!", 200, string.Empty);
             } catch (Exception ex)
             {
+                Console.WriteLine($"[Callback Error] {ex}");
                 return ApiResponse<string>.FailResponse($"Lỗi khi xử lý callback: {ex.Message}", 500);
             } 
         }
