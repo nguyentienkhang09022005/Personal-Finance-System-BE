@@ -36,6 +36,8 @@ public partial class PersonFinanceSysDbContext : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    public virtual DbSet<Package> Packages { get; set; }
+
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
@@ -377,6 +379,48 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasConstraintName("fk_notification_user");
         });
 
+        modelBuilder.Entity<Package>(entity =>
+        {
+            entity.HasKey(e => e.IdPackage).HasName("package_pkey");
+
+            entity.ToTable("package");
+
+            entity.Property(e => e.IdPackage)
+                .ValueGeneratedNever()
+                .HasColumnName("id_package");
+            entity.Property(e => e.CreateAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("create_at");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.DurationDays).HasColumnName("duration_days");
+            entity.Property(e => e.PackageName)
+                .HasMaxLength(100)
+                .HasColumnName("package_name");
+            entity.Property(e => e.Price)
+                .HasPrecision(12, 2)
+                .HasColumnName("price");
+
+            entity.HasMany(d => d.PermissionNames).WithMany(p => p.IdPackages)
+                .UsingEntity<Dictionary<string, object>>(
+                    "PackagePermission",
+                    r => r.HasOne<Permission>().WithMany()
+                        .HasForeignKey("PermissionName")
+                        .HasConstraintName("fk_package_permission_permission"),
+                    l => l.HasOne<Package>().WithMany()
+                        .HasForeignKey("IdPackage")
+                        .HasConstraintName("fk_package_permission_package"),
+                    j =>
+                    {
+                        j.HasKey("IdPackage", "PermissionName").HasName("package_permission_pkey");
+                        j.ToTable("package_permission");
+                        j.IndexerProperty<Guid>("IdPackage").HasColumnName("id_package");
+                        j.IndexerProperty<string>("PermissionName")
+                            .HasMaxLength(50)
+                            .HasColumnName("permission_name");
+                    });
+        });
+
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasKey(e => e.IdPayment).HasName("payment_pkey");
@@ -396,6 +440,7 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.IdAppTrans)
                 .HasMaxLength(100)
                 .HasColumnName("id_app_trans");
+            entity.Property(e => e.IdPackage).HasColumnName("id_package");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.IdZpTrans).HasColumnName("id_zp_trans");
             entity.Property(e => e.Method)
@@ -404,6 +449,11 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
+
+            entity.HasOne(d => d.IdPackageNavigation).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.IdPackage)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_payment_package");
 
             entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.IdUser)
@@ -598,25 +648,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasForeignKey(d => d.RoleName)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("user_role");
-
-            entity.HasMany(d => d.PermissionNames).WithMany(p => p.IdUsers)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserPermission",
-                    r => r.HasOne<Permission>().WithMany()
-                        .HasForeignKey("PermissionName")
-                        .HasConstraintName("fk_user_permission_permission"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("IdUser")
-                        .HasConstraintName("fk_user_permission_user"),
-                    j =>
-                    {
-                        j.HasKey("IdUser", "PermissionName").HasName("user_permission_pkey");
-                        j.ToTable("user_permission");
-                        j.IndexerProperty<Guid>("IdUser").HasColumnName("id_user");
-                        j.IndexerProperty<string>("PermissionName")
-                            .HasMaxLength(50)
-                            .HasColumnName("permission_name");
-                    });
         });
 
         OnModelCreatingPartial(modelBuilder);

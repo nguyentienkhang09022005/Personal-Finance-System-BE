@@ -112,16 +112,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
             }
         }
 
-
         public async Task<ApiResponse<string>> ResolveZaloPayCallbackAsync(ZaloPayCallBackRequest zaloPayCallBackRequest)
         {
             try
-            {
-                Console.WriteLine("==== CALLBACK DATA RAW ====");
-                Console.WriteLine($"Data: {zaloPayCallBackRequest.Data}");
-                Console.WriteLine($"Mac: {zaloPayCallBackRequest.Mac}");
-                Console.WriteLine("===========================");
-
+            {           
                 // Kiểm tra MAC với Key2
                 string mac = ComputeHmacSha256(zaloPayCallBackRequest.Data, _Key2);
                 if (!mac.Equals(zaloPayCallBackRequest.Mac, StringComparison.OrdinalIgnoreCase))
@@ -136,10 +130,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 if (payment == null) throw new Exception("Không tìm thấy giao dịch!");
 
                 // Cập nhật status
-                if (payment.Status != ConstantStatusPayment.PaymentSuccess)
-                {
+                if (payment.Status != ConstantStatusPayment.PaymentSuccess){
                     await _paymentRepository.UpdateStatusPaymentAsync(payment.IdPayment, ConstantStatusPayment.PaymentSuccess);
                 }
+
+                // Cập nhật 
                 return ApiResponse<string>.SuccessResponse("Xử lý callback thành công!", 200, string.Empty);
             } catch (Exception ex)
             {

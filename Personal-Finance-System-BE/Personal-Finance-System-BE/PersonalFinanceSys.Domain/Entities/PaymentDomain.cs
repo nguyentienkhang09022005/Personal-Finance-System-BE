@@ -18,6 +18,8 @@
 
         public Guid? IdUser { get; set; }
 
+        public Guid? IdPackage { get; set; }
+
         public PaymentDomain(){}
     }
 }

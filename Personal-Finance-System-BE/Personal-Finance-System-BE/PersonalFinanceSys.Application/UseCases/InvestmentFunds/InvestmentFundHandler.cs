@@ -118,26 +118,33 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         // Hàm tạo quỹ cá nhân
         public async Task<ApiResponse<InvestmentFundResponse>> CreateInvestmentHandleAsync(InvestmentFundCreationRequest investmentFundCreationRequest)
         {
-            bool userExists = await _userRepository.ExistUserAsync(investmentFundCreationRequest.IdUser);
-            if (!userExists)
-                return ApiResponse<InvestmentFundResponse>.FailResponse("Không tìm thấy người dùng!", 404);
-
-            var investmentFundDomain = _mapper.Map<InvestmentFundDomain>(investmentFundCreationRequest);
-            var investmentFundCreated = await _investmentFundRepository.AddInvestmentAsync(investmentFundDomain);
-
-            if (investmentFundCreationRequest.UrlImage != null)
+            try
             {
-                var image = new ImageDomain
-                {
-                    Url = investmentFundCreationRequest.UrlImage,
-                    IdRef = investmentFundCreated.IdFund,
-                    RefType = "INVESTMENT_FUND"
-                };
-                await _imageRepository.AddImageAsync(image);
-            }
+                bool userExists = await _userRepository.ExistUserAsync(investmentFundCreationRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<InvestmentFundResponse>.FailResponse("Không tìm thấy người dùng!", 404);
 
-            var investmentFundResponse = _mapper.Map<InvestmentFundResponse>(investmentFundCreated);
-            return ApiResponse<InvestmentFundResponse>.SuccessResponse("Tạo quỹ thành công!", 200, investmentFundResponse);
+                var investmentFundDomain = _mapper.Map<InvestmentFundDomain>(investmentFundCreationRequest);
+                var investmentFundCreated = await _investmentFundRepository.AddInvestmentAsync(investmentFundDomain);
+
+                if (investmentFundCreationRequest.UrlImage != null)
+                {
+                    var image = new ImageDomain
+                    {
+                        Url = investmentFundCreationRequest.UrlImage,
+                        IdRef = investmentFundCreated.IdFund,
+                        RefType = "INVESTMENT_FUND"
+                    };
+                    await _imageRepository.AddImageAsync(image);
+                }
+
+                var investmentFundResponse = _mapper.Map<InvestmentFundResponse>(investmentFundCreated);
+                return ApiResponse<InvestmentFundResponse>.SuccessResponse("Tạo quỹ thành công!", 200, investmentFundResponse);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<InvestmentFundResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+            }
         }
 
         // Hàm thay đổi thông tin của quỹ
@@ -146,6 +153,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             try
             {
                 var investmentFundEntity = await _investmentFundRepository.ExistInvestmentFund(idFund);
+                if (investmentFundEntity == null){
+                    return ApiResponse<InvestmentFundResponse>.FailResponse("Không tìm thấy quỹ!", 404);
+                }
                 var investmentDomain = _mapper.Map<InvestmentFundDomain>(investmentFundEntity);
 
                 _mapper.Map(investmentFundUpdateRequest, investmentDomain);

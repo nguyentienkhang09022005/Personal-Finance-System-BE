@@ -21,5 +21,9 @@ public partial class Payment
 
     public Guid? IdUser { get; set; }
 
+    public Guid? IdPackage { get; set; }
+
+    public virtual Package? IdPackageNavigation { get; set; }
+
     public virtual User? IdUserNavigation { get; set; }
 }
