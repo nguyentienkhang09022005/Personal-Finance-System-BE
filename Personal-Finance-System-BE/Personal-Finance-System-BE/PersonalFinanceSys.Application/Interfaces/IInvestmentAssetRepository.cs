@@ -10,8 +10,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<bool> CheckExistInvestmentAssetAsync(Guid idAsset);
 
-        Task<bool> CheckExistAssetAsync(string id);
-
         Task<InvestmentAssetDomain> GetInfInvestmentAssetAsync(Guid idAsset);
 
         Task<List<InvestmentAssetDomain>> GetListInvestmentAssetAsync(Guid idFund);
