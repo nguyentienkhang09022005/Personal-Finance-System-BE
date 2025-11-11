@@ -105,5 +105,20 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<TransactionDomain>>(transaction);
         }
 
+        public async Task<List<TransactionDomain>> GetTransactionsByUserAndMonthsAsync(Guid idUser, (int month, int year)[] periods)
+        {
+            var transactions = await _context.Transactions
+                .Where(t => t.IdUser == idUser && t.TransactionDate.HasValue)
+                .ToListAsync();
+
+            var filtered = transactions
+                .Where(t => periods.Any(p =>
+                    t.TransactionDate!.Value.Month == p.month &&
+                    t.TransactionDate!.Value.Year == p.year))
+                .ToList();
+
+            return _mapper.Map<List<TransactionDomain>>(filtered);
+        }
+
     }
 }

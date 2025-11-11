@@ -4,7 +4,6 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions
 {
@@ -127,6 +126,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             }
         }
 
+        // Hàm so sánh giao dịch giữa 2 năm
         public async Task<ApiResponse<CompareTransactionByYearResponse>> CompareTransactionByYearAsync(CompareTransactionByYearRequest compareTransactionByYearRequest)
         {
             try
@@ -137,7 +137,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                     return ApiResponse<CompareTransactionByYearResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var transactions = await _transactionRepository.GetTransactionsByUserAndYearsAsync(compareTransactionByYearRequest.IdUser,
+                var transactions = await _transactionRepository.GetTransactionsByUserAndYearsAsync(
+                    compareTransactionByYearRequest.IdUser,
                     new[] { compareTransactionByYearRequest.Year1, compareTransactionByYearRequest.Year2 });
 
                 if (!transactions.Any()){
@@ -155,8 +156,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                 var listYear2 = groupByYear.GetValueOrDefault(compareTransactionByYearRequest.Year2, new List<TransactionResponse>());
 
                 // Tính tổng thu và chi của mỗi năm
-                var summaryYear1 = CalculateTransactionSummary(listYear1, compareTransactionByYearRequest.Year1);
-                var summaryYear2 = CalculateTransactionSummary(listYear2, compareTransactionByYearRequest.Year2);
+                var summaryYear1 = CalculateTransactionYearSummary(listYear1, compareTransactionByYearRequest.Year1);
+                var summaryYear2 = CalculateTransactionYearSummary(listYear2, compareTransactionByYearRequest.Year2);
 
                 var compareResponse = new CompareTransactionByYearResponse
                 {
@@ -173,7 +174,71 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             }
         }
 
-        private YearlyTransactionSummary CalculateTransactionSummary(List<TransactionResponse> transactions, int year)
+        // Hàm so sánh giao dịch giữa 2 tháng cùng hoặc khác năm
+        public async Task<ApiResponse<CompareTransactionByMonthResponse>> CompareTransactionByMonthAsync(CompareTransactionByMonthRequest compareTransactionByMonthRequest)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(compareTransactionByMonthRequest.IdUser);
+                if (!checkUserExist){
+                    return ApiResponse<CompareTransactionByMonthResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var transactions = await _transactionRepository.GetTransactionsByUserAndMonthsAsync(
+                    compareTransactionByMonthRequest.IdUser,
+                    new[] 
+                    { 
+                        (compareTransactionByMonthRequest.FirstMonth, compareTransactionByMonthRequest.FirstYear),
+                        (compareTransactionByMonthRequest.SecondMonth, compareTransactionByMonthRequest.SecondYear) 
+                    });
+
+                if (!transactions.Any()){
+                    return ApiResponse<CompareTransactionByMonthResponse>.FailResponse("Không có giao dịch trong 2 tháng này!", 404);
+                }
+
+                var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
+
+                var groupByMonthYear = transactionResponses
+                    .GroupBy(t => new { t.TransactionDate!.Value.Month, t.TransactionDate!.Value.Year })
+                    .ToDictionary(g => (g.Key!.Month, g.Key!.Year), g => g.ToList());
+
+                // Lấy giao dịch của từng tháng và năm
+                groupByMonthYear.TryGetValue(
+                    (compareTransactionByMonthRequest.FirstMonth, compareTransactionByMonthRequest.FirstYear),
+                    out var month1List);
+
+                groupByMonthYear.TryGetValue(
+                    (compareTransactionByMonthRequest.SecondMonth, compareTransactionByMonthRequest.SecondYear),
+                    out var month2List);
+
+                month1List ??= new List<TransactionResponse>();
+                month2List ??= new List<TransactionResponse>();
+
+                // Tính tổng thu và chi của mỗi tháng và năm
+                var summaryMonth1 = CalculateTransactionMonthSummary(month1List, 
+                                                                     compareTransactionByMonthRequest.FirstMonth,
+                                                                     compareTransactionByMonthRequest.FirstYear);
+                var summaryMonth2 = CalculateTransactionMonthSummary(month2List,
+                                                                     compareTransactionByMonthRequest.SecondMonth,
+                                                                     compareTransactionByMonthRequest.SecondYear);
+
+                var compareResponse = new CompareTransactionByMonthResponse
+                {
+                    Month1Summary = summaryMonth1,
+                    Month2Summary = summaryMonth2,
+                    SpreadIncomeAndExpense = (summaryMonth1.TotalIncome - summaryMonth1.TotalExpense)
+                                           - (summaryMonth2.TotalIncome - summaryMonth2.TotalExpense)
+                };
+
+                return ApiResponse<CompareTransactionByMonthResponse>.SuccessResponse("So sánh giao dịch giữa hai tháng thành công!", 200, compareResponse);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<CompareTransactionByMonthResponse>.FailResponse(ex.Message, 500);
+            }
+        }
+
+        private YearlyTransactionSummary CalculateTransactionYearSummary(List<TransactionResponse> transactions, int year)
         {
             var incomeTransactions = transactions
                 .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeCollect)
@@ -186,6 +251,46 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             return new YearlyTransactionSummary
             {
                 Year = year,
+                TotalIncome = incomeTransactions.Sum(t => t.Amount),
+                TransactionIncomeDetails = incomeTransactions.Select(t => new CompareTransactionDetailResponse
+                {
+                    IdTransaction = t.IdTransaction,
+                    TransactionName = t.TransactionName,
+                    TransactionType = t.TransactionType,
+                    Amount = t.Amount,
+                    TransactionCategory = t.TransactionCategory,
+                    TransactionDate = t.TransactionDate
+                }).ToList(),
+
+                TotalExpense = expenseTransactions.Sum(t => t.Amount),
+                TransactionExpenseDetails = expenseTransactions.Select(t => new CompareTransactionDetailResponse
+                {
+                    IdTransaction = t.IdTransaction,
+                    TransactionName = t.TransactionName,
+                    TransactionType = t.TransactionType,
+                    Amount = t.Amount,
+                    TransactionCategory = t.TransactionCategory,
+                    TransactionDate = t.TransactionDate
+                }).ToList(),
+
+                SpreadIncomeAndExpenseByYear = incomeTransactions.Sum(t => t.Amount) - expenseTransactions.Sum(t => t.Amount)
+            };
+        }
+
+        private MonthlyTransactionSummary CalculateTransactionMonthSummary(List<TransactionResponse> transactions, int month, int year)
+        {
+            var incomeTransactions = transactions
+                .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeCollect)
+                .ToList();
+
+            var expenseTransactions = transactions
+                .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
+                .ToList();
+
+            return new MonthlyTransactionSummary
+            {
+                Year = year,
+                Month = month,
                 TotalIncome = incomeTransactions.Sum(t => t.Amount),
                 TransactionIncomeDetails = incomeTransactions.Select(t => new CompareTransactionDetailResponse
                 {

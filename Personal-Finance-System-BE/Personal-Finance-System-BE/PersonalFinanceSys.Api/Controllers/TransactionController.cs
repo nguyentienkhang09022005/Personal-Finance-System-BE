@@ -51,6 +51,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("compare-transaction-by-month")]
+        public async Task<IActionResult> CompareTransactionByMonthAsync([FromBody] CompareTransactionByMonthRequest compareTransactionByMonthRequest)
+        {
+            var result = await _transactionHandler.CompareTransactionByMonthAsync(compareTransactionByMonthRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
         [Authorize]
         [HttpPatch("update-transaction")]
         public async Task<IActionResult> UpdateTransactionAsync([FromBody] TransactionUpdateRequest transactionUpdateRequest,

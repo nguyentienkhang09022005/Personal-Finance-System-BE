@@ -22,5 +22,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<List<TransactionDomain>> GetExpenseTransactionsByUserAsync(Guid idUser);
 
         Task<List<TransactionDomain>> GetTransactionsByUserAndYearsAsync(Guid idUser, int[] years);
+
+        Task<List<TransactionDomain>> GetTransactionsByUserAndMonthsAsync(Guid idUser, (int month, int year)[] periods);
     }
 }
