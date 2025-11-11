@@ -24,7 +24,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
         {
             var jwtSettings = _config.GetSection("JwtSettings");
 
-            // Lấy danh sách permission mà user đã mua
+            // Lấy danh sách permission mà user đã mua gói
             var permissions = await _context.Payments
                 .Where(p => p.IdUser == user.IdUser && p.Status == ConstantStatusPayment.PaymentSuccess && p.IdPackage != null)
                 .Include(p => p.IdPackageNavigation!)

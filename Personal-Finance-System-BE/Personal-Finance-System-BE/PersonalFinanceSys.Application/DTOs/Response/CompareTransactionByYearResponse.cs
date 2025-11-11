@@ -5,8 +5,6 @@
         public YearlyTransactionSummary Year1Summary { get; set; } = new();
 
         public YearlyTransactionSummary Year2Summary { get; set; } = new();
-
-        public decimal SpreadIncomeAndExpense { get; set; }
     }
 
     public class YearlyTransactionSummary

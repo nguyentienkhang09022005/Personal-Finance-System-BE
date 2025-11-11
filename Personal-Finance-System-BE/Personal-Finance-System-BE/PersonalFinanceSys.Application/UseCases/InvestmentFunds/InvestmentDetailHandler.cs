@@ -13,16 +13,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
     {
         private readonly IInvestmentDetailRepository _investmentDetailRepository;
         private readonly IInvestmentAssetRepository _investmentAssetRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly CryptoHandler _cryptoHandler;
 
         public InvestmentDetailHandler(IInvestmentDetailRepository investmentDetailRepository, 
                                        IInvestmentAssetRepository investmentAssetRepository, 
+                                       IUserRepository userRepository,
                                        IMapper mapper,
                                        CryptoHandler cryptoHandler)
         {
             _investmentDetailRepository = investmentDetailRepository;
             _investmentAssetRepository = investmentAssetRepository;
+            _userRepository = userRepository;
             _mapper = mapper;
             _cryptoHandler = cryptoHandler;
         }
@@ -177,6 +180,172 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailByUserAsync(Guid idUser)
         {
             return await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
+        }
+
+        // Hàm so sánh đầu tư giữa 2 năm
+        public async Task<ApiResponse<CompareInvestmentDetailByYearResponse>> CompareInvestmentDetailByYearAsync(CompareInvestmentDetailByYearRequest compareInvestmentDetailByYearRequest)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(compareInvestmentDetailByYearRequest.IdUser);
+                if (!checkUserExist){
+                    return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByYearRequest.Id);
+                if (!checkAssetExist){
+                    return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy tài sản!", 404);
+                }
+
+                var investmentDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndYearsAsync(
+                    compareInvestmentDetailByYearRequest.IdUser,
+                    new[] { compareInvestmentDetailByYearRequest.Year1, compareInvestmentDetailByYearRequest.Year2 });
+
+                if (!investmentDetails.Any()){
+                    return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không có giao dịch đầu tư loại tài sản trong 2 năm này!", 404);
+                }
+
+                var groupByYear = investmentDetails
+                    .GroupBy(t => t.CreateAt?.Year)
+                    .ToDictionary(g => g.Key!.Value, g => g.ToList());
+
+                // Lấy giao dịch đầu tư của từng năm
+                groupByYear.TryGetValue(compareInvestmentDetailByYearRequest.Year1, out var year1Details);
+                groupByYear.TryGetValue(compareInvestmentDetailByYearRequest.Year2, out var year2Details);
+
+                year1Details ??= new List<InvestmentDetailDomain>();
+                year2Details ??= new List<InvestmentDetailDomain>();
+
+                var year1Summary = CalculateYearlyInvestmentSummary(year1Details, compareInvestmentDetailByYearRequest.Year1);
+                var year2Summary = CalculateYearlyInvestmentSummary(year2Details, compareInvestmentDetailByYearRequest.Year2);
+
+                var compareResponse = new CompareInvestmentDetailByYearResponse
+                {
+                    Year1Summary = year1Summary,
+                    Year2Summary = year2Summary
+                };
+
+                return ApiResponse<CompareInvestmentDetailByYearResponse>.SuccessResponse("So sánh giao dịch đầu tư giữa hai năm thành công!", 200, compareResponse);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse(ex.Message, 500);
+            }
+        }
+
+        // Hàm so sánh giao dịch giữa 2 tháng cùng hoặc khác năm
+        public async Task<ApiResponse<CompareInvestmentDetailByMonthResponse>> CompareInvestmentDetailByMonthAsync(CompareInvestmentDetailByMonthRequest compareInvestmentDetailByMonthRequest)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(compareInvestmentDetailByMonthRequest.IdUser);
+                if (!checkUserExist){
+                    return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByMonthRequest.Id);
+                if (!checkAssetExist){
+                    return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy tài sản!", 404);
+                }
+
+                var investmentsDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndMonthsAsync(
+                    compareInvestmentDetailByMonthRequest.IdUser,
+                    new[]
+                    {
+                        (compareInvestmentDetailByMonthRequest.FirstMonth, compareInvestmentDetailByMonthRequest.FirstYear),
+                        (compareInvestmentDetailByMonthRequest.SecondMonth, compareInvestmentDetailByMonthRequest.SecondYear)
+                    });
+
+                if (!investmentsDetails.Any()){
+                    return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không có giao dịch đầu tư loại tài sản trong 2 tháng này!", 404);
+                }
+
+                var groupByMonthYear = investmentsDetails
+                    .GroupBy(t => new { t.CreateAt!.Value.Month, t.CreateAt!.Value.Year })
+                    .ToDictionary(g => (g.Key!.Month, g.Key!.Year), g => g.ToList());
+
+                // Lấy giao dịch đầu tư của từng tháng và năm
+                groupByMonthYear.TryGetValue(
+                    (compareInvestmentDetailByMonthRequest.FirstMonth, compareInvestmentDetailByMonthRequest.FirstYear),
+                    out var month1List);
+
+                groupByMonthYear.TryGetValue(
+                    (compareInvestmentDetailByMonthRequest.SecondMonth, compareInvestmentDetailByMonthRequest.SecondYear),
+                    out var month2List);
+
+                month1List ??= new List<InvestmentDetailDomain>();
+                month2List ??= new List<InvestmentDetailDomain>();
+
+                // Tính tổng mua và bán của mỗi tháng và năm
+                var summaryMonth1 = CalculateMonthlyInvestmentSummary(month1List,
+                                                                     compareInvestmentDetailByMonthRequest.FirstMonth,
+                                                                     compareInvestmentDetailByMonthRequest.FirstYear);
+                var summaryMonth2 = CalculateMonthlyInvestmentSummary(month2List,
+                                                                     compareInvestmentDetailByMonthRequest.SecondMonth,
+                                                                     compareInvestmentDetailByMonthRequest.SecondYear);
+
+                var compareResponse = new CompareInvestmentDetailByMonthResponse
+                {
+                    Month1Summary = summaryMonth1,
+                    Month2Summary = summaryMonth2
+                };
+
+                return ApiResponse<CompareInvestmentDetailByMonthResponse>.SuccessResponse("So sánh giao dịch đầu tư giữa hai tháng thành công!", 200, compareResponse);
+            }
+            catch (Exception ex){
+                return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse(ex.Message, 500);
+            }
+        }
+
+        private MonthlyInvestmentDetailSummary CalculateMonthlyInvestmentSummary(List<InvestmentDetailDomain> details, 
+                                                                                 int month, int year)
+        {
+            var summary = new MonthlyInvestmentDetailSummary
+            {
+                Month = month,
+                Year = year,
+                TotalBuy = details.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).Sum(d => d.Expense),
+                TotalQuantityBuy = (int)details.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).Sum(d => d.Quantity),
+                InvestmentDetailBuyDetails = details
+                    .Where(d => d.Type == ConstrantBuyAndSell.TypeBuy)
+                    .Select(_mapper.Map<CompareInvestmentDetailResponse>)
+                    .ToList(),
+
+                TotalSell = details.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).Sum(d => d.Expense),
+                TotalQuantitySell = (int)details.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).Sum(d => d.Quantity),
+                InvestmentDetailSellDetails = details
+                    .Where(d => d.Type == ConstrantBuyAndSell.TypeSell)
+                    .Select(_mapper.Map<CompareInvestmentDetailResponse>)
+                    .ToList(),
+            };
+
+            summary.SpreadBuyAndSellByMonth = summary.TotalBuy - summary.TotalSell;
+            return summary;
+        }
+
+        private YearlyInvestmentDetailSummary CalculateYearlyInvestmentSummary(List<InvestmentDetailDomain> details, 
+                                                                               int year)
+        {
+            var summary = new YearlyInvestmentDetailSummary
+            {
+                Year = year,
+                TotalBuy = details.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).Sum(d => d.Expense),
+                TotalQuantityBuy = (int)details.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).Sum(d => d.Quantity),
+                InvestmentDetailBuyDetails = details
+                    .Where(d => d.Type == ConstrantBuyAndSell.TypeBuy)
+                    .Select(_mapper.Map<CompareInvestmentDetailResponse>)
+                    .ToList(),
+
+                TotalSell = details.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).Sum(d => d.Expense),
+                TotalQuantitySell = (int)details.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).Sum(d => d.Quantity),
+                InvestmentDetailSellDetails = details
+                    .Where(d => d.Type == ConstrantBuyAndSell.TypeSell)
+                    .Select(_mapper.Map<CompareInvestmentDetailResponse>)
+                    .ToList(),
+            };
+
+            summary.SpreadBuyAndSellByYear = summary.TotalBuy - summary.TotalSell;
+            return summary;
         }
     }
 }

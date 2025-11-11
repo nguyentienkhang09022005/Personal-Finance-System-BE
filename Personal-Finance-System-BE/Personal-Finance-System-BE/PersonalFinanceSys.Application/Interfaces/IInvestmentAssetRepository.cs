@@ -17,5 +17,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<List<InvestmentAssetDomain>> GetAssetsForMultipleFundsAsync(List<Guid> fundIds);
 
         Task<List<InvestmentAssetDomain>> GetAllAssetsByUserAsync(Guid idUser);
+
+        Task<bool> CheckExistInvestmentAssetByIdAsync(string id);
     }
 }

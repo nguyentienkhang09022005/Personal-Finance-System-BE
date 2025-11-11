@@ -5,8 +5,6 @@
         public MonthlyTransactionSummary Month1Summary { get; set; } = new();
 
         public MonthlyTransactionSummary Month2Summary { get; set; } = new();
-
-        public decimal SpreadIncomeAndExpense { get; set; }
     }
     public class MonthlyTransactionSummary
     {
@@ -20,6 +18,6 @@
         public decimal TotalExpense { get; set; }
         public List<CompareTransactionDetailResponse> TransactionExpenseDetails { get; set; } = new();
 
-        public decimal SpreadIncomeAndExpenseByYear { get; set; }
+        public decimal SpreadIncomeAndExpenseByMonth { get; set; }
     }
 }

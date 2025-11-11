@@ -76,5 +76,44 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .AsNoTracking()
                 .ToListAsync());
         }
+
+        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndMonthsAsync(Guid idUser,
+                                                                                                (int month, int year)[] periods)
+        {
+            await using var context = _contextFactory.CreateDbContext();
+
+            // Lấy tất cả chi tiết đầu tư của user, lọc theo tháng-năm
+            var details = await context.InvestmentDetails
+                .Include(d => d.IdAssetNavigation)
+                .ThenInclude(a => a.IdFundNavigation)
+                .Where(d => d.IdAssetNavigation.IdFundNavigation.IdUser == idUser && d.CreateAt.HasValue)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var filtered = details
+                .Where(d => periods.Any(p =>
+                    d.CreateAt!.Value.Month == p.month && d.CreateAt.Value.Year == p.year))
+                .ToList();
+
+            return _mapper.Map<List<InvestmentDetailDomain>>(filtered);
+        }
+
+        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndYearsAsync(
+            Guid idUser,
+            int[] years)
+        {
+            await using var context = _contextFactory.CreateDbContext();
+
+            var details = await context.InvestmentDetails
+                .Include(d => d.IdAssetNavigation)
+                .ThenInclude(a => a.IdFundNavigation)
+                .Where(d => d.IdAssetNavigation.IdFundNavigation.IdUser == idUser
+                            && d.CreateAt.HasValue
+                            && years.Contains(d.CreateAt.Value.Year))
+                .AsNoTracking()
+                .ToListAsync();
+
+            return _mapper.Map<List<InvestmentDetailDomain>>(details);
+        }
     }
 }

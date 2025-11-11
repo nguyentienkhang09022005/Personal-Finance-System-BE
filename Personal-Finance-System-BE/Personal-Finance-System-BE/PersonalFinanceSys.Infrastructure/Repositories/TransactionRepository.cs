@@ -97,12 +97,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
         public async Task<List<TransactionDomain>> GetTransactionsByUserAndYearsAsync(Guid idUser, int[] years)
         {
-            var transaction = await _context.Transactions
+            var transactions = await _context.Transactions
                 .Where(t => t.IdUser == idUser && t.TransactionDate.HasValue
                             && years.Contains(t.TransactionDate.Value.Year))
                 .ToListAsync();
 
-            return _mapper.Map<List<TransactionDomain>>(transaction);
+            return _mapper.Map<List<TransactionDomain>>(transactions);
         }
 
         public async Task<List<TransactionDomain>> GetTransactionsByUserAndMonthsAsync(Guid idUser, (int month, int year)[] periods)

@@ -163,8 +163,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                 {
                     Year1Summary = summaryYear1,
                     Year2Summary = summaryYear2,
-                    SpreadIncomeAndExpense = (summaryYear1.TotalIncome - summaryYear1.TotalExpense)
-                                           - (summaryYear2.TotalIncome - summaryYear2.TotalExpense)
                 };
 
                 return ApiResponse<CompareTransactionByYearResponse>.SuccessResponse("So sánh giao dịch giữa hai năm thành công!", 200, compareResponse);
@@ -226,8 +224,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                 {
                     Month1Summary = summaryMonth1,
                     Month2Summary = summaryMonth2,
-                    SpreadIncomeAndExpense = (summaryMonth1.TotalIncome - summaryMonth1.TotalExpense)
-                                           - (summaryMonth2.TotalIncome - summaryMonth2.TotalExpense)
                 };
 
                 return ApiResponse<CompareTransactionByMonthResponse>.SuccessResponse("So sánh giao dịch giữa hai tháng thành công!", 200, compareResponse);
@@ -313,7 +309,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
                     TransactionDate = t.TransactionDate
                 }).ToList(),
 
-                SpreadIncomeAndExpenseByYear = incomeTransactions.Sum(t => t.Amount) - expenseTransactions.Sum(t => t.Amount)
+                SpreadIncomeAndExpenseByMonth = incomeTransactions.Sum(t => t.Amount) - expenseTransactions.Sum(t => t.Amount)
             };
         }
     }

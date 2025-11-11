@@ -149,7 +149,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                     await _paymentRepository.UpdateStatusPaymentAsync(payment.IdPayment, ConstantStatusPayment.PaymentSuccess);
                 }
 
-                // Cập nhật 
                 return ApiResponse<string>.SuccessResponse("Xử lý callback thành công!", 200, string.Empty);
             } catch (Exception ex)
             {

@@ -40,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("compare-transaction-by-year")]
         public async Task<IActionResult> CompareTransactionByYearAsync([FromBody] CompareTransactionByYearRequest compareTransactionByYear)
         {
@@ -51,6 +52,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("compare-transaction-by-month")]
         public async Task<IActionResult> CompareTransactionByMonthAsync([FromBody] CompareTransactionByMonthRequest compareTransactionByMonthRequest)
         {

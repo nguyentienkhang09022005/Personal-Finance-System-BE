@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 {
@@ -33,6 +34,28 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
         public async Task<IActionResult> AddInvestmentDetail([FromBody] InvestmentDetailRequest investmentDetailRequest)
         {
             var result = await _investmentDetailHandler.CreateInvestmentDetailHandleAsync(investmentDetailRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("compare-investment-detail-by-month")]
+        public async Task<IActionResult> CompareInvestmentDetailByMonthAsync([FromBody] CompareInvestmentDetailByMonthRequest compareInvestmentDetailByMonthRequest)
+        {
+            var result = await _investmentDetailHandler.CompareInvestmentDetailByMonthAsync(compareInvestmentDetailByMonthRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("compare-investment-detail-by-year")]
+        public async Task<IActionResult> CompareInvestmentDetailByYearAsync([FromBody] CompareInvestmentDetailByYearRequest compareInvestmentDetailByYearRequest)
+        {
+            var result = await _investmentDetailHandler.CompareInvestmentDetailByYearAsync(compareInvestmentDetailByYearRequest);
             if (result.Success)
             {
                 return Ok(result);

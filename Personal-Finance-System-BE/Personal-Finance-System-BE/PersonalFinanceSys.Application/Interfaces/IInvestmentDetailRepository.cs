@@ -13,5 +13,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<decimal> GetNetQuantityForAssetAsync(Guid idAsset);
 
         Task<List<InvestmentDetailDomain>> GetAllDetailsByUserAsync(Guid idUser);
+
+        Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndMonthsAsync(Guid idUser, (int month, int year)[] periods);
+
+        Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndYearsAsync(Guid idUser, int[] years);
     }
 }
