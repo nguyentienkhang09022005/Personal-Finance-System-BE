@@ -135,6 +135,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(userUpdateRequest.Phone))
+                {
+                    if (userUpdateRequest.Phone.Length < 10 || userUpdateRequest.Phone.Length > 12)
+                        return ApiResponse<UserResponse>.FailResponse("Số điện thoại không hợp lệ!", 400);
+                }
+
                 var userEntity = await _userRepository.GetExistUserAsync(idUser);
                 if (userEntity == null){
                     return ApiResponse<UserResponse>.FailResponse("Không tìm thấy người dùng!", 404);
