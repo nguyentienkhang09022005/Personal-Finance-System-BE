@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentEmail.Core;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -141,6 +142,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                         return ApiResponse<UserResponse>.FailResponse("Số điện thoại không hợp lệ!", 400);
                 }
 
+                if (!string.IsNullOrWhiteSpace(userUpdateRequest.Email))
+                {
+                    if (!userUpdateRequest.Email.Contains("@"))
+                        throw new ArgumentException("Email không hợp lệ! Phải có dạng example@gmail.com!");
+                }
+                    
                 var userEntity = await _userRepository.GetExistUserAsync(idUser);
                 if (userEntity == null){
                     return ApiResponse<UserResponse>.FailResponse("Không tìm thấy người dùng!", 404);
