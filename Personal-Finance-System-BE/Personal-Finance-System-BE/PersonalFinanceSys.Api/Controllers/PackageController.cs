@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _packageHandler = packageHandler;
         }
 
+        [Authorize]
         [HttpPost("create-package")]
         public async Task<IActionResult> AddPackage([FromBody] PackageCreationRequest packageCreationRequest)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-package")]
         public async Task<IActionResult> GetListPackage([FromQuery] Guid idUser)
         {

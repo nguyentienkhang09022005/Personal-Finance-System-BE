@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _transactionHandler = transactionHandler;
         }
 
+        [Authorize]
         [HttpGet("list-transaction")]
         public async Task<IActionResult> ListTransactionAsync([FromQuery] Guid idUser)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-transaction-full")]
         public async Task<IActionResult> ListTransactionFullAsync([FromQuery] Guid idUser)
         {

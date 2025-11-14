@@ -28,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-user")]
         public async Task<IActionResult> InfUser([FromQuery] Guid idUser)
         {
@@ -39,7 +40,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPost("add-user")]
         public async Task<IActionResult> AddUser([FromBody] UserCreationRequest userCreationRequest)
         {

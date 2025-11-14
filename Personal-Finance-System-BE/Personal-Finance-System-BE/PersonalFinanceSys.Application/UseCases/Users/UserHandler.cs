@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using FluentEmail.Core;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users
@@ -14,12 +12,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
     {
         private readonly IUserRepository _userRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IPaymentRepository _paymentRepository;
         private readonly IMapper _mapper;
-        
-        public UserHandler(IUserRepository userRepository, IImageRepository imageRepository, IMapper mapper)
+
+        public UserHandler(IUserRepository userRepository, 
+                           IImageRepository imageRepository, 
+                           IPaymentRepository paymentRepository,
+                           IMapper mapper)
         {
             _userRepository = userRepository;
             _imageRepository = imageRepository;
+            _paymentRepository = paymentRepository;
             _mapper = mapper;
         }
 
@@ -113,6 +116,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 var newUser = _mapper.Map<UserDomain>(userCreationRequest);
                 var createdUser = await _userRepository.AddUserAsync(newUser);
 
+                // Tạo hình ảnh nếu có
                 if (userCreationRequest.UrlAvatar != null)
                 {
                     var avartar = new ImageDomain
@@ -123,6 +127,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                     };
                     await _imageRepository.AddImageAsync(avartar);
                 }
+
+                // Cập nhật gói mặc định cho new account
+                PaymentDomain paymentDomain = new PaymentDomain();
+                paymentDomain.IdUser = createdUser.IdUser;
+                paymentDomain.IdPackage = ConstantPackageID.PACKAGE_BASIC_ID;
+                paymentDomain.Status = ConstantStatusPayment.PaymentSuccess;
+
+                PaymentResponse paymentResponse = await _paymentRepository.CreatePaymentAsync(paymentDomain);
+
                 return ApiResponse<string>.SuccessResponse(
                     "Tạo người dùng thành công!", 
                     200, 

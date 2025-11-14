@@ -5,6 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen
@@ -12,14 +13,20 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
     public class OtpHandler
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPaymentRepository _paymentRepository;
         private readonly IFluentEmail _email;
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<OtpHandler> _logger;
 
 
-        public OtpHandler(IUserRepository userRepository, IMemoryCache memoryCache, IFluentEmail email, ILogger<OtpHandler> logger)
+        public OtpHandler(IUserRepository userRepository, 
+                          IPaymentRepository paymentRepository,
+                          IMemoryCache memoryCache, 
+                          IFluentEmail email, 
+                          ILogger<OtpHandler> logger)
         {
             _userRepository = userRepository;
+            _paymentRepository = paymentRepository;
             _memoryCache = memoryCache;
             _email = email;
             _logger = logger;
@@ -91,7 +98,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 newUser.Password = cacheData.Password;
                 newUser.RoleName = ConstantRole.UserRole;
 
-                await _userRepository.AddUserAsync(newUser);
+                var createdUser = await _userRepository.AddUserAsync(newUser);
+
+                // Cập nhật gói mặc định cho new account
+                PaymentDomain paymentDomain = new PaymentDomain();
+                paymentDomain.IdUser = createdUser.IdUser;
+                paymentDomain.IdPackage = ConstantPackageID.PACKAGE_BASIC_ID;
+                paymentDomain.Status = ConstantStatusPayment.PaymentSuccess;
+
+                PaymentResponse paymentResponse = await _paymentRepository.CreatePaymentAsync(paymentDomain);
 
                 _memoryCache.Remove(cacheKey);
 

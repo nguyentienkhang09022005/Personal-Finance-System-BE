@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
-using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Payments;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
@@ -18,7 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _paymentHandler = paymentHandler;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost("create-payment")]
         public async Task<IActionResult> CreatePayment(PaymentRequest paymentRequest)
         {
