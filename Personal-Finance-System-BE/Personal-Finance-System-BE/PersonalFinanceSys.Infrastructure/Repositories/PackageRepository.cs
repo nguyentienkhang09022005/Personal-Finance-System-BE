@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -61,13 +62,22 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return package ?? throw new NotFoundException("Không tìm thấy gói");      
         }
 
-        public async Task<List<PackageDomain>> GetListPackageDomains()
+        public async Task<(List<Package> AllPackages, List<Guid> BoughtPackageIds)>GetPackagesWithBoughtInfo(Guid idUser)
         {
-            var packages = await _context.Packages
-                            .AsNoTracking()
-                            .Include(p => p.PermissionNames)
-                            .ToListAsync();
-            return _mapper.Map<List<PackageDomain?>>(packages);
+            // Lấy danh sách các IdPackage mà user đã mua
+            var boughtIds = await _context.Payments
+                .Where(p => p.IdUser == idUser && p.Status == ConstantStatusPayment.PaymentSuccess)
+                .Select(p => p.IdPackage.Value)
+                .Distinct()
+                .ToListAsync();
+
+            // Lấy toàn bộ package
+            var allPackages = await _context.Packages
+                .AsNoTracking()
+                .Include(p => p.PermissionNames)
+                .ToListAsync();
+
+            return (allPackages, boughtIds);
         }
 
         public async Task<PackageDomain> UpdatePackageAsync(PackageDomain packageDomain, Package package, List<string> permissionNames)

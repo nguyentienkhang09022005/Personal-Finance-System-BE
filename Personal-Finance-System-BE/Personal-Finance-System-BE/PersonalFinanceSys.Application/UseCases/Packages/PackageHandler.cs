@@ -18,16 +18,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pac
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<List<PackageResponse>>> GetListPackageAsync()
+        public async Task<ApiResponse<List<ListPackageResponse>>> GetListPackageAsync(Guid idUser)
         {
             try
             {
-                var packages = await _packageRepository.GetListPackageDomains();
-                if (packages == null || !packages.Any()){
-                    return ApiResponse<List<PackageResponse>>.SuccessResponse("Chưa có gói nào được tạo!", 200, new List<PackageResponse>());
+                var (allPackages, boughtIds) = await _packageRepository.GetPackagesWithBoughtInfo(idUser);
+                if (allPackages == null || !allPackages.Any()){
+                    return ApiResponse<List<ListPackageResponse>>.SuccessResponse("Chưa có gói nào được tạo!", 200, new List<ListPackageResponse>());
                 }
 
-                var packageResponses = packages.Select(p => new PackageResponse
+                var response = allPackages.Select(p => new ListPackageResponse
                 {
                     IdPackage = p.IdPackage,
                     PackageName = p.PackageName,
@@ -35,19 +35,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pac
                     Price = p.Price,
                     DurationDays = p.DurationDays,
                     CreateAt = p.CreateAt,
-                    Permissions = p.PermissionNames
-                .Select(per => new PermissionResponse
-                {
-                    PermissionName = per.PermissionName,
-                    Description = per.Description
-                })
-                .ToList()
+
+                    Bought = boughtIds.Contains(p.IdPackage),
+
+                    Permissions = p.PermissionNames.Select(per => new PermissionResponse
+                    {
+                        PermissionName = per.PermissionName,
+                        Description = per.Description
+                    }).ToList()
                 }).ToList();
-                return ApiResponse<List<PackageResponse>>.SuccessResponse("Lấy danh sách gói thành công!", 200, packageResponses);
+                return ApiResponse<List<ListPackageResponse>>.SuccessResponse("Lấy danh sách gói thành công!", 200, response);
             }
-            catch (Exception ex)
-            {
-                return ApiResponse<List<PackageResponse>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+            catch (Exception ex){
+                return ApiResponse<List<ListPackageResponse>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
 

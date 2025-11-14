@@ -39,7 +39,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var image = await context.Images
                 .AsNoTracking()
                 .Where(img => img.IdRef == idRef && img.RefType == refType)
+                .OrderBy(img => img.CreateAt)
                 .Select(img => img.Url)
+                .OrderBy(img => img)
                 .LastOrDefaultAsync();
 
             return image;
