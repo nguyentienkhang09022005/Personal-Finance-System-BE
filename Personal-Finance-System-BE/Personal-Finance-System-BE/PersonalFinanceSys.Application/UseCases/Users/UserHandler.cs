@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentEmail.Core;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -118,7 +119,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                     {
                         Url = userCreationRequest.UrlAvatar,
                         IdRef = createdUser.IdUser,
-                        RefType = "USERS"
+                        RefType = ConstantRole.UserRole 
                     };
                     await _imageRepository.AddImageAsync(avartar);
                 }
@@ -170,7 +171,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                     {
                         Url = userUpdateRequest.UrlAvatar,
                         IdRef = idUser,
-                        RefType = "USERS"
+                        RefType = ConstantRole.UserRole
                     };
 
                     await _imageRepository.AddImageAsync(image);

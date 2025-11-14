@@ -1,5 +1,6 @@
 ﻿using FluentEmail.Core;
 using Microsoft.Extensions.Caching.Memory;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -88,6 +89,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 newUser.Name = cacheData.Name;
                 newUser.Email = cacheData.Email;
                 newUser.Password = cacheData.Password;
+                newUser.RoleName = ConstantRole.UserRole;
 
                 await _userRepository.AddUserAsync(newUser);
 
