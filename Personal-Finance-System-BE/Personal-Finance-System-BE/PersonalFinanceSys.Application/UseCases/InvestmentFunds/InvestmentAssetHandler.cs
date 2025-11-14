@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -205,7 +206,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             foreach (var detail in assetDetails.Values)
             {
                 var totalExpense = detail.listInvestmentDetailResponses?
-                    .Where(d => d.Type == "Mua")
+                    .Where(d => d.Type == ConstrantBuyAndSell.TypeBuy)
                     .Sum(d => d.Expense) ?? 0;
                 totalTransaction += totalExpense;
             }

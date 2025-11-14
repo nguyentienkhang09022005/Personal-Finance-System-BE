@@ -87,17 +87,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
         private decimal CalculateValueTotalAsset(List<InvestmentDetailDomain> details, decimal currentPriceVND)
         {
-            decimal remainingQuantity = details.Where(i => i.Type == "Mua").Sum(i => i.Quantity)
-                                            - details.Where(i => i.Type == "Bán").Sum(i => i.Quantity);
+            decimal remainingQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Quantity)
+                                            - details.Where(i => i.Type == ConstrantBuyAndSell.TypeSell).Sum(i => i.Quantity);
             return remainingQuantity * currentPriceVND;
         }
 
         private decimal CalculateAverageNetCost(List<InvestmentDetailDomain> details)
         {
-            decimal totalBuyQuantity = details.Where(i => i.Type == "Mua").Sum(i => i.Quantity);
-            decimal totalSellQuantity = details.Where(i => i.Type == "Bán").Sum(i => i.Quantity);
+            decimal totalBuyQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Quantity);
+            decimal totalSellQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeSell).Sum(i => i.Quantity);
             decimal remainingQuantity = totalBuyQuantity - totalSellQuantity;
-            decimal totalNetCostBuy = details.Where(i => i.Type == "Mua").Sum(i => i.Expense + i.Fee);
+            decimal totalNetCostBuy = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Expense + i.Fee);
 
             if (totalBuyQuantity == 0 || remainingQuantity <= 0)
                 return 0;
@@ -110,10 +110,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
         private decimal CalculateTotalProfitAndLoss(List<InvestmentDetailDomain> details, decimal currentPriceVND)
         {
-            decimal totalBuyQuantity = details.Where(i => i.Type == "Mua").Sum(i => i.Quantity);
-            decimal totalSellQuantity = details.Where(i => i.Type == "Bán").Sum(i => i.Quantity);
+            decimal totalBuyQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Quantity);
+            decimal totalSellQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeSell).Sum(i => i.Quantity);
             decimal remainingQuantity = totalBuyQuantity - totalSellQuantity;
-            decimal totalNetCostBuy = details.Where(i => i.Type == "Mua").Sum(i => i.Expense + i.Fee);
+            decimal totalNetCostBuy = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Expense + i.Fee);
 
             if (totalBuyQuantity == 0 || remainingQuantity <= 0)
                 return 0;
