@@ -14,6 +14,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<List<InvestmentAssetDomain>> GetListInvestmentAssetAsync(Guid idFund);
 
+        Task<List<InvestmentAssetDomain>> GetListInvestmentAssetByUserAsync(Guid idUser);
+
         Task<List<InvestmentAssetDomain>> GetAssetsForMultipleFundsAsync(List<Guid> fundIds);
 
         Task<List<InvestmentAssetDomain>> GetAllAssetsByUserAsync(Guid idUser);

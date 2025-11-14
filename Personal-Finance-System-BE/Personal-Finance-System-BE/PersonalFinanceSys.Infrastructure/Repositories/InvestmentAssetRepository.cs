@@ -82,6 +82,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAsset);
         }
 
+        public async Task<List<InvestmentAssetDomain>> GetListInvestmentAssetByUserAsync(Guid idUser)
+        {
+            var listInvestmentAsset = await _context.InvestmentAssets
+                .Where(a => a.IdFundNavigation.IdUser == idUser)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (listInvestmentAsset == null)
+                throw new NotFoundException("Không tìm thấy danh sách tài sản!");
+            return _mapper.Map<List<InvestmentAssetDomain>>(listInvestmentAsset);
+        }
+
         public async Task<List<InvestmentAssetDomain>> GetAssetsForMultipleFundsAsync(List<Guid> fundIds)
         {
             if (fundIds == null || !fundIds.Any())

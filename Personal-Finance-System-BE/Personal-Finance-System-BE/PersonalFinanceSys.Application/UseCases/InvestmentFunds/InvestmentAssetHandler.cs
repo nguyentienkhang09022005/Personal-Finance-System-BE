@@ -32,6 +32,30 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             _logger = logger;
         }
 
+        public async Task<ApiResponse<List<ListInvestmentAssetResponse>>> ListInvestmentAssetAsync(Guid idUser)
+        {
+            try
+            {
+                var listInvestmentAsset = await _investmentAssetRepository.GetListInvestmentAssetByUserAsync(idUser);
+
+                var listCryptoAsync = await _cryptoHandler.GetListCryptoAsync();
+                if (listCryptoAsync?.Data == null)
+                    return ApiResponse<List<ListInvestmentAssetResponse>>.FailResponse("Không lấy được danh sách crypto!", 500);
+
+                var cryptoDict = listCryptoAsync.Data.ToDictionary(c => c.Id, c => c);
+
+                var listResponse = MapListInvestmentAssetResponse(listInvestmentAsset, cryptoDict);
+                
+                return ApiResponse<List<ListInvestmentAssetResponse>>.SuccessResponse(
+                    "Lấy danh sách tài sản của người dùng thành công!", 
+                    200, 
+                    listResponse);
+            }
+            catch (Exception ex){
+                return ApiResponse<List<ListInvestmentAssetResponse>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+            }
+        }
+
         public async Task<ApiResponse<InvestmentAssetResponse>> GetInfInvestmentFundHandleAsync(Guid idFund)
         {
             try
@@ -48,15 +72,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
 
                 // Lấy toàn bộ detail của từng asset
-                _logger.LogInformation("Đang tải chi tiết (details) cho {AssetCount} tài sản...", listInvestmentAsset.Count);
                 var assetDetails = await LoadAllAssetDetailsAsync(listInvestmentAsset);
-                _logger.LogInformation("Đã tải thành công chi tiết cho {DetailCount} / {TotalCount} tài sản.", assetDetails.Count, listInvestmentAsset.Count);
 
                 // Ghi log các tài sản bị thiếu chi tiết
                 if (assetDetails.Count < listInvestmentAsset.Count)
                 {
                     var missingAssetIds = listInvestmentAsset.Select(a => a.IdAsset).Except(assetDetails.Keys);
-                    _logger.LogWarning("Không thể tải chi tiết (details) cho các Asset ID sau: {MissingAssetIds}", string.Join(", ", missingAssetIds));
                 }
 
                 // Tổng tài sản và tổng lãi lỗ

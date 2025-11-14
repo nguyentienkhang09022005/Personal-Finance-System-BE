@@ -48,6 +48,20 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<TransactionDomain>>(transactions);
         }
 
+        public async Task<List<TransactionDomain>> GetListBriefTransactionAsync(Guid idUser)
+        {
+            var sevenDaysAgo = DateTime.Now.AddDays(-7);
+
+            var transactions = _context.Transactions
+                .Where(t => t.IdUser == idUser
+                    && t.TransactionDate != null
+                    && t.TransactionDate >= sevenDaysAgo)
+                .IgnoreAutoIncludes()
+                .AsNoTracking()
+                .ToList();
+            return _mapper.Map<List<TransactionDomain>>(transactions);
+        }
+
         public async Task<TransactionDomain> GetTransactionByIdAsync(Guid idTransaction)
         {
             var transaction = _context.Transactions

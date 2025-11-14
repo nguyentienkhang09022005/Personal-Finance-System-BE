@@ -18,9 +18,21 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpGet("list-investment-asset")]
-        public async Task<IActionResult> GetListInvestmentDetail([FromQuery] Guid idFund)
+        public async Task<IActionResult> GetListInvestmentAssetByFund([FromQuery] Guid idFund)
         {
             var result = await _investmentAssetHandler.GetInfInvestmentFundHandleAsync(idFund);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [Authorize]
+        [HttpGet("list-investment-asset-by-user")]
+        public async Task<IActionResult> GetListInvestmentAssetByUser([FromQuery] Guid idUser)
+        {
+            var result = await _investmentAssetHandler.ListInvestmentAssetAsync(idUser);
             if (result.Success)
             {
                 return Ok(result);

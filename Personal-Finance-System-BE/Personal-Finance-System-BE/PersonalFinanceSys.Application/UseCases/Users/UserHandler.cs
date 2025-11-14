@@ -34,7 +34,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
 
                 var idUsers = userDomains.Select(u => u.IdUser).ToList();
 
-                var imageDict = await _imageRepository.GetImagesByListRefAsync(idUsers, "USERS");
+                var imageDict = await _imageRepository.GetImagesByListRefAsync(idUsers, ConstantRole.UserRole);
 
                 var userResponses = _mapper.Map<List<UserResponse>>(userDomains);
 
@@ -60,7 +60,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             {
                 // Song song lấy thông tin người dùng và ảnh đại diện
                 var userTask = _userRepository.GetUserByIdAsync(idUser);
-                var imageTask = _imageRepository.GetImageUrlByIdRefAsync(idUser, "USERS");
+                var imageTask = _imageRepository.GetImageUrlByIdRefAsync(idUser, ConstantRole.UserRole);
 
                 await Task.WhenAll(userTask, imageTask);
 

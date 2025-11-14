@@ -25,6 +25,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
 
             CreateMap<TransactionDomain, TransactionResponse>();
 
+            CreateMap<TransactionDomain, ListBriefTransactionResponse>();
+
             CreateMap<TransactionDomain, TransactionChartResponse>();
 
             CreateMap<InvestmentDetailDomain, CompareInvestmentDetailResponse>();

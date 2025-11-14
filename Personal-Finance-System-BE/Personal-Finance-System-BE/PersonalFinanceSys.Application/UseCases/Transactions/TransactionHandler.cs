@@ -126,6 +126,68 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Tra
             }
         }
 
+        public async Task<ApiResponse<List<TransactionResponse>>> GetListTransactionFullAsync(Guid idUser)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(idUser);
+                if (!checkUserExist){
+                    return ApiResponse<List<TransactionResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var transactions = await _transactionRepository.GetListTransactionAsync(idUser);
+                var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
+
+                if (!transactionResponses.Any())
+                {
+                    return ApiResponse<List<TransactionResponse>>.FailResponse(
+                        "Người dùng chưa có giao dịch chi tiêu nào!",
+                        404);
+                }
+
+                return ApiResponse<List<TransactionResponse>>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, transactionResponses);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<TransactionResponse>>.FailResponse(ex.Message, 500);
+            }
+        }
+
+        public async Task<ApiResponse<BriefTransactionResponse>> GetListBriefTransactionAsync(Guid idUser)
+        {
+            try
+            {
+                var checkUserExist = await _userRepository.ExistUserAsync(idUser);
+                if (!checkUserExist){
+                    return ApiResponse<BriefTransactionResponse>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
+                var transactions = await _transactionRepository.GetListBriefTransactionAsync(idUser);
+
+                var totalTransaction = transactions.Count(); // Tổng số giao dịch trong 7 ngày qua
+
+                var listBriefTransactionResponses = _mapper.Map<List<ListBriefTransactionResponse>>(transactions);
+
+                if (!listBriefTransactionResponses.Any())
+                {
+                    return ApiResponse<BriefTransactionResponse>.FailResponse(
+                        "Người dùng chưa có giao dịch chi tiêu nào trong 7 ngày qua!",
+                        404);
+                }
+
+                var briefTransactionResponse = new BriefTransactionResponse
+                {
+                    totalTransactionInWeek = totalTransaction,
+                    listBriefTransactionResponses = listBriefTransactionResponses
+                };
+
+                return ApiResponse<BriefTransactionResponse>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, briefTransactionResponse);
+            }
+            catch (Exception ex){
+                return ApiResponse<BriefTransactionResponse>.FailResponse(ex.Message, 500);
+            }
+        }
+
         // Hàm so sánh giao dịch giữa 2 năm
         public async Task<ApiResponse<CompareTransactionByYearResponse>> CompareTransactionByYearAsync(CompareTransactionByYearRequest compareTransactionByYearRequest)
         {

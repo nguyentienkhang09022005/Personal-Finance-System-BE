@@ -13,6 +13,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<List<TransactionDomain>> GetListTransactionAsync(Guid idUser);
 
+        Task<List<TransactionDomain>> GetListBriefTransactionAsync(Guid idUser);
+
         Task<TransactionDomain> GetTransactionByIdAsync(Guid idTransaction);
 
         Task<Transaction> ExistTransaction(Guid idTransaction);

@@ -16,11 +16,33 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _transactionHandler = transactionHandler;
         }
 
-        [Authorize]
         [HttpGet("list-transaction")]
         public async Task<IActionResult> ListTransactionAsync([FromQuery] Guid idUser)
         {
             var result = await _transactionHandler.GetListTransactionAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("list-transaction-full")]
+        public async Task<IActionResult> ListTransactionFullAsync([FromQuery] Guid idUser)
+        {
+            var result = await _transactionHandler.GetListTransactionFullAsync(idUser);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [Authorize]
+        [HttpGet("list-brief-transaction")]
+        public async Task<IActionResult> ListBriefTransactionAsync([FromQuery] Guid idUser)
+        {
+            var result = await _transactionHandler.GetListBriefTransactionAsync(idUser);
             if (result.Success)
             {
                 return Ok(result);
