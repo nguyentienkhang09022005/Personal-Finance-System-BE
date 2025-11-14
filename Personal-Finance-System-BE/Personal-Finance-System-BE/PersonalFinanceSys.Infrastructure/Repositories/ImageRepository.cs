@@ -40,7 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .AsNoTracking()
                 .Where(img => img.IdRef == idRef && img.RefType == refType)
                 .Select(img => img.Url)
-                .FirstOrDefaultAsync();
+                .LastOrDefaultAsync();
 
             return image;
         }
