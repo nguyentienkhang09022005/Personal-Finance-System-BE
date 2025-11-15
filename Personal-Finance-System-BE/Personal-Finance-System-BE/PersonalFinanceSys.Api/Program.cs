@@ -117,6 +117,7 @@ builder.Services.AddScoped<OtpHandler>();
 builder.Services.AddScoped<AuthenHandler>();
 builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<UserHandler>();
+builder.Services.AddScoped<UserFinanceHandler>();
 builder.Services.AddScoped<InvestmentFundHandler>();
 builder.Services.AddHttpClient<CryptoHandler>();
 builder.Services.AddHttpClient<NewsHandler>();

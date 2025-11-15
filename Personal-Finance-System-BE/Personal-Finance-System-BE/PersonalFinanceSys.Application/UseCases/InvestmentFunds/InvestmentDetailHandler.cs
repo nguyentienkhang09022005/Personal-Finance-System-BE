@@ -125,6 +125,70 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             return valueTotalAsset - totalNetCostRemaining;
         }
 
+        private decimal CalculateTotalProfit(List<InvestmentDetailDomain> details, decimal currentPriceVND)
+        {
+            decimal totalBuyQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Quantity);
+            decimal totalSellQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeSell).Sum(i => i.Quantity);
+            decimal remainingQuantity = totalBuyQuantity - totalSellQuantity;
+            decimal totalNetCostBuy = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Expense + i.Fee);
+
+            if (totalBuyQuantity == 0 || remainingQuantity <= 0)
+                return 0;
+
+            decimal averageCostPerCoinBeforeSell = totalNetCostBuy / totalBuyQuantity;
+            decimal totalNetCostRemaining = totalNetCostBuy - (totalSellQuantity * averageCostPerCoinBeforeSell);
+            decimal valueTotalAsset = remainingQuantity * currentPriceVND;
+
+
+
+            decimal profit = valueTotalAsset - totalNetCostRemaining;
+
+            return profit > 0 ? profit : 0;
+        }
+
+        public async Task<decimal> InvestmentAssetProfitByUserHandleAsync(Guid idUser)
+        {
+            try
+            {
+                var investmentAssets = await _investmentAssetRepository.GetAllAssetsByUserAsync(idUser);
+                var investmentDetails = await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
+
+                // Gom nhóm detail theo asset
+                var detailByAsset = investmentDetails
+                    .GroupBy(d => d.IdAsset!.Value)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                decimal totalProfit = 0;
+                foreach (var investmentAsset in investmentAssets)
+                {
+                    var assetDetails = investmentDetails.Where(d => d.IdAsset == investmentAsset.IdAsset).ToList();
+                    if (!assetDetails.Any())
+                        continue;
+
+                    var priceResult = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+
+                    if (priceResult?.Data == null)
+                        continue;
+
+                    decimal currentPriceVND = priceResult.Data.MarketData.CurrentPrice.VND;
+
+                    // Tính lãi của asset hiện tại
+                    totalProfit += CalculateTotalProfit(assetDetails, currentPriceVND);
+                }
+ 
+                return totalProfit;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi hệ thống: ", ex); 
+            }
+        }
+
+        public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailByUserAsync(Guid idUser)
+        {
+            return await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
+        }
+
         public async Task<ApiResponse<string>> CreateInvestmentDetailHandleAsync(InvestmentDetailRequest investmentDetailRequest)
         {
             try
@@ -175,11 +239,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             {
                 return ApiResponse<string>.FailResponse(ex.Message, 404);
             }
-        }
-
-        public async Task<List<InvestmentDetailDomain>> GetListInvestmentDetailByUserAsync(Guid idUser)
-        {
-            return await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
         }
 
         // Hàm so sánh đầu tư giữa 2 năm
