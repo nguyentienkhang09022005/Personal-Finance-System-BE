@@ -76,7 +76,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 var appUser = paymentRequest.IdUser.ToString();
                 int amount = (int)Math.Round(paymentRequest.Amount);
                 var embedDataJson = JsonSerializer.Serialize(new { 
-                    redirecturl = "http://localhost:3000/profile" 
+                    redirecturl = "http://localhost:3000/dashboard/profile"
                 });
                 var itemsJson = JsonSerializer.Serialize(Array.Empty<object>());
 
