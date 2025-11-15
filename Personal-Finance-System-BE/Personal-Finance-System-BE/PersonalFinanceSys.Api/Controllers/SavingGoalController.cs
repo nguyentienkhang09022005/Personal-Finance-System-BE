@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _savingGoalHandler = savingGoalHandler;
         }
 
+        [Authorize]
         [HttpGet("list-saving-goal")]
         public async Task<IActionResult> ListSavingGoalAsync([FromQuery] Guid idUser)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-saving-goal")]
         public async Task<IActionResult> InfSavingGoalAsync([FromQuery] Guid idSavingGoal)
         {

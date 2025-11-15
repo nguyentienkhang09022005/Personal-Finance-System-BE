@@ -58,6 +58,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .AnyAsync(i => i.Id == id);
         }
 
+        public async Task<bool> CheckExistInvestmentAssetByIdAndIdFundAsync(string id, Guid idFund)
+        {
+            return await _context.InvestmentAssets
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .AnyAsync(i => i.Id == id && i.IdFund == idFund);
+        }
+
         public async Task<InvestmentAssetDomain> GetInfInvestmentAssetAsync(Guid idAsset)
         {
             var investmentAsset = await _context.InvestmentAssets
@@ -87,6 +95,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var listInvestmentAsset = await _context.InvestmentAssets
                 .Where(a => a.IdFundNavigation.IdUser == idUser)
                 .AsNoTracking()
+                .GroupBy(a => a.Id)
+                .Select(g => g.First())        
                 .ToListAsync();
 
             if (listInvestmentAsset == null)
