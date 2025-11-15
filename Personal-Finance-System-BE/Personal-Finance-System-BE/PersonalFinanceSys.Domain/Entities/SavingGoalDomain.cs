@@ -23,6 +23,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
 
         public virtual ICollection<SavingDetail> SavingDetails { get; set; } = new List<SavingDetail>();
 
+        public SavingGoalDomain() { }
+
         public SavingGoalDomain(decimal targetAmount, DateOnly targetDate)
         {
             SetTargetAmount(targetAmount);

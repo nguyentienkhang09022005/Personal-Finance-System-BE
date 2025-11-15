@@ -40,7 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
                 var budgetDomain = _mapper.Map<BudgetDomain>(budgetCreationRequest);
                 var createdBudget = await _budgetRepository.AddBudgetAsync(budgetDomain);
 
-                if (budgetCreationRequest.UrlImage != null)
+                if (!string.IsNullOrEmpty(budgetCreationRequest.UrlImage))
                 {
                     var image = new ImageDomain
                     {
@@ -93,7 +93,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
 
                 _mapper.Map(budgetUpdateRequest, budgetDomain);
                 // Cập nhật ảnh nếu có
-                if (budgetUpdateRequest.UrlImage != null)
+                if (!string.IsNullOrEmpty(budgetUpdateRequest.UrlImage))
                 {
                     var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idBudget, "BUDGETS");
                     if (!string.IsNullOrEmpty(existingImageUrl))

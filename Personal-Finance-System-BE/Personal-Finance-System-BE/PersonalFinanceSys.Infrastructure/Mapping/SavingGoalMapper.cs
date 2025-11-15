@@ -11,7 +11,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
         {
         public SavingGoalMapper()
         {
-            CreateMap<SavingGoal, SavingGoalDomain>();
+            CreateMap<SavingGoal, SavingGoalDomain>()
+                .ConstructUsing(src => new SavingGoalDomain());
 
             CreateMap<SavingGoalDomain, SavingGoal>()
                 .ForMember(dest => dest.IdSaving, opt => opt.Ignore());

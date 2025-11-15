@@ -36,7 +36,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                 var savingGoalDomain = _mapper.Map<SavingGoalDomain>(savingGoalCreationRequest);
                 var createdSavingGoal = await _savingGoalRepository.AddSavingGoalAsync(savingGoalDomain);
 
-                if (savingGoalCreationRequest.UrlImage != null)
+                if (!string.IsNullOrEmpty(savingGoalCreationRequest.UrlImage))
                 {
                     var image = new ImageDomain
                     {
@@ -89,7 +89,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                 _mapper.Map(savingGoalUpdateRequest, savingGoalDomain);
 
                 // Cập nhật ảnh nếu có
-                if (savingGoalUpdateRequest.UrlImage != null)
+                if (!string.IsNullOrEmpty(savingGoalUpdateRequest.UrlImage))
                 {
                     var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, "SAVING_GOAL");
                     if (!string.IsNullOrEmpty(existingImageUrl)){
