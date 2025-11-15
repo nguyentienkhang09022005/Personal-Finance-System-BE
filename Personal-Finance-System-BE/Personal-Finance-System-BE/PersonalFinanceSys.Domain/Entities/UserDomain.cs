@@ -18,8 +18,6 @@
 
         public string? Password { get; set; }
 
-        public decimal? TotalAmount { get; set; }
-
         public string? RoleName { get; set; }
 
         public DateTime? CreateAt { get; set; }

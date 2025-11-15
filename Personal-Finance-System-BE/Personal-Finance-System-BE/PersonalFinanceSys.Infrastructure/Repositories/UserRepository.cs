@@ -26,7 +26,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var user = _mapper.Map<User>(users);
             user.IdUser = Guid.NewGuid();
             user.RoleName = ConstantRole.UserRole;
-            user.TotalAmount = 0;
 
             if (!string.IsNullOrEmpty(user.Password)){
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);

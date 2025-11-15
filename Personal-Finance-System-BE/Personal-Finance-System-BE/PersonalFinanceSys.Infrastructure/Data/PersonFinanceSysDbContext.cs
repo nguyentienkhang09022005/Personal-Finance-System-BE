@@ -639,10 +639,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.RoleName)
                 .HasMaxLength(20)
                 .HasColumnName("role_name");
-            entity.Property(e => e.TotalAmount)
-                .HasPrecision(10, 2)
-                .HasDefaultValueSql("0")
-                .HasColumnName("total_amount");
 
             entity.HasOne(d => d.RoleNameNavigation).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleName)

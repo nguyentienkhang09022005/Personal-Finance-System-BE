@@ -19,8 +19,6 @@ public partial class User
 
     public string? Password { get; set; }
 
-    public decimal? TotalAmount { get; set; }
-
     public DateTime? CreateAt { get; set; }
 
     public string? RoleName { get; set; }

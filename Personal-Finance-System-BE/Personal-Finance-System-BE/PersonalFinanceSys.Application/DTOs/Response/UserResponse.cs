@@ -14,8 +14,6 @@
 
         public string? Address { get; set; }
 
-        public decimal? TotalAmount { get; set; }
-
         public string UrlAvatar { get; set; }
 
         public DateTime? CreateAt { get; set; }
