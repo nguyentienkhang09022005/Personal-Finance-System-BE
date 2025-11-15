@@ -28,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-investment-asset-by-user")]
         public async Task<IActionResult> GetListInvestmentAssetByUser([FromQuery] Guid idUser)
         {

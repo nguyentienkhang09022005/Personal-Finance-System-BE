@@ -30,7 +30,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpGet("inf-finance-user")]
         public async Task<IActionResult> InfFinanceUser([FromQuery] Guid idUser)
         {

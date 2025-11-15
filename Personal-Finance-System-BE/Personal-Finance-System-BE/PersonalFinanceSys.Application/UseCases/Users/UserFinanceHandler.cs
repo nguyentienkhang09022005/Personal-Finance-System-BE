@@ -38,17 +38,24 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 var transactions = await _transactionRepository.GetListTransactionAsync(idUser);
                 var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
 
-                var expenseTransactions = transactionResponses // Lọc ra loại Thu
+                var collectTransactions = transactionResponses // Lọc ra loại Thu
                     .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeCollect)
                     .ToList();
 
-                decimal totalCollect = expenseTransactions == null ? 0 : expenseTransactions.Sum(t => t.Amount); // Tổng tiền nhận vào
+                var expenseTransactions = transactionResponses // Lọc ra loại Thu
+                    .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
+                    .ToList();
+
+                decimal totalCollect = collectTransactions == null ? 0 : collectTransactions.Sum(t => t.Amount); // Tổng tiền nhận vào
+                decimal totalExpense = expenseTransactions == null ? 0 : expenseTransactions.Sum(t => t.Amount); // Tổng tiền chi ra
+
+                decimal totalCollectAndExpense = totalCollect - totalExpense;
 
                 // Fund
                 decimal profitResponse = await _investmentDetailHandler.InvestmentAssetProfitByUserHandleAsync(idUser);
 
                 // Tổng tài chính
-                decimal totalAmount = totalCollect + profitResponse;
+                decimal totalAmount = totalCollectAndExpense + profitResponse;
 
                 var userFinanceResponse = new UserFinanceResponse
                 {

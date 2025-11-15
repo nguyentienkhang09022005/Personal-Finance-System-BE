@@ -125,27 +125,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             return valueTotalAsset - totalNetCostRemaining;
         }
 
-        private decimal CalculateTotalProfit(List<InvestmentDetailDomain> details, decimal currentPriceVND)
-        {
-            decimal totalBuyQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Quantity);
-            decimal totalSellQuantity = details.Where(i => i.Type == ConstrantBuyAndSell.TypeSell).Sum(i => i.Quantity);
-            decimal remainingQuantity = totalBuyQuantity - totalSellQuantity;
-            decimal totalNetCostBuy = details.Where(i => i.Type == ConstrantBuyAndSell.TypeBuy).Sum(i => i.Expense + i.Fee);
-
-            if (totalBuyQuantity == 0 || remainingQuantity <= 0)
-                return 0;
-
-            decimal averageCostPerCoinBeforeSell = totalNetCostBuy / totalBuyQuantity;
-            decimal totalNetCostRemaining = totalNetCostBuy - (totalSellQuantity * averageCostPerCoinBeforeSell);
-            decimal valueTotalAsset = remainingQuantity * currentPriceVND;
-
-
-
-            decimal profit = valueTotalAsset - totalNetCostRemaining;
-
-            return profit > 0 ? profit : 0;
-        }
-
         public async Task<decimal> InvestmentAssetProfitByUserHandleAsync(Guid idUser)
         {
             try
@@ -154,28 +133,56 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 var investmentDetails = await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
 
                 // Gom nhóm detail theo asset
-                var detailByAsset = investmentDetails
+                var detailsByAsset = investmentDetails
+                    .Where(d => d.IdAsset.HasValue)
                     .GroupBy(d => d.IdAsset!.Value)
                     .ToDictionary(g => g.Key, g => g.ToList());
 
                 decimal totalProfit = 0;
                 foreach (var investmentAsset in investmentAssets)
                 {
-                    var assetDetails = investmentDetails.Where(d => d.IdAsset == investmentAsset.IdAsset).ToList();
-                    if (!assetDetails.Any())
+                    if (!detailsByAsset.TryGetValue(investmentAsset.IdAsset, out var assetDetails))
                         continue;
 
                     var priceResult = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
-
                     if (priceResult?.Data == null)
                         continue;
 
                     decimal currentPriceVND = priceResult.Data.MarketData.CurrentPrice.VND;
 
-                    // Tính lãi của asset hiện tại
-                    totalProfit += CalculateTotalProfit(assetDetails, currentPriceVND);
+                    // Tổng số lượng mua, tổng tiền mua + phí
+                    var buyDetails = assetDetails.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).ToList();
+                    decimal totalBuyQuantity = buyDetails.Sum(d => d.Quantity);
+                    decimal totalBuyExpense = buyDetails.Sum(d => d.Expense + d.Fee);
+
+                    // Tổng số lượng bán, tổng tiền bán + phí
+                    var sellDetails = assetDetails.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).ToList();
+                    decimal totalSellQuantity = sellDetails.Sum(d => d.Quantity);
+
+                    // Giá vốn trung bình trên 1 đơn vị
+                    decimal averageCostPerUnit = totalBuyQuantity > 0 ? totalBuyExpense / totalBuyQuantity : 0;
+
+                    // Tính lợi/lỗ từ các lệnh bán
+                    decimal profitFromSell = 0;
+                    foreach (var sell in sellDetails)
+                    {
+                        decimal sellProfit = (sell.Price - averageCostPerUnit) * sell.Quantity - sell.Fee;
+                        profitFromSell += sellProfit;
+                    }
+
+                    // Số lượng còn lại
+                    decimal remainingQuantity = totalBuyQuantity - totalSellQuantity;
+
+                    // Giá trị hiện tại của phần còn lại trừ phí mua
+                    decimal remainingValue = remainingQuantity * currentPriceVND;
+                    decimal remainingCost = remainingQuantity * averageCostPerUnit;
+
+                    decimal profitFromHolding = remainingValue - remainingCost;
+
+                    // Tổng lợi nhuận/lỗ của asset
+                    totalProfit += profitFromSell + profitFromHolding;
                 }
- 
+
                 return totalProfit;
             }
             catch (Exception ex)
