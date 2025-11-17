@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,6 +10,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Notifications;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Packages;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Payments;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Posts;
@@ -17,6 +19,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingG
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Hubs;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services;
 using System.Text;
@@ -103,6 +106,7 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 
 // Services
@@ -111,6 +115,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
 
 
 // Handlers
@@ -134,11 +139,14 @@ builder.Services.AddScoped<PermissionHandler>();
 builder.Services.AddScoped<PaymentHandler>();
 builder.Services.AddScoped<PackageHandler>();
 builder.Services.AddScoped<PostHandler>();
-
+builder.Services.AddScoped<NotificationHandler>();
 
 
 // Mapper Registration
 builder.Services.AddAutoMapper(typeof(Program));
+
+// SignalR Registration
+builder.Services.AddSignalR();
 
 // HttpContextAccessor Registration
 builder.Services.AddHttpContextAccessor();
@@ -174,7 +182,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") 
+        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500") 
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Allow send Cookie
@@ -220,6 +228,18 @@ builder.Services.AddAuthentication(options =>
             });
 
             return context.Response.WriteAsync(result);
+        },
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                context.HttpContext.Request.Path.StartsWithSegments("/hubs/notification"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
         }
     };
 });
@@ -240,6 +260,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/hubs/notification");
 
 app.MapControllers();
 
