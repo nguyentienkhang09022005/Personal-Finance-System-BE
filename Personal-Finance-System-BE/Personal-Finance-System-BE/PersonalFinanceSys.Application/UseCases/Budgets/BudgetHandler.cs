@@ -3,8 +3,6 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Budgets
 {
@@ -141,7 +139,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
                 {
                     return ApiResponse<List<BudgetResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
-                var budgetDomains = await _budgetRepository.GetListBudgetAsync(idUser);
+                var budgetDomains = await _budgetRepository.GetListBudgetByUserIdAsync(idUser);
                 if (!budgetDomains.Any())
                 {
                     return ApiResponse<List<BudgetResponse>>.SuccessResponse(

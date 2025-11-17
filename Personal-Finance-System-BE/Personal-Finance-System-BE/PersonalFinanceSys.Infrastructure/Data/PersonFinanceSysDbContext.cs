@@ -488,6 +488,10 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
+            entity.Property(e => e.IsApproved).HasColumnName("is_approved");
+            entity.Property(e => e.Snapshot)
+                .HasColumnType("jsonb")
+                .HasColumnName("snapshot");
             entity.Property(e => e.Title)
                 .HasMaxLength(255)
                 .HasColumnName("title");

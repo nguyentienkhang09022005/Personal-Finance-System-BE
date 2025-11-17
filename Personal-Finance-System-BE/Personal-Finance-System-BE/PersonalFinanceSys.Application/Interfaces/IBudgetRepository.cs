@@ -11,7 +11,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<BudgetDomain> UpdateBudgetAsync(BudgetDomain budgetDomain, Budget budget);
 
-        Task<List<BudgetDomain>> GetListBudgetAsync(Guid idUser);
+        Task<List<BudgetDomain>> GetListBudgetByUserIdAsync(Guid idUser);
 
         Task<bool> ExistBudget(Guid idBudget);
 

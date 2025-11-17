@@ -50,12 +50,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task<bool> ExistBudget(Guid idBudget)
         {
             return await _context.Budgets
-                            .AsNoTracking()
-                            .IgnoreAutoIncludes()
-                            .AnyAsync(b => b.IdBudget == idBudget);
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .AnyAsync(b => b.IdBudget == idBudget);
         }
 
-        public async Task<List<BudgetDomain>> GetListBudgetAsync(Guid idUser)
+        public async Task<List<BudgetDomain>> GetListBudgetByUserIdAsync(Guid idUser)
         {
             var budgets = _context.Budgets
                             .Where(s => s.IdUser == idUser)

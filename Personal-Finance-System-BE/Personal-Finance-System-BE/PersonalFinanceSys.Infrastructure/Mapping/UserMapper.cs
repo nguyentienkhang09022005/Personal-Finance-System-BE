@@ -21,8 +21,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             // UserDomain -> UserResponse
             CreateMap<UserDomain, UserResponse>();
 
+            CreateMap<UserDomain, UserOfPostResponse>();
+
             // User -> UserResponse
             CreateMap<User, UserResponse>();
+
+            CreateMap<User, UserOfPostResponse>();
 
             // UserCreationRequest -> UserDomain
             CreateMap<UserCreationRequest, UserDomain>()

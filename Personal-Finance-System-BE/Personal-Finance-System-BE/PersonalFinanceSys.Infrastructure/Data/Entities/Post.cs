@@ -17,6 +17,10 @@ public partial class Post
 
     public Guid? IdUser { get; set; }
 
+    public bool? IsApproved { get; set; }
+
+    public string? Snapshot { get; set; }
+
     public virtual ICollection<Evaluate> Evaluates { get; set; } = new List<Evaluate>();
 
     public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
