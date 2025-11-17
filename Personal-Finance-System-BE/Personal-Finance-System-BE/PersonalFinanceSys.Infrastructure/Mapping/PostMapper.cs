@@ -25,8 +25,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             CreateMap<InvestmentAssetPostCreationRequest, PostDomain>()
                 .ForMember(dest => dest.Snapshot, opt => opt.Ignore());
 
-            // UserUpdateRequest -> UserDomain
-            //CreateMap<UserUpdateRequest, UserDomain>();
+            CreateMap<ApprovePostRequest, PostDomain>();
+
+            CreateMap<TransactionPostUpdateRequest, PostDomain>();
+
+            CreateMap<InvestmentAssetPostUpdateRequest, PostDomain>();
+
+            CreateMap<PostUpdateRequest, PostDomain>();
         }
     }
 }

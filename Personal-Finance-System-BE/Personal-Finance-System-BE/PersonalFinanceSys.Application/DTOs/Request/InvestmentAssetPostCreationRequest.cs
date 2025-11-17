@@ -15,8 +15,6 @@
 
     public class ListInvestmentAssetOfPost
     {
-        public string Category { get; set; }
-
         public string? AssetName { get; set; }
 
         public string? AssetSymbol { get; set; }

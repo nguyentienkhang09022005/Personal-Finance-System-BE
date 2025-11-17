@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
-using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals
 {
@@ -42,7 +42,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                     {
                         Url = savingGoalCreationRequest.UrlImage,
                         IdRef = createdSavingGoal.IdSaving,
-                        RefType = "SAVING_GOAL"
+                        RefType = ConstantTypeRef.TypeSavingGoal,
                     };
                     await _imageRepository.AddImageAsync(image);
                 }
@@ -59,9 +59,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
             try
             {
                 await _savingGoalRepository.DeleteSavingGoalAsync(idSavingGoal);
-                var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, "SAVING_GOAL");
+                var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, ConstantTypeRef.TypeSavingGoal);
                 if (!string.IsNullOrEmpty(existingImageUrl)){
-                    await _imageRepository.DeleteImageByIdRefAsync(idSavingGoal, "SAVING_GOAL");
+                    await _imageRepository.DeleteImageByIdRefAsync(idSavingGoal, ConstantTypeRef.TypeSavingGoal);
                 }
 
                 return ApiResponse<string>.SuccessResponse(
@@ -91,16 +91,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                 // Cập nhật ảnh nếu có
                 if (!string.IsNullOrEmpty(savingGoalUpdateRequest.UrlImage))
                 {
-                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, "SAVING_GOAL");
+                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, ConstantTypeRef.TypeSavingGoal);
                     if (!string.IsNullOrEmpty(existingImageUrl)){
-                        await _imageRepository.DeleteImageByIdRefAsync(idSavingGoal, "SAVING_GOAL");
+                        await _imageRepository.DeleteImageByIdRefAsync(idSavingGoal, ConstantTypeRef.TypeSavingGoal);
                     }
 
                     var image = new ImageDomain
                     {
                         Url = savingGoalUpdateRequest.UrlImage,
                         IdRef = idSavingGoal,
-                        RefType = "SAVING_GOAL"
+                        RefType = ConstantTypeRef.TypeSavingGoal
                     };
 
                     await _imageRepository.AddImageAsync(image);
@@ -136,7 +136,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
 
                 // Lấy danh sách id mục tiêu tiết kiệm để truy xuất ảnh
                 var idRefs = savingGoalDomains.Select(g => g.IdSaving).ToList();
-                var imageDict = await _imageRepository.GetImagesByListRefAsync(idRefs, "SAVING_GOAL");
+                var imageDict = await _imageRepository.GetImagesByListRefAsync(idRefs, ConstantTypeRef.TypeSavingGoal);
 
                 var savingGoalResponses = savingGoalDomains.Select(goal =>
                 {
@@ -178,7 +178,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Sav
                     return ApiResponse<SavingGoalResponse>.FailResponse("Không tìm thấy mục tiêu tiết kiệm!", 404);
                 }
 
-                var imageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, "SAVING_GOAL");
+                var imageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idSavingGoal, ConstantTypeRef.TypeSavingGoal);
 
                 var currentAmount = savingGoalDomain.SavingDetails.Sum(d => d.Amount ?? 0); // Tổng tiền đã tiết kiệm
                 var remaining = savingGoalDomain.TargetAmount - currentAmount; // Số tiền còn lại cần tiết kiệm

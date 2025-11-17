@@ -39,6 +39,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Post> GetExistPostAsync(Guid idPost)
+        {
+            var user = await _context.Posts
+                .Include(p => p.IdUserNavigation)
+                .FirstOrDefaultAsync(p => p.IdPost == idPost);
+
+            return user ?? throw new NotFoundException("Không tìm thấy bài đăng!");
+        }
+
         public async Task<bool> ExistPostAsync(Guid idPost)
         {
             return await _context.Posts

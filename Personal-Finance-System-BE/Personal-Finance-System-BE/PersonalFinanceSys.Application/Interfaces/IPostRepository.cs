@@ -18,5 +18,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<PostDomain?> UpdatePostAsync(PostDomain postDomain, Post post);
 
         Task<bool> ExistPostAsync(Guid idPost);
+
+        Task<Post> GetExistPostAsync(Guid idPost);
     }
 }

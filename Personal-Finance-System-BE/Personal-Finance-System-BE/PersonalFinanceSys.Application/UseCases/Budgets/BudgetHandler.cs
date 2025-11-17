@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
@@ -44,7 +45,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
                     {
                         Url = budgetCreationRequest.UrlImage,
                         IdRef = createdBudget.IdBudget,
-                        RefType = "BUDGETS"
+                        RefType = ConstantTypeRef.TypeBudget,
                     };
                     await _imageRepository.AddImageAsync(image);
                 }
@@ -62,10 +63,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
             try
             {
                 await _budgetRepository.DeleteBudgetAsync(idBudget);
-                var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idBudget, "BUDGETS");
+                var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idBudget, ConstantTypeRef.TypeBudget);
                 if (!string.IsNullOrEmpty(existingImageUrl))
                 {
-                    await _imageRepository.DeleteImageByIdRefAsync(idBudget, "BUDGETS");
+                    await _imageRepository.DeleteImageByIdRefAsync(idBudget, ConstantTypeRef.TypeBudget);
                 }
 
                 return ApiResponse<string>.SuccessResponse("Xóa ngân sách thành công!", 200, string.Empty);
@@ -93,17 +94,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
                 // Cập nhật ảnh nếu có
                 if (!string.IsNullOrEmpty(budgetUpdateRequest.UrlImage))
                 {
-                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idBudget, "BUDGETS");
+                    var existingImageUrl = await _imageRepository.GetImageUrlByIdRefAsync(idBudget, ConstantTypeRef.TypeBudget);
                     if (!string.IsNullOrEmpty(existingImageUrl))
                     {
-                        await _imageRepository.DeleteImageByIdRefAsync(idBudget, "BUDGETS");
+                        await _imageRepository.DeleteImageByIdRefAsync(idBudget, ConstantTypeRef.TypeBudget);
                     }
 
                     var image = new ImageDomain
                     {
                         Url = budgetUpdateRequest.UrlImage,
                         IdRef = idBudget,
-                        RefType = "BUDGETS"
+                        RefType = ConstantTypeRef.TypeBudget
                     };
 
                     await _imageRepository.AddImageAsync(image);
@@ -161,7 +162,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
 
                 // Lấy danh sách id ngân sách để truy xuất ảnh
                 var idRefs = budgetDomains.Select(b => b.IdBudget).ToList();
-                var imageDict = await _imageRepository.GetImagesByListRefAsync(idRefs, "BUDGETS");
+                var imageDict = await _imageRepository.GetImagesByListRefAsync(idRefs, ConstantTypeRef.TypeBudget);
 
                 var budgetResponses = budgetDomains.Select(budget =>
                 {

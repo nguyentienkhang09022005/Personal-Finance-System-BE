@@ -51,7 +51,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .IgnoreAutoIncludes()
                 .FirstOrDefaultAsync(u => u.IdUser == idUser);
 
-            return user ?? throw new NotFoundException("Không tìm người dùng!");
+            return user ?? throw new NotFoundException("Không tìm thất người dùng!");
         }
 
         public async Task<bool> ExistUserAsync(Guid idUser)

@@ -15,8 +15,6 @@
 
     public class TransactionOfPost
     {
-        public string Category { get; set; }
-
         public string TransactionName { get; set; } = null!;
 
         public string? TransactionType { get; set; }
