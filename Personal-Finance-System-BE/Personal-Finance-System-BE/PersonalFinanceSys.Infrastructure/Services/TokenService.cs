@@ -36,6 +36,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
 
             var claims = new List<Claim>
             {
+                new Claim(JwtRegisteredClaimNames.Sub, user.IdUser.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
@@ -74,6 +75,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services
 
             var claims = new List<Claim>
             {
+                new Claim(JwtRegisteredClaimNames.Sub, user.IdUser.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
