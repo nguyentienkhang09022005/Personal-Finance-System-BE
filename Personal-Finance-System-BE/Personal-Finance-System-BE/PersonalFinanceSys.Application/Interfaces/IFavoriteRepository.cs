@@ -7,5 +7,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task AddFavoriteAsync(FavoriteDomain favoriteDomain);
 
         Task DeleteFavoriteAsync(Guid idUser, Guid idPost);
+
+        Task<bool> ExistFavorite(Guid idUser, Guid idPost);
     }
 }

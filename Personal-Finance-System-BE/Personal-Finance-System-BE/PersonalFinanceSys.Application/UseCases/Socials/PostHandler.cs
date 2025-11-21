@@ -3,6 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using SendGrid.Helpers.Errors.Model;
 using System.Text.Json;
@@ -14,16 +15,22 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IFavoriteRepository _favoriteRepository;
         private readonly IMapper _mapper;
+        private readonly EvaluateHandler _evaluateHandler;
 
         public PostHandler(IPostRepository postRepository, 
                            IUserRepository userRepository, 
                            IImageRepository imageRepository,
-                           IMapper mapper)
+                           IFavoriteRepository favoriteRepository,
+                           IMapper mapper,
+                           EvaluateHandler evaluateHandler)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _imageRepository = imageRepository;
+            _favoriteRepository = favoriteRepository;
+            _evaluateHandler = evaluateHandler;
             _mapper = mapper;
         }
         public async Task<ApiResponse<List<PostResponse>>> GetListPostsByUserIdAsync(Guid idUser)
@@ -43,6 +50,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
                         200, 
                         new List<PostResponse>());
                 }
+                var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(idUser, ConstantTypeRef.TypeUser);
 
                 var postIds = posts.Select(p => p.IdPost).ToList();
                 var imagesDict = await _imageRepository.GetImagesByListRefAsync(postIds, ConstantTypeRef.TypePost);
@@ -52,8 +60,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
                 {
                     var postResponse = _mapper.Map<PostResponse>(post);
 
-                    // Avatar User
-                    var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(idUser, ConstantTypeRef.TypeUser);
+                    postResponse.IsFavorited = await _favoriteRepository.ExistFavorite(idUser, post.IdPost);
+
+                    postResponse.EvaluateResponse = await _evaluateHandler.GetListEvaluateAsync(post.IdPost);
+
+                    if (postResponse.UserOfPostResponse == null)
+                        postResponse.UserOfPostResponse = new UserOfPostResponse();
+
+                    // Avatar user
                     if (!string.IsNullOrEmpty(avatarUser)){
                         postResponse.UserOfPostResponse.UrlAvatar = avatarUser;
                     }
@@ -80,7 +94,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
 
                     listResponse.Add(postResponse);
                 }
-
 
                 return ApiResponse<List<PostResponse>>.SuccessResponse("Lấy danh sách gói thành công!", 200, listResponse);
             }
@@ -112,11 +125,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
                     var postResponse = _mapper.Map<PostResponse>(post);
 
                     // Avatar User
+                    if (postResponse.UserOfPostResponse == null)
+                        postResponse.UserOfPostResponse = new UserOfPostResponse();
+
                     var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(post.IdUser, ConstantTypeRef.TypeUser);
                     if (!string.IsNullOrEmpty(avatarUser))
-                    {
                         postResponse.UserOfPostResponse.UrlAvatar = avatarUser;
-                    }
 
                     // Snapshot
                     if (!string.IsNullOrEmpty(post.Snapshot))
@@ -149,10 +163,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
             }
         }
 
-        public async Task<ApiResponse<List<PostResponse>>> GetListPostsApprovedAsync()
+        public async Task<ApiResponse<List<PostResponse>>> GetListPostsApprovedAsync(Guid idUser)
         {
             try
             {
+                var checkUserExist = await _userRepository.ExistUserAsync(idUser);
+                if (!checkUserExist)
+                {
+                    return ApiResponse<List<PostResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
+                }
+
                 var posts = await _postRepository.GetListPostApprovedAsync();
                 if (posts == null || !posts.Any())
                 {
@@ -170,12 +190,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
                 {
                     var postResponse = _mapper.Map<PostResponse>(post);
 
+                    postResponse.IsFavorited = await _favoriteRepository.ExistFavorite(idUser, post.IdPost);
+
+                    postResponse.EvaluateResponse = await _evaluateHandler.GetListEvaluateAsync(post.IdPost);
+
                     // Avatar User
+                    if (postResponse.UserOfPostResponse == null)
+                        postResponse.UserOfPostResponse = new UserOfPostResponse();
+
                     var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(post.IdUser, ConstantTypeRef.TypeUser);
                     if (!string.IsNullOrEmpty(avatarUser))
-                    {
                         postResponse.UserOfPostResponse.UrlAvatar = avatarUser;
-                    }
 
                     // Snapshot
                     if (!string.IsNullOrEmpty(post.Snapshot))

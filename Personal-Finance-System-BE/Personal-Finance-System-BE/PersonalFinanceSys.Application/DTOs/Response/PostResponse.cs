@@ -10,6 +10,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
 
         public string Content { get; set; } = null!;
 
+        public bool IsFavorited { get; set; } = false;
+
         public DateTime? CreateAt { get; set; }
 
         public DateTime? UpdateAt { get; set; }
@@ -17,6 +19,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
         public bool? IsApproved { get; set; }
 
         public string? UrlImage { get; set; }
+
+        public ListEvaluateResponse? EvaluateResponse { get; set; }
 
         public List<SnapshotResponse>? SnapshotResponse { get; set; }
 

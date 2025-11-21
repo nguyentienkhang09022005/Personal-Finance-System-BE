@@ -37,5 +37,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             _context.Favorites.Remove(favorite);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistFavorite(Guid idUser, Guid idPost)
+        {
+            var exists = await _context.Favorites
+    .AsNoTracking()
+    .AnyAsync(f => f.IdPost == idPost && f.IdUser == idUser);
+
+            Console.WriteLine($"Check favorite for user {idUser} post {idPost} => {exists}");
+            return exists;
+
+        }
     }
 }

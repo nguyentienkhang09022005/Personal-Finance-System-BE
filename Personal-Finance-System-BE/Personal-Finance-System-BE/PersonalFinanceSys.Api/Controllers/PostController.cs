@@ -16,7 +16,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _postHandler = postHandler;
         }
 
-        [Authorize]
         [HttpGet("list-post-by-user")]
         public async Task<IActionResult> ListPostByUserAsync([FromQuery] Guid idUser)
         {
@@ -28,11 +27,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpGet("list-post-approved")]
-        public async Task<IActionResult> ListPostApprovedAsync()
+        public async Task<IActionResult> ListPostApprovedAsync([FromQuery] Guid idUser)
         {
-            var result = await _postHandler.GetListPostsApprovedAsync();
+            var result = await _postHandler.GetListPostsApprovedAsync(idUser);
             if (result.Success)
             {
                 return Ok(result);
@@ -40,7 +38,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpGet("list-post-not-approved")]
         public async Task<IActionResult> ListPostNotApprovedAsync()
         {
