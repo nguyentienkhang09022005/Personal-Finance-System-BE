@@ -31,8 +31,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
         public async Task DeleteBudgetAsync(Guid idBudget)
         {
-            var budget = await _context.Budgets.FindAsync(idBudget)
-                                        ?? throw new NotFoundException("Không tìm ngân sách cần xóa!");
+            var budget = await _context.Budgets
+                .FindAsync(idBudget) ?? throw new NotFoundException("Không tìm thấy ngân sách cần xóa!");
 
             _context.Budgets.Remove(budget);
             await _context.SaveChangesAsync();
@@ -44,7 +44,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                             .IgnoreAutoIncludes()
                             .FirstOrDefaultAsync(b => b.IdBudget == idBudget);
 
-            return budget ?? throw new NotFoundException("Không tìm mục tiêu tiết kiệm!");
+            return budget ?? throw new NotFoundException("Không tìm thấy mục tiêu tiết kiệm!");
         }
 
         public async Task<bool> ExistBudget(Guid idBudget)
@@ -58,7 +58,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task<List<BudgetDomain>> GetListBudgetByUserIdAsync(Guid idUser)
         {
             var budgets = _context.Budgets
-                            .Where(s => s.IdUser == idUser)
+                            .Where(b => b.IdUser == idUser)
                             .AsNoTracking()
                             .ToList();
             return _mapper.Map<List<BudgetDomain>>(budgets);

@@ -7,8 +7,6 @@ public partial class Favorite
 {
     public Guid IdFavorite { get; set; }
 
-    public bool? IsFavorite { get; set; }
-
     public DateTime? CreateAt { get; set; }
 
     public Guid? IdPost { get; set; }

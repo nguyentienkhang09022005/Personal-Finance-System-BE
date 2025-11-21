@@ -1,6 +1,5 @@
 ﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -16,6 +15,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Payment
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Posts;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.RolePermission;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.SavingGoals;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Transactions;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Users;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -107,6 +107,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+builder.Services.AddScoped<IEvaluateRepository, EvaluateRepository>();
 
 
 // Services
@@ -140,6 +142,8 @@ builder.Services.AddScoped<PaymentHandler>();
 builder.Services.AddScoped<PackageHandler>();
 builder.Services.AddScoped<PostHandler>();
 builder.Services.AddScoped<NotificationHandler>();
+builder.Services.AddScoped<FavoriteHandler>();
+builder.Services.AddScoped<EvaluateHandler>();
 
 
 // Mapper Registration

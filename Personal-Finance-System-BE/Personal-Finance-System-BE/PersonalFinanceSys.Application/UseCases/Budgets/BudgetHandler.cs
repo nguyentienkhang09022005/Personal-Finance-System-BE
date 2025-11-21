@@ -182,7 +182,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Bud
                         BudgetGoal = budget.BudgetGoal,
                         UrlImage = imageDict.ContainsKey(budget.IdBudget) ? imageDict[budget.IdBudget] : null
                     };
-                }).ToList(); return ApiResponse<List<BudgetResponse>>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, budgetResponses);
+                }).ToList(); 
+                return ApiResponse<List<BudgetResponse>>.SuccessResponse("Lấy danh sách giao dịch thành công!", 200, budgetResponses);
             }
             catch (Exception ex)
             {

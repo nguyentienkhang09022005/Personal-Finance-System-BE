@@ -123,9 +123,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("create_at");
             entity.Property(e => e.IdPost).HasColumnName("id_post");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
-            entity.Property(e => e.IsFavorite)
-                .HasDefaultValue(false)
-                .HasColumnName("is_favorite");
 
             entity.HasOne(d => d.IdPostNavigation).WithMany(p => p.Favorites)
                 .HasForeignKey(d => d.IdPost)
