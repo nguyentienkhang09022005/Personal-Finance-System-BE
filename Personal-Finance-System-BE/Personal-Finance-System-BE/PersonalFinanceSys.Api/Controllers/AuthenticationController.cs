@@ -4,7 +4,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Authen;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 {
-    [Route("api/authen")]
+    [Route("api/authen/")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
