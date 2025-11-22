@@ -186,7 +186,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500", "https://portfolio-management-fi.vercel.app/") 
+        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500", "https://portfolio-management-fi.vercel.app") 
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Allow send Cookie
