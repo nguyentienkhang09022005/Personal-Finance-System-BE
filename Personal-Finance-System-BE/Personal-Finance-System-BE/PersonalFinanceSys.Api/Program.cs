@@ -188,8 +188,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000", 
                            "http://127.0.0.1:5500", 
-                           "https://portfolio-management-fi.vercel.app",
-                           "https://portfolio-management-fi.vercel.app/") 
+                           "https://portfolio-management-fi.vercel.app") 
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Allow send Cookie
@@ -255,7 +254,6 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -265,6 +263,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowFrontend");
 
 app.MapHub<NotificationHub>("/hubs/notification");
 
