@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _favoriteHandler = favoriteHandler;
         }
 
+        [Authorize]
         [HttpPost("create-favorite")]
         public async Task<IActionResult> AddFavoriteAsync([FromBody] FavoriteRequest favoriteRequest)
         {

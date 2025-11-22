@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _postHandler = postHandler;
         }
 
+        [Authorize]
         [HttpGet("list-post-by-user")]
         public async Task<IActionResult> ListPostByUserAsync([FromQuery] Guid idUser)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-post-approved")]
         public async Task<IActionResult> ListPostApprovedAsync([FromQuery] Guid idUser)
         {
@@ -38,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-post-not-approved")]
         public async Task<IActionResult> ListPostNotApprovedAsync()
         {
@@ -98,7 +101,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-
+        [Authorize]
         [HttpPatch("update-transaction-post")]
         public async Task<IActionResult> UpdateTransactionPostAsync([FromBody] TransactionPostUpdateRequest transactionPostUpdateRequest,
                                                                     [FromQuery] Guid idPost)
@@ -111,6 +114,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPatch("update-asset-post")]
         public async Task<IActionResult> UpdateAssetPostAsync([FromBody] InvestmentAssetPostUpdateRequest investmentAssetPostUpdateRequest,
                                                               [FromQuery] Guid idPost)
@@ -123,6 +127,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPatch("update-post")]
         public async Task<IActionResult> UpdatePostAsync([FromBody] PostUpdateRequest postUpdateRequest,
                                                          [FromQuery] Guid idPost)

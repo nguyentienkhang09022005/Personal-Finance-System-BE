@@ -22,7 +22,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task AcceptFriendshipAsync(FriendshipDomain friendshipDomain, Friendship friendship)
         {
             _mapper.Map(friendshipDomain, friendship);
-            friendship.UpdateAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+            friendship.UpdateAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
 
@@ -31,6 +31,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var friendship = _mapper.Map<Friendship>(friendshipDomain);
             friendship.IdFriendship = Guid.NewGuid();
             friendship.Status = ConstantStatusFriendship.FriendshipPending;
+            friendship.CreateAt = DateTime.UtcNow;
             friendship.UpdateAt = null;
 
             _context.Friendships.Add(friendship);
@@ -66,7 +67,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         // Lấy danh sách bạn bè của user
         public async Task<List<FriendshipDomain>> GetListFriendshipOfUserAsync(Guid idUser)
         {
-            var friendships = _context.Friendships
+            var friendships = await _context.Friendships
                 .Where(f => (f.IdUser == idUser || f.IdRef == idUser)
                     && f.Status == ConstantStatusFriendship.FriendshipAccept).AsNoTracking()
                 .Include(f => f.IdUserNavigation)
@@ -78,8 +79,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         // Lấy danh sách lời mời kết bạn đã gửi với trạng thái đang chờ
         public async Task<List<FriendshipDomain>> GetListFriendshipSentWithStatusPendingByUserAsync(Guid idUser)
         {
-            var friendships = _context.Friendships
-                .Where( f => f.IdUser == idUser && f.Status == ConstantStatusFriendship.FriendshipPending)
+            var friendships = await _context.Friendships
+                .Where(f => f.IdUser == idUser && f.Status == ConstantStatusFriendship.FriendshipPending)
                 .Include(f => f.IdRefNavigation)
                 .AsNoTracking()
                 .ToListAsync();
@@ -89,7 +90,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         // Lấy danh sách lời mời kết bạn đã nhận với trạng thái đang chờ
         public async Task<List<FriendshipDomain>> GetListFriendshipReceivedWithStatusPendingByUserAsync(Guid idUser)
         {
-            var friendships = _context.Friendships
+            var friendships = await _context.Friendships
                 .Where(f => f.IdRef == idUser && f.Status == ConstantStatusFriendship.FriendshipPending)
                 .Include(f => f.IdUserNavigation)
                 .AsNoTracking()
@@ -100,7 +101,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task RejectFriendshipAsync(FriendshipDomain friendshipDomain, Friendship friendship)
         {
             _mapper.Map(friendshipDomain, friendship);
-            friendship.UpdateAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+            friendship.UpdateAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
     }

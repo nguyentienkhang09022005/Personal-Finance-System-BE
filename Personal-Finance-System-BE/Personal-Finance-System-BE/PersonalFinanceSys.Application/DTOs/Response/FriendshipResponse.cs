@@ -10,7 +10,14 @@
 
         public DateTime? UpdateAt { get; set; }
 
-        public InfFriendOfFriendshipResponse? infFriendOfFriendshipResponse { get; set; }
+        public InfFriendshipResponse? infFriendshipResponse { get; set; }
+    }
+
+    public class InfFriendshipResponse
+    {
+        public InfFriendOfFriendshipResponse? Sender { get; set; }
+
+        public InfFriendOfFriendshipResponse? Receiver { get; set; }
     }
 
     public class InfFriendOfFriendshipResponse

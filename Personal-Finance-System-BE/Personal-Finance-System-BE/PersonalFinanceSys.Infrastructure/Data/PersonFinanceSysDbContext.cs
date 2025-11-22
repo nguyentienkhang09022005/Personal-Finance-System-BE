@@ -91,7 +91,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdPost).HasColumnName("id_post");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
@@ -119,7 +118,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_favorite");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdPost).HasColumnName("id_post");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
@@ -168,20 +166,14 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.IdFriendship)
                 .ValueGeneratedNever()
                 .HasColumnName("id_friendship");
-            entity.Property(e => e.CreateAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("create_at");
+            entity.Property(e => e.CreateAt).HasColumnName("create_at");
             entity.Property(e => e.IdRef).HasColumnName("id_ref");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValueSql("'PENDING'::character varying")
                 .HasColumnName("status");
-            entity.Property(e => e.UpdateAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("update_at");
+            entity.Property(e => e.UpdateAt).HasColumnName("update_at");
 
             entity.HasOne(d => d.IdRefNavigation).WithMany(p => p.FriendshipIdRefNavigations)
                 .HasForeignKey(d => d.IdRef)
@@ -205,7 +197,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_image");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdRef).HasColumnName("id_ref");
             entity.Property(e => e.RefType)
@@ -265,7 +256,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_detail");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Expense)
                 .HasPrecision(30, 2)
@@ -301,7 +291,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_fund");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.FundName)
@@ -332,7 +321,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("is_read");
             entity.Property(e => e.SendAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("send_at");
 
             entity.HasOne(d => d.IdFriendshipNavigation).WithMany(p => p.Messages)
@@ -358,7 +346,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("is_read");
             entity.Property(e => e.NotificationDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("notification_date");
             entity.Property(e => e.NotificationType)
                 .HasMaxLength(50)
@@ -387,7 +374,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_package");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.DurationDays).HasColumnName("duration_days");
@@ -432,7 +418,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("amount");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdAppTrans)
                 .HasMaxLength(100)
@@ -482,7 +467,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.IsApproved).HasColumnName("is_approved");
@@ -494,7 +478,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.UpdateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("update_at");
 
             entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Posts)
@@ -529,7 +512,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("amount");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.IdSaving).HasColumnName("id_saving");
 
@@ -550,7 +532,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_saving");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
@@ -585,7 +566,6 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("amount");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.TransactionCategory)
@@ -624,7 +604,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("create_at");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.Gender)

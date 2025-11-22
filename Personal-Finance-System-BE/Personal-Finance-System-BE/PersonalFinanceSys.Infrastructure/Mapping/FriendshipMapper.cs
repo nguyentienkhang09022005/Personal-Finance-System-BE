@@ -15,12 +15,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
             CreateMap<FriendshipDomain, Friendship>()
                 .ForMember(dest => dest.IdFriendship, opt => opt.Ignore());
 
-            CreateMap<EvaluateCreationRequest, FriendshipDomain>();
+            CreateMap<FriendshipCreationRequest, FriendshipDomain>();
 
-            CreateMap<EvaluateUpdateRequest, FriendshipDomain>()
+            CreateMap<FriendshipUpdateRequest, FriendshipDomain>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<FriendshipDomain, FriendshipResponse>();
+            CreateMap<FriendshipDomain, InfFriendshipResponse>()
+                    .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.IdUserNavigation))
+                    .ForMember(dest => dest.Receiver, opt => opt.MapFrom(src => src.IdRefNavigation));
+
+            CreateMap<FriendshipDomain, FriendshipResponse>()
+                    .ForMember(dest => dest.infFriendshipResponse,
+                               opt => opt.MapFrom(src => src));
         }
     }
 }

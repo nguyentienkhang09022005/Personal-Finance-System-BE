@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _evaluateHandler = evaluateHandler;
         }
 
+        [Authorize]
         [HttpPost("create-evaluate")]
         public async Task<IActionResult> AddEvaluateAsync([FromBody] EvaluateCreationRequest evaluateCreationRequest)
         {

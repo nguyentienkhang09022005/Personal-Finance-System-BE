@@ -109,6 +109,7 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IEvaluateRepository, EvaluateRepository>();
+builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 
 
 // Services
@@ -144,6 +145,7 @@ builder.Services.AddScoped<PostHandler>();
 builder.Services.AddScoped<NotificationHandler>();
 builder.Services.AddScoped<FavoriteHandler>();
 builder.Services.AddScoped<EvaluateHandler>();
+builder.Services.AddScoped<FriendshipHandler>();
 
 
 // Mapper Registration
