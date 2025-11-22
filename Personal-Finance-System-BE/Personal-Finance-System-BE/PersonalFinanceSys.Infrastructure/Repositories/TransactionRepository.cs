@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
@@ -93,7 +94,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         {
             await _context.Transactions
                 .Where(t => t.IdUser == idUser
-                            && t.TransactionType == "Chi"
+                            && t.TransactionType == ConstrantCollectAndExpense.TypeExpense
                             && t.TransactionCategory == oldCategoryName)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(t => t.TransactionCategory, newCategoryName));
@@ -102,7 +103,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task<List<TransactionDomain>> GetExpenseTransactionsByUserAsync(Guid idUser)
         {
             var transactionEntities = await _context.Transactions
-                .Where(t => t.IdUser == idUser && t.TransactionType == "Chi")
+                .Where(t => t.IdUser == idUser && t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
                 .AsNoTracking()
                 .ToListAsync();
             
