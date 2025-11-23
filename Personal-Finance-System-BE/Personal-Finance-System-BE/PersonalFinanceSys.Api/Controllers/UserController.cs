@@ -30,6 +30,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-user-with-user-role")]
         public async Task<IActionResult> ListUserWithUserRole()
         {

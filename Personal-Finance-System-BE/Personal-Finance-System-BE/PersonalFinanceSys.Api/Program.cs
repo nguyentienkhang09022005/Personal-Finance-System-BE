@@ -273,7 +273,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<NotificationHub>("/hubs/notification");
-app.MapHub<MessageHub>("/hubs/message");
 
 app.MapControllers();
 
