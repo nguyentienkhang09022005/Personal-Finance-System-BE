@@ -110,7 +110,7 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IEvaluateRepository, EvaluateRepository>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 // Services
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -146,6 +146,7 @@ builder.Services.AddScoped<NotificationHandler>();
 builder.Services.AddScoped<FavoriteHandler>();
 builder.Services.AddScoped<EvaluateHandler>();
 builder.Services.AddScoped<FriendshipHandler>();
+builder.Services.AddScoped<MessageHandler>();
 
 
 // Mapper Registration
@@ -272,6 +273,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<NotificationHub>("/hubs/notification");
+app.MapHub<MessageHub>("/hubs/message");
 
 app.MapControllers();
 

@@ -37,6 +37,8 @@ public partial class User
 
     public virtual ICollection<InvestmentFund> InvestmentFunds { get; set; } = new List<InvestmentFund>();
 
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

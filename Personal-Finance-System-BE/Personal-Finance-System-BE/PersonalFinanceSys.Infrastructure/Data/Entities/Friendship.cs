@@ -15,7 +15,7 @@ public partial class Friendship
 
     public Guid? IdUser { get; set; }
 
-    public Guid? IdRef { get; set; }
+    public Guid IdRef { get; set; }
 
     public virtual User? IdRefNavigation { get; set; }
 

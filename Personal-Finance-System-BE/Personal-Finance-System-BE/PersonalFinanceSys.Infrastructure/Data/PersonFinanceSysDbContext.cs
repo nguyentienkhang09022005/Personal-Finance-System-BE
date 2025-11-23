@@ -315,18 +315,24 @@ public partial class PersonFinanceSysDbContext : DbContext
                 .HasColumnName("id_message");
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.IdFriendship).HasColumnName("id_friendship");
+            entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.IsFriend).HasColumnName("is_friend");
             entity.Property(e => e.IsRead)
                 .HasDefaultValue(false)
                 .HasColumnName("is_read");
             entity.Property(e => e.SendAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasDefaultValueSql("now()")
                 .HasColumnName("send_at");
 
             entity.HasOne(d => d.IdFriendshipNavigation).WithMany(p => p.Messages)
                 .HasForeignKey(d => d.IdFriendship)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_message_friendship");
+
+            entity.HasOne(d => d.IdUserNavigation).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.IdUser)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_message_sender");
         });
 
         modelBuilder.Entity<Notification>(entity =>

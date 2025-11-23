@@ -42,9 +42,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         new List<FriendshipResponse>());
                 }
 
-                var refIds = friendshipDomains.Select(p => p.IdRef).ToList();
-                var imagesDict = await _imageRepository.GetImagesByListRefAsync(refIds, ConstantTypeRef.TypePost);
-
                 var friendshipResponses = new List<FriendshipResponse>();
 
                 foreach (var friendshipDomain in friendshipDomains)
@@ -85,9 +82,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         200,
                         new List<FriendshipResponse>());
                 }
-
-                var refIds = friendshipDomains.Select(p => p.IdRef).ToList();
-                var imagesDict = await _imageRepository.GetImagesByListRefAsync(refIds, ConstantTypeRef.TypePost);
 
                 var friendshipResponses = new List<FriendshipResponse>();
 
@@ -130,9 +124,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         200,
                         new List<FriendshipResponse>());
                 }
-
-                var refIds = friendshipDomains.Select(p => p.IdRef).ToList();
-                var imagesDict = await _imageRepository.GetImagesByListRefAsync(refIds, ConstantTypeRef.TypePost);
 
                 var friendshipResponses = new List<FriendshipResponse>();
 

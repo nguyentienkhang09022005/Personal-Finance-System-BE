@@ -17,5 +17,9 @@ public partial class Message
 
     public Guid? IdFriendship { get; set; }
 
+    public Guid? IdUser { get; set; }
+
     public virtual Friendship? IdFriendshipNavigation { get; set; }
+
+    public virtual User? IdUserNavigation { get; set; }
 }
