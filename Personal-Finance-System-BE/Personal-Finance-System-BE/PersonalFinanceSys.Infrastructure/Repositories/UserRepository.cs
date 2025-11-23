@@ -72,6 +72,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<UserDomain?>>(users);
         }
 
+        public async Task<List<UserDomain?>> GetListUserWithUserRoleAsync()
+        {
+            var users = await _context.Users
+                .IgnoreAutoIncludes()
+                .AsNoTracking()
+                .Where(u => u.RoleName == ConstantRole.UserRole)
+                .ToListAsync();
+            return _mapper.Map<List<UserDomain?>>(users);
+        }
+
         // Get User By Email
         public async Task<UserDomain?> GetUserByEmailAsync(string email)
         {

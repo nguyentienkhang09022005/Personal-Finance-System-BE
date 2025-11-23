@@ -9,6 +9,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<List<UserDomain?>> GetListUserAsync();
 
+        Task<List<UserDomain?>> GetListUserWithUserRoleAsync();
+
         Task<UserDomain?> GetUserByIdAsync(Guid idUser);
 
         Task<UserDomain?> GetUserByEmailAsync(string email);

@@ -55,6 +55,35 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
             }
         }
 
+        // Lấy danh sách người dùng với Role là User
+        public async Task<ApiResponse<List<UserResponse>>> GetListUserWithUserRoleHandleAsync()
+        {
+            try
+            {
+                var userDomains = await _userRepository.GetListUserWithUserRoleAsync();
+                if (userDomains == null || !userDomains.Any())
+                    return ApiResponse<List<UserResponse>>.SuccessResponse("Không có người dùng nào", 200, new List<UserResponse>());
+
+                var idUsers = userDomains.Select(u => u.IdUser).ToList();
+
+                var imageDict = await _imageRepository.GetImagesByListRefAsync(idUsers, ConstantRole.UserRole);
+
+                var userResponses = _mapper.Map<List<UserResponse>>(userDomains);
+
+                foreach (var userResponse in userResponses)
+                {
+                    imageDict.TryGetValue(userResponse.IdUser, out var urlAvatar);
+                    userResponse.UrlAvatar = string.IsNullOrEmpty(urlAvatar) ? null : urlAvatar;
+                }
+
+                return ApiResponse<List<UserResponse>>.SuccessResponse("Lấy danh sách người dùng thành công", 200, userResponses);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<List<UserResponse>>.FailResponse($"Lỗi khi lấy danh sách người dùng: {ex.Message}", 500);
+            }
+        }
+
 
         // Hàm lấy thông tin chi tiết người dùng qua ID
         public async Task<ApiResponse<UserResponse>> GetInfUserHandleAsync(Guid idUser)
