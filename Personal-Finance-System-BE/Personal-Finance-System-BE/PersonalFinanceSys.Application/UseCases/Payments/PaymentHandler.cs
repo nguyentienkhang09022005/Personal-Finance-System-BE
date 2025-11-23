@@ -58,6 +58,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 if (!packageExists)
                     return ApiResponse<PaymentResponse>.FailResponse("Không tìm thấy gói!", 404);
 
+                bool existingPaymentSuccess = await _paymentRepository.CheckExistPaymentWithStatusSuccess(paymentRequest.IdUser, paymentRequest.IdPackage);
+                if (existingPaymentSuccess)
+                    return ApiResponse<PaymentResponse>.FailResponse("Người dùng đã mua gói này trước đó!", 400);
+
                 // Tạo IdAppTrans
                 var vnNow = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "SE Asia Standard Time");
                 var prefix = vnNow.ToString("yyMMdd");
@@ -140,11 +144,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 var callbackData = JsonSerializer.Deserialize<ZaloPayCallbackData>(zaloPayCallBackRequest.Data);
                 if (callbackData == null) throw new Exception("Dữ liệu callback rỗng!");
 
-                // Lấy payment từ DB
                 var payment = await _paymentRepository.GetPaymentByIdAppTransAsync(callbackData.AppTransId);
                 if (payment == null) throw new Exception("Không tìm thấy giao dịch!");
 
-                // Cập nhật status
                 if (payment.Status != ConstantStatusPayment.PaymentSuccess){
                     await _paymentRepository.UpdateStatusPaymentAsync(payment.IdPayment, ConstantStatusPayment.PaymentSuccess);
                 }
@@ -155,6 +157,35 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pay
                 Console.WriteLine($"[Callback Error] {ex}");
                 return ApiResponse<string>.FailResponse($"Lỗi khi xử lý callback: {ex.Message}", 500);
             } 
+        }
+
+        public async Task<ApiResponse<string>> CancelPackageAsync(PaymentCancelRequest paymentCancelRequest)
+        {
+            try
+            {
+                bool userExists = await _userRepository.ExistUserAsync(paymentCancelRequest.IdUser);
+                if (!userExists)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy người dùng!", 404);
+
+                bool packageExists = await _packageRepository.CheckExistPackage(paymentCancelRequest.IdPackage);
+                if (!packageExists)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy gói!", 404);
+
+                var payment = await _paymentRepository.GetPaymentByUserIdAndPackageIdAsync(paymentCancelRequest.IdUser, 
+                                                                                           paymentCancelRequest.IdPackage);
+                if (payment == null) throw new Exception("Không tìm thấy giao dịch!");
+
+                if (payment.Status == ConstantStatusPayment.PaymentSuccess)
+                {
+                    await _paymentRepository.UpdateStatusPaymentAsync(payment.IdPayment, ConstantStatusPayment.PaymentCanceled);
+                }
+
+                return ApiResponse<string>.SuccessResponse("Hủy gói thành công!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse(ex.Message, 500);
+            }
         }
 
         private static string ComputeHmacSha256(string data, string key)

@@ -18,7 +18,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpPost("create-payment")]
-        public async Task<IActionResult> CreatePayment(PaymentRequest paymentRequest)
+        public async Task<IActionResult> CreatePayment([FromBody]PaymentRequest paymentRequest)
         {
             var result = await _paymentHandler.CreatePaymentIntentAsync(paymentRequest);
             if (result.Success)
@@ -32,6 +32,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
         public async Task<IActionResult> CallBack(ZaloPayCallBackRequest zaloPayCallBackRequest)
         {
             var result = await _paymentHandler.ResolveZaloPayCallbackAsync(zaloPayCallBackRequest);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [Authorize]
+        [HttpPatch("cancel-package-for-payment")]
+        public async Task<IActionResult> CancelPackageForPayment([FromBody] PaymentCancelRequest paymentCancelRequest)
+        {
+            var result = await _paymentHandler.CancelPackageAsync(paymentCancelRequest);
             if (result.Success)
             {
                 return Ok(result);

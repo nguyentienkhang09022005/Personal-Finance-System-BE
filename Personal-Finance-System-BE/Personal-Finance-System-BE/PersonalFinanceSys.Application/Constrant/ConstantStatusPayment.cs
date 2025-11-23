@@ -5,5 +5,6 @@
         public const string PaymentSuccess = "Thành Công";
         public const string PaymentPending = "Đang Xữ Lý";
         public const string PaymentFailed = "Thất Bại";
+        public const string PaymentCanceled= "Đã Hủy";
     }
 }

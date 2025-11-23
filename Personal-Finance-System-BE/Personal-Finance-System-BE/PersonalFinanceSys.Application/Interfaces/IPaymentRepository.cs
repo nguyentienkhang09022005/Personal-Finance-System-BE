@@ -10,6 +10,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<PaymentDomain> GetPaymentByIdAppTransAsync(string IdAppTrans);
 
+        Task<PaymentDomain> GetPaymentByUserIdAndPackageIdAsync(Guid idUser, Guid idPackage);
+
+        Task<bool> CheckExistPaymentWithStatusSuccess(Guid idUser, Guid idPackage);
+
         Task UpdateStatusPaymentAsync(Guid idPayment, string status);
     }
 }

@@ -41,6 +41,27 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<PaymentDomain>(payment);
         }
 
+        public async Task<PaymentDomain> GetPaymentByUserIdAndPackageIdAsync(Guid idUser, Guid idPackage)
+        {
+            var payment = await _context.Payments
+                .Where(p => p.Status == ConstantStatusPayment.PaymentSuccess &&
+                            p.IdUser == idUser &&
+                            p.IdPackage == idPackage)
+                .FirstOrDefaultAsync();
+            if (payment == null) return null;
+            return _mapper.Map<PaymentDomain>(payment);
+        }
+
+        public async Task<bool> CheckExistPaymentWithStatusSuccess(Guid idUser, Guid idPackage)
+        {
+            return await _context.Payments
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .AnyAsync(p => p.IdUser == idUser && 
+                          p.IdPackage == idPackage &&
+                          p.Status == ConstantStatusPayment.PaymentSuccess);
+        }
+
         public Task UpdateStatusPaymentAsync(Guid idPayment, string status)
         {
             var payment = _context.Payments.FirstOrDefault(p => p.IdPayment == idPayment);
