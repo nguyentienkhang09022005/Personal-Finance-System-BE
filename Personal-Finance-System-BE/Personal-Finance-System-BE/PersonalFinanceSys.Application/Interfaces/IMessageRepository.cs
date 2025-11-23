@@ -14,7 +14,5 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
         Task<bool> ExistMessage(Guid idMessage);
 
         Task<Message> GetExistMessage(Guid idMessage);
-
-        Task UpdateStatusMessageAsync(Guid idFriendship);
     }
 }

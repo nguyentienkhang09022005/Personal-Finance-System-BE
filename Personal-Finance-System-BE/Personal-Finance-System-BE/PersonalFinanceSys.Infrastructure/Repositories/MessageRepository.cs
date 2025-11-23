@@ -28,7 +28,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
             var message = _mapper.Map<Message>(messageDomain);
             message.IdMessage = Guid.NewGuid();
-            message.IsRead = false;
             message.SendAt = DateTime.UtcNow;
 
             message.IsFriend = messageDomain.IdUser == friendship.IdRef;
@@ -71,15 +70,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .OrderBy(m => m.SendAt)
                 .ToListAsync();
             return _mapper.Map<List<MessageDomain>>(messages);
-        }
-
-        public async Task UpdateStatusMessageAsync(Guid idFriendship)
-        {
-            await _context.Messages
-                .Where(m => m.IdFriendship == idFriendship)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.IsRead, true)
-                );
         }
     }
 }

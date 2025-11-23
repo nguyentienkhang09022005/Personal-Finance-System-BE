@@ -76,8 +76,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     throw new Exception("Không tìm thấy thông tin người bạn!");
                 }
 
-                await _messageRepository.UpdateStatusMessageAsync(idFriendship);
-
                 var messageDomains = await _messageRepository.GetListMessageAsync(idFriendship);
 
                 var UrlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(infRefUser.IdUser, ConstantTypeRef.TypeUser);
@@ -87,7 +85,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     IdMessage = message.IdMessage,
                     Content = message.Content,
                     IsFriend = message.IsFriend,
-                    IsRead = message.IsRead,
                     SendAt = message.SendAt
                 }).ToList();
 

@@ -317,9 +317,6 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.IdFriendship).HasColumnName("id_friendship");
             entity.Property(e => e.IdUser).HasColumnName("id_user");
             entity.Property(e => e.IsFriend).HasColumnName("is_friend");
-            entity.Property(e => e.IsRead)
-                .HasDefaultValue(false)
-                .HasColumnName("is_read");
             entity.Property(e => e.SendAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("send_at");

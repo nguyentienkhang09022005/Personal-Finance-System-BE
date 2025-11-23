@@ -11,8 +11,6 @@ public partial class Message
 
     public bool? IsFriend { get; set; }
 
-    public bool? IsRead { get; set; }
-
     public DateTime? SendAt { get; set; }
 
     public Guid? IdFriendship { get; set; }
