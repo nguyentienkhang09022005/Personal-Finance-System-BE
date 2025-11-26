@@ -160,6 +160,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 if (!refExists)
                     return ApiResponse<string>.FailResponse("Không tìm thấy người nhận!", 404);
 
+                bool friendshipExists = await _friendshipRepository.ExistFriendshipByRefId(friendshipCreationRequest.IdRef);
+                if (friendshipExists)
+                    return ApiResponse<string>.FailResponse("Đã kết bạn với người này rồi!", 400);
+
                 var friendshipDomain = _mapper.Map<FriendshipDomain>(friendshipCreationRequest);
                 await _friendshipRepository.AddFriendshipAsync(friendshipDomain);
 
