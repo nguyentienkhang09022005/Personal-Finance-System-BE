@@ -101,7 +101,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPatch("update-transaction-post")]
         public async Task<IActionResult> UpdateTransactionPostAsync([FromBody] TransactionPostUpdateRequest transactionPostUpdateRequest,
                                                                     [FromQuery] Guid idPost)

@@ -406,7 +406,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
                 
                 _mapper.Map(transactionPostUpdateRequest, postDomain);
                 postDomain.IsApproved = false;
-                postDomain.UpdateAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                postDomain.UpdateAt = DateTime.UtcNow;
                 // Chuyển đổi thành Json để lưu
                 if (transactionPostUpdateRequest.TransactionOfPost != null && transactionPostUpdateRequest.TransactionOfPost.Any())
                 {
@@ -492,7 +492,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
 
                 _mapper.Map(investmentAssetPostUpdateRequest, postDomain);
                 postDomain.IsApproved = false;
-                postDomain.UpdateAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                postDomain.UpdateAt = DateTime.UtcNow;
                 // Chuyển đổi thành Json để lưu
                 if (investmentAssetPostUpdateRequest.InvestmentAssetOfPost != null && investmentAssetPostUpdateRequest.InvestmentAssetOfPost.Any())
                 {
@@ -597,7 +597,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Pos
 
                 _mapper.Map(postUpdateRequest, postDomain);
                 postDomain.IsApproved = false;
-                postDomain.UpdateAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                postDomain.UpdateAt = DateTime.UtcNow;
 
                 var postApproved = await _postRepository.UpdatePostAsync(postDomain, postEntity);
 
