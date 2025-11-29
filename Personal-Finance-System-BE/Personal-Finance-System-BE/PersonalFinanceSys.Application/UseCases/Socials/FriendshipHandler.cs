@@ -42,6 +42,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         new List<FriendshipResponse>());
                 }
 
+                var allIdUsers = friendshipDomains
+                    .SelectMany(f => new List<Guid> { f.IdUser, f.IdRef })
+                    .Distinct()
+                    .ToList();
+
+                var avatarUrls = await _imageRepository.GetImagesByListRefAsync(allIdUsers, ConstantTypeRef.TypeUser);
+
                 var friendshipResponses = new List<FriendshipResponse>();
 
                 foreach (var friendshipDomain in friendshipDomains)
@@ -51,9 +58,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     if (friendshipResponse.infFriendshipResponse.Sender == null)
                         friendshipResponse.infFriendshipResponse.Sender = new InfFriendOfFriendshipResponse();
 
-                    var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(friendshipDomain.IdRef, ConstantTypeRef.TypeUser);
-                    if (!string.IsNullOrEmpty(avatarUser))
-                        friendshipResponse.infFriendshipResponse.Sender.UrlAvatar = avatarUser;
+                    if (friendshipResponse.infFriendshipResponse.Receiver == null)
+                        friendshipResponse.infFriendshipResponse.Receiver = new InfFriendOfFriendshipResponse();
+                    
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdUser, out var senderAvatar))
+                        friendshipResponse.infFriendshipResponse.Sender.UrlAvatar = senderAvatar;
+
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdRef, out var receiverAvatar))
+                        friendshipResponse.infFriendshipResponse.Receiver.UrlAvatar = receiverAvatar;
 
                     friendshipResponses.Add(friendshipResponse);
                 }
@@ -83,18 +95,30 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         new List<FriendshipResponse>());
                 }
 
+                var allIdUsers = friendshipDomains
+                    .SelectMany(f => new List<Guid> { f.IdUser, f.IdRef })
+                    .Distinct()
+                    .ToList();
+
+                var avatarUrls = await _imageRepository.GetImagesByListRefAsync(allIdUsers, ConstantTypeRef.TypeUser);
+
                 var friendshipResponses = new List<FriendshipResponse>();
 
                 foreach (var friendshipDomain in friendshipDomains)
                 {
                     var friendshipResponse = _mapper.Map<FriendshipResponse>(friendshipDomain);
 
+                    if (friendshipResponse.infFriendshipResponse.Sender == null)
+                        friendshipResponse.infFriendshipResponse.Sender = new InfFriendOfFriendshipResponse();
+
                     if (friendshipResponse.infFriendshipResponse.Receiver == null)
                         friendshipResponse.infFriendshipResponse.Receiver = new InfFriendOfFriendshipResponse();
 
-                    var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(friendshipDomain.IdRef, ConstantTypeRef.TypeUser);
-                    if (!string.IsNullOrEmpty(avatarUser))
-                        friendshipResponse.infFriendshipResponse.Receiver.UrlAvatar = avatarUser;
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdUser, out var senderAvatar))
+                        friendshipResponse.infFriendshipResponse.Sender.UrlAvatar = senderAvatar;
+
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdRef, out var receiverAvatar))
+                        friendshipResponse.infFriendshipResponse.Receiver.UrlAvatar = receiverAvatar;
 
                     friendshipResponses.Add(friendshipResponse);
                 }
@@ -125,6 +149,13 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                         new List<FriendshipResponse>());
                 }
 
+                var allIdUsers = friendshipDomains
+                    .SelectMany(f => new List<Guid> { f.IdUser, f.IdRef })
+                    .Distinct()
+                    .ToList();
+
+                var avatarUrls = await _imageRepository.GetImagesByListRefAsync(allIdUsers, ConstantTypeRef.TypeUser);
+
                 var friendshipResponses = new List<FriendshipResponse>();
 
                 foreach (var friendshipDomain in friendshipDomains)
@@ -134,9 +165,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     if (friendshipResponse.infFriendshipResponse.Sender == null)
                         friendshipResponse.infFriendshipResponse.Sender = new InfFriendOfFriendshipResponse();
 
-                    var avatarUser = await _imageRepository.GetImageUrlByIdRefAsync(friendshipDomain.IdRef, ConstantTypeRef.TypeUser);
-                    if (!string.IsNullOrEmpty(avatarUser))
-                        friendshipResponse.infFriendshipResponse.Sender.UrlAvatar = avatarUser;
+                    if (friendshipResponse.infFriendshipResponse.Receiver == null)
+                        friendshipResponse.infFriendshipResponse.Receiver = new InfFriendOfFriendshipResponse();
+
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdUser, out var senderAvatar))
+                        friendshipResponse.infFriendshipResponse.Sender.UrlAvatar = senderAvatar;
+
+                    if (avatarUrls.TryGetValue(friendshipDomain.IdRef, out var receiverAvatar))
+                        friendshipResponse.infFriendshipResponse.Receiver.UrlAvatar = receiverAvatar;
 
                     friendshipResponses.Add(friendshipResponse);
                 }

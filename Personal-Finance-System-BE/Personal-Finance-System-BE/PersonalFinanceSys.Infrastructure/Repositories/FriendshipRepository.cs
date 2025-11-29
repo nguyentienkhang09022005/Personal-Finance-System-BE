@@ -79,6 +79,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .Where(f => (f.IdUser == idUser || f.IdRef == idUser)
                     && f.Status == ConstantStatusFriendship.FriendshipAccept).AsNoTracking()
                 .Include(f => f.IdUserNavigation)
+                .Include(f => f.IdRefNavigation)
                 .AsNoTracking()
                 .ToListAsync();
             return _mapper.Map<List<FriendshipDomain>>(friendships);
@@ -89,6 +90,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         {
             var friendships = await _context.Friendships
                 .Where(f => f.IdUser == idUser && f.Status == ConstantStatusFriendship.FriendshipPending)
+                .Include(f => f.IdUserNavigation)
                 .Include(f => f.IdRefNavigation)
                 .AsNoTracking()
                 .ToListAsync();
@@ -101,6 +103,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var friendships = await _context.Friendships
                 .Where(f => f.IdRef == idUser && f.Status == ConstantStatusFriendship.FriendshipPending)
                 .Include(f => f.IdUserNavigation)
+                .Include(f => f.IdRefNavigation)
                 .AsNoTracking()
                 .ToListAsync();
             return _mapper.Map<List<FriendshipDomain>>(friendships);

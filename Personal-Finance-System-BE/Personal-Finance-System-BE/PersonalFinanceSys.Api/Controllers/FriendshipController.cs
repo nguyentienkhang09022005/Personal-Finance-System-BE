@@ -17,7 +17,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _friendshipHandler = friendshipHandler;
         }
 
-        [Authorize]
         [HttpGet("list-friendship-of-user")]
         public async Task<IActionResult> ListFriendshipOfUserAsync([FromQuery] Guid idUser)
         {
@@ -29,7 +28,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpGet("list-friendship-sent-of-user")]
         public async Task<IActionResult> ListFriendshipSentOfUserAsync([FromQuery] Guid idUser)
         {
@@ -41,7 +39,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpGet("list-friendship-received-of-user")]
         public async Task<IActionResult> ListFriendshipReceivedOfUserAsync([FromQuery] Guid idUser)
         {
@@ -53,7 +50,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPost("create-friendship")]
         public async Task<IActionResult> AddFriendshipAsync([FromBody] FriendshipCreationRequest friendshipCreationRequest)
         {
@@ -65,7 +61,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPatch("accept-friendship")]
         public async Task<IActionResult> AcceptFriendshipAsync([FromBody] FriendshipUpdateRequest friendshipUpdateRequest,
                                                                [FromQuery] Guid idFriendship)
@@ -78,7 +73,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPatch("reject-friendship")]
         public async Task<IActionResult> RejectFriendshipAsync([FromBody] FriendshipUpdateRequest friendshipUpdateRequest,
                                                                [FromQuery] Guid idFriendship)
@@ -91,7 +85,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpDelete("delete-friendship")]
         public async Task<IActionResult> DeleteFriendshipAsync([FromQuery] Guid idFriendship)
         {
