@@ -19,7 +19,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             _mapper = mapper;
         }
 
-        public async Task AddMessageAsync(MessageDomain messageDomain)
+        public async Task<MessageDomain> AddMessageAsync(MessageDomain messageDomain)
         {
             var friendship = await _context.Friendships
                 .AsNoTracking()
@@ -34,6 +34,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
 
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
+            return _mapper.Map<MessageDomain>(message);
         }
 
         public async Task DeleteMessageAsync(Guid idMessage)

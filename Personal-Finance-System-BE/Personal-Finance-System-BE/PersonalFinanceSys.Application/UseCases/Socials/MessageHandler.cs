@@ -3,6 +3,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Notifications;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials
@@ -13,18 +14,21 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         private readonly IFriendshipRepository _friendshipRepository;
         private readonly IUserRepository _userRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly NotificationHandler _notificationHandler;
         private readonly IMapper _mapper;
 
         public MessageHandler(IMessageRepository messageRepository,
                               IFriendshipRepository friendshipRepository,
                               IUserRepository userRepository,
                               IImageRepository imageRepository,
+                              NotificationHandler notificationHandler,
                               IMapper mapper)
         {
             _messageRepository = messageRepository;
             _friendshipRepository = friendshipRepository;
             _userRepository = userRepository;
             _imageRepository = imageRepository;
+            _notificationHandler = notificationHandler;
             _mapper = mapper;
         }
 
@@ -32,15 +36,37 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         {
             try
             {
-                bool friendshipExists = await _friendshipRepository.ExistFriendship(messageRequest.IdFriendship);
-                if (!friendshipExists)
+                var friendshipExists = await _friendshipRepository.GetExistFriendship(messageRequest.IdFriendship);
+                if (friendshipExists == null)
                     return ApiResponse<string>.FailResponse("Không tìm thấy mối quan hệ bạn bè!", 404);
 
-                var friendship = await _friendshipRepository.GetExistFriendship(messageRequest.IdFriendship);
-
                 var messageDomain = _mapper.Map<MessageDomain>(messageRequest);
-                await _messageRepository.AddMessageAsync(messageDomain);
+                var savedMessage = await _messageRepository.AddMessageAsync(messageDomain);
 
+                var userSender = await _userRepository.GetUserByIdAsync(messageRequest.IdUser);
+                if (userSender == null)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy người gửi!", 404);
+
+                Guid idReceiver;
+                if (messageRequest.IdUser == friendshipExists.IdUser){
+                    idReceiver = friendshipExists.IdRef;
+                }
+                else{
+                    idReceiver = friendshipExists.IdUser;
+                }
+
+                // Tạo notification
+                var notificationRequest = new NotificationRequest
+                {
+                    IdUser = idReceiver,
+                    IdRelated = savedMessage.IdMessage,
+                    NotificationType = ConstantNotificationType.MessageType,
+                    Title = "Tin nhắn mới",
+                    Content = $"Bạn nhận được tin nhắn mới từ {userSender.Name}.",
+                    RelatedType = ConstantNotificationType.MessageType
+                };
+
+                await _notificationHandler.CreateNotificationAsync(notificationRequest);
                 return ApiResponse<string>.SuccessResponse("Gửi tin nhắn thành công!", 201, string.Empty);
             }
             catch (Exception ex)

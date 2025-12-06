@@ -5,7 +5,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 {
     public interface IMessageRepository
     {
-        Task AddMessageAsync(MessageDomain messageDomain);
+        Task<MessageDomain> AddMessageAsync(MessageDomain messageDomain);
 
         Task DeleteMessageAsync(Guid idMessage);
 

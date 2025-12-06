@@ -4,7 +4,7 @@
     {
         public Guid IdFriendship { get; set; }
 
-        public Guid? IdUser { get; set; }
+        public Guid IdUser { get; set; }
 
         public string? Content { get; set; }
     }

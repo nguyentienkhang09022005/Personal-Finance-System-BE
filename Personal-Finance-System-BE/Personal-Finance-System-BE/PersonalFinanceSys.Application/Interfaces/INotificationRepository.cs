@@ -11,6 +11,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task DeleteNotificationAsync(Guid idNotification);
 
-        Task<Notification> GetExistPostAsync(Guid idNotification);
+        Task<Notification> GetExistNotificationAsync(Guid idNotification);
+
+        Task UpdateNotificationAsync(NotificationDomain notificationDomain, Notification notification);
     }
 }

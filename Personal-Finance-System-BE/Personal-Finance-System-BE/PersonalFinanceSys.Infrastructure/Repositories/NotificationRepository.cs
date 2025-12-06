@@ -24,6 +24,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var notification = _mapper.Map<Notification>(notificationDomain);
             notification.IdNotification = Guid.NewGuid();
             notification.IsRead = false;
+            notification.NotificationDate = DateTime.UtcNow;
 
             await _context.Notifications.AddAsync(notification);
             await _context.SaveChangesAsync();
@@ -39,7 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Notification> GetExistPostAsync(Guid idNotification)
+        public async Task<Notification> GetExistNotificationAsync(Guid idNotification)
         {
             var notification = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.IdNotification == idNotification);
@@ -54,6 +55,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .AsNoTracking()
                 .ToList();
             return _mapper.Map<List<NotificationDomain>>(notifications);
+        }
+
+        public async Task UpdateNotificationAsync(NotificationDomain notificationDomain, Notification notification)
+        {
+            _mapper.Map(notificationDomain, notification);
+            await _context.SaveChangesAsync();
         }
     }
 }

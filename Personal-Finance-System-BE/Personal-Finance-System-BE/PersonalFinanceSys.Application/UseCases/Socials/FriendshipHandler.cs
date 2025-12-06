@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Npgsql;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Notifications;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials
@@ -12,16 +14,22 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         private readonly IFriendshipRepository _friendshipRepository;
         private readonly IUserRepository _userRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly INotificationHubService _notificationHubService;
+        private readonly NotificationHandler _notificationHandler;
         private readonly IMapper _mapper;
 
         public FriendshipHandler(IFriendshipRepository friendshipRepository,
                                  IUserRepository userRepository,
                                  IImageRepository imageRepository,
+                                 INotificationHubService notificationHubService,
+                                 NotificationHandler notificationHandler,
                                  IMapper mapper)
         {
             _friendshipRepository = friendshipRepository;
             _userRepository = userRepository;
             _imageRepository = imageRepository;
+            _notificationHubService = notificationHubService;
+            _notificationHandler = notificationHandler;
             _mapper = mapper;
         }
 
@@ -188,20 +196,32 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         {
             try
             {
-                bool userExists = await _userRepository.ExistUserAsync(friendshipCreationRequest.IdUser);
-                if (!userExists)
+                var userExists = await _userRepository.GetExistUserAsync(friendshipCreationRequest.IdUser);
+                if (userExists == null)
                     return ApiResponse<string>.FailResponse("Không tìm thấy người gửi!", 404);
 
                 bool refExists = await _userRepository.ExistUserAsync(friendshipCreationRequest.IdRef);
                 if (!refExists)
                     return ApiResponse<string>.FailResponse("Không tìm thấy người nhận!", 404);
 
-                bool friendshipExists = await _friendshipRepository.ExistFriendshipByRefId(friendshipCreationRequest.IdRef);
+                bool friendshipExists = await _friendshipRepository.ExistFriendship(friendshipCreationRequest.IdRef, friendshipCreationRequest.IdUser);
                 if (friendshipExists)
                     return ApiResponse<string>.FailResponse("Đã kết bạn với người này rồi!", 400);
 
                 var friendshipDomain = _mapper.Map<FriendshipDomain>(friendshipCreationRequest);
                 await _friendshipRepository.AddFriendshipAsync(friendshipDomain);
+
+                var notificationRequest = new NotificationRequest
+                {
+                    IdUser = friendshipCreationRequest.IdRef,
+                    IdRelated = friendshipCreationRequest.IdUser,
+                    NotificationType = ConstantNotificationType.FriendshipType,
+                    Title = "Lời mời kết bạn mới!",
+                    Content = $"Bạn nhận được lời mời kết bạn từ người dùng {userExists.Name}.",
+                    RelatedType = ConstantNotificationType.FriendshipType,
+                };
+
+                await _notificationHandler.CreateNotificationAsync(notificationRequest);
 
                 return ApiResponse<string>.SuccessResponse("Gửi lời mời kết bạn thành công!", 201, string.Empty);
             }
@@ -239,6 +259,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 _mapper.Map(friendshipUpdateRequest, friendshipDomain);
 
                 await _friendshipRepository.AcceptFriendshipAsync(friendshipDomain, friendshipEntity);
+
+                var notificationRequest = new NotificationRequest
+                {
+                    IdUser = friendshipDomain.IdUser,
+                    IdRelated = friendshipDomain.IdRef,
+                    NotificationType = ConstantNotificationType.FriendshipType,
+                    Title = "Lời mời được chấp nhận",
+                    Content = $"Lời mời kết bạn của bạn đã được chấp nhận bởi người dùng {friendshipDomain.IdRef}.",
+                    RelatedType = ConstantNotificationType.FriendshipType,
+                };
+
+                await _notificationHandler.CreateNotificationAsync(notificationRequest);
 
                 return ApiResponse<string>.SuccessResponse("Kết bạn thành công!", 200, string.Empty);
             }

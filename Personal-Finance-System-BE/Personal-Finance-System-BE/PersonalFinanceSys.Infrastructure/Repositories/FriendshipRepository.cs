@@ -64,12 +64,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return friendship ?? throw new NotFoundException("Không tìm thấy bạn bè!");
         }
 
-        public async Task<bool> ExistFriendshipByRefId(Guid idRef)
+        public async Task<bool> ExistFriendship(Guid idRef, Guid idUser)
         {
             return await _context.Friendships
                 .AsNoTracking()
                 .IgnoreAutoIncludes()
-                .AnyAsync(f => f.IdRef == idRef);
+                .AnyAsync(f => f.IdRef == idRef && f.IdUser == idUser);
         }
 
         // Lấy danh sách bạn bè của user

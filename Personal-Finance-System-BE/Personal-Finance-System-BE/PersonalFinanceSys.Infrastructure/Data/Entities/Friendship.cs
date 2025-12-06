@@ -13,7 +13,7 @@ public partial class Friendship
 
     public DateTime? UpdateAt { get; set; }
 
-    public Guid? IdUser { get; set; }
+    public Guid IdUser { get; set; }
 
     public Guid IdRef { get; set; }
 

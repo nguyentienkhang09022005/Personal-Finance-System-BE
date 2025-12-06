@@ -23,6 +23,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces
 
         Task<Friendship> GetExistFriendship(Guid idFriendship);
 
-        Task<bool> ExistFriendshipByRefId(Guid idRef);
+        Task<bool> ExistFriendship(Guid idRef, Guid idUser);
     }
 }
