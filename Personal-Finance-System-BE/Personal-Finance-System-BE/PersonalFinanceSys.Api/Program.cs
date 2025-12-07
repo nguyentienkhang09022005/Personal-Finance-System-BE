@@ -22,6 +22,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Hubs;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Services;
+using System.IO;
 using System.Text;
 
 
@@ -118,6 +119,7 @@ builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
+builder.Services.AddScoped<IMessageHubService, MessageHubService>();
 
 
 // Handlers
@@ -241,9 +243,11 @@ builder.Services.AddAuthentication(options =>
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) &&
-                context.HttpContext.Request.Path.StartsWithSegments("/hubs/notification"))
+
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs/notification") 
+                                                    || path.StartsWithSegments("/hubs/message")))
             {
                 context.Token = accessToken;
             }
@@ -272,6 +276,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<NotificationHub>("/hubs/notification");
+app.MapHub<MessageHub>("/hubs/message");
 
 app.MapControllers();
 

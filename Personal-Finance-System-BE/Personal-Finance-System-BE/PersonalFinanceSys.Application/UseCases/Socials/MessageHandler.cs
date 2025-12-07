@@ -15,6 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         private readonly IUserRepository _userRepository;
         private readonly IImageRepository _imageRepository;
         private readonly NotificationHandler _notificationHandler;
+        private readonly IMessageHubService _messageHubService;
         private readonly IMapper _mapper;
 
         public MessageHandler(IMessageRepository messageRepository,
@@ -22,6 +23,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                               IUserRepository userRepository,
                               IImageRepository imageRepository,
                               NotificationHandler notificationHandler,
+                              IMessageHubService messageHubService,
                               IMapper mapper)
         {
             _messageRepository = messageRepository;
@@ -29,23 +31,24 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             _userRepository = userRepository;
             _imageRepository = imageRepository;
             _notificationHandler = notificationHandler;
+            _messageHubService = messageHubService;
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<string>> CreateMessageAsync(MessageRequest messageRequest)
+        public async Task<ApiResponse<MessageResponse>> CreateMessageAsync(MessageRequest messageRequest)
         {
             try
             {
                 var friendshipExists = await _friendshipRepository.GetExistFriendship(messageRequest.IdFriendship);
                 if (friendshipExists == null)
-                    return ApiResponse<string>.FailResponse("Không tìm thấy mối quan hệ bạn bè!", 404);
-
-                var messageDomain = _mapper.Map<MessageDomain>(messageRequest);
-                var savedMessage = await _messageRepository.AddMessageAsync(messageDomain);
+                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy mối quan hệ bạn bè!", 404);
 
                 var userSender = await _userRepository.GetUserByIdAsync(messageRequest.IdUser);
                 if (userSender == null)
-                    return ApiResponse<string>.FailResponse("Không tìm thấy người gửi!", 404);
+                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy người gửi!", 404);
+
+                var messageDomain = _mapper.Map<MessageDomain>(messageRequest);
+                var savedMessage = await _messageRepository.AddMessageAsync(messageDomain);
 
                 Guid idReceiver;
                 if (messageRequest.IdUser == friendshipExists.IdUser){
@@ -54,6 +57,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 else{
                     idReceiver = friendshipExists.IdUser;
                 }
+
+                var receiver = await _userRepository.GetUserByIdAsync(idReceiver);
+                var urlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(receiver.IdUser, ConstantTypeRef.TypeUser);
+
+                var messageDetail = new MessageDetailResponse
+                {
+                    IdMessage = savedMessage.IdMessage,
+                    Content = savedMessage.Content,
+                    IsFriend = savedMessage.IsFriend,
+                    SendAt = savedMessage.SendAt
+                };
+
+                var messageResponse = new MessageResponse
+                {
+                    IdUser = receiver.IdUser,
+                    Name = receiver.Name,
+                    UrlAvatar = urlAvatar,
+                    MessageDetailResponses = new List<MessageDetailResponse> { messageDetail }
+                };
 
                 // Tạo notification
                 var notificationRequest = new NotificationRequest
@@ -65,13 +87,15 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     Content = $"Bạn nhận được tin nhắn mới từ {userSender.Name}.",
                     RelatedType = ConstantNotificationType.MessageType
                 };
-
                 await _notificationHandler.CreateNotificationAsync(notificationRequest);
-                return ApiResponse<string>.SuccessResponse("Gửi tin nhắn thành công!", 201, string.Empty);
+
+                await _messageHubService.PushMessageToUserAsync(idReceiver, messageResponse);
+
+                return ApiResponse<MessageResponse>.SuccessResponse("Gửi tin nhắn thành công!", 201, messageResponse);
             }
             catch (Exception ex)
             {
-                return ApiResponse<string>.FailResponse(ex.Message, 500);
+                return ApiResponse<MessageResponse>.FailResponse(ex.Message, 500);
             }
         }
 
