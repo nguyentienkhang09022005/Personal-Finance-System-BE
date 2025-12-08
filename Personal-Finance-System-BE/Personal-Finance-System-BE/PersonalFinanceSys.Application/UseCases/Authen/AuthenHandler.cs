@@ -49,6 +49,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Aut
                 return ApiResponse<AuthenticationResponse>.FailResponse("Email hoặc mật khẩu không đúng!", 401);
             }
 
+            if (userDomain.IsActive == false){
+                return ApiResponse<AuthenticationResponse>.FailResponse("Tài khoản này đã ngừng hoạt động!", 401);
+            }
+
             if (!BCrypt.Net.BCrypt.Verify(authenticationRequest.Password, userDomain.Password)){
                 return ApiResponse<AuthenticationResponse>.FailResponse("Email hoặc mật khẩu không đúng!", 401);
             }
