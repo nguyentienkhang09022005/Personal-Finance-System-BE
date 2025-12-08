@@ -78,10 +78,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
         }
 
         [Authorize]
-        [HttpDelete("delete-user")]
+        [HttpPatch("delete-and-restore-user")]
         public async Task<IActionResult> DeleteUser([FromQuery] Guid idUser)
         {
-            var result = await _userHandler.deleteUserHandleAsync(idUser);
+            var result = await _userHandler.deleteAndRestoreUserHandleAsync(idUser);
             if (result.Success)
             {
                 return Ok(result);

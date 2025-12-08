@@ -237,7 +237,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
         }
 
         // Hàm xóa tài khoản người dùng
-        public async Task<ApiResponse<string>> deleteUserHandleAsync(Guid idUser)
+        public async Task<ApiResponse<string>> deleteAndRestoreUserHandleAsync(Guid idUser)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 }
                 
                 return ApiResponse<string>.SuccessResponse(
-                    "Xóa người dùng thành công!", 
+                    "Thay đổi trạng thái tài khoản người dùng thành công!", 
                     200, 
                     string.Empty);
             }
