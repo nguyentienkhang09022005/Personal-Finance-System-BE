@@ -23,6 +23,8 @@ public partial class User
 
     public string? RoleName { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual ICollection<Evaluate> Evaluates { get; set; } = new List<Evaluate>();

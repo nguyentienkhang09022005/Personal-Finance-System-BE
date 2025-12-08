@@ -28,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("send-message")]
         public async Task<IActionResult> SendMessageAsync([FromBody] MessageRequest messageRequest)
         {

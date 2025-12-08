@@ -16,6 +16,8 @@
 
         public string UrlAvatar { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public DateTime? CreateAt { get; set; }
     }
 }

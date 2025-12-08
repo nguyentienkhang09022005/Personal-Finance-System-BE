@@ -612,6 +612,9 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.Gender)
                 .HasMaxLength(5)
                 .HasColumnName("gender");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");

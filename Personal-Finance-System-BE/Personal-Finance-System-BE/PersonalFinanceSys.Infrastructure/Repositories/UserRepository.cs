@@ -39,8 +39,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         public async Task DeleteUserAsync(Guid idUser)
         {
             var user = await _context.Users.FindAsync(idUser) ?? throw new NotFoundException("Không tìm thấy người dùng!");
-
-            _context.Users.Remove(user);
+            user.IsActive = false;
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
 
