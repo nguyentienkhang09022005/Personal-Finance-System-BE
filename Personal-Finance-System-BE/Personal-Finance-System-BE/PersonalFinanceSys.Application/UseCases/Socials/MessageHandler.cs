@@ -58,8 +58,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     idReceiver = friendshipExists.IdUser;
                 }
 
-                var receiver = await _userRepository.GetUserByIdAsync(idReceiver);
-                var urlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(receiver.IdUser, ConstantTypeRef.TypeUser);
+                var urlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(userSender.IdUser, ConstantTypeRef.TypeUser);
 
                 var messageDetail = new MessageDetailResponse
                 {
@@ -71,8 +70,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
 
                 var messageResponse = new MessageResponse
                 {
-                    IdUser = receiver.IdUser,
-                    Name = receiver.Name,
+                    IdUser = userSender.IdUser,
+                    Name = userSender.Name,
                     UrlAvatar = urlAvatar,
                     MessageDetailResponses = new List<MessageDetailResponse> { messageDetail }
                 };

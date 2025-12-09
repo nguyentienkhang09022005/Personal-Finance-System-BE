@@ -53,7 +53,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize]
         [HttpPost("create-friendship")]
         public async Task<IActionResult> AddFriendshipAsync([FromBody] FriendshipCreationRequest friendshipCreationRequest)
         {
