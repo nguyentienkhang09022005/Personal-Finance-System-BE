@@ -42,9 +42,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpDelete("delete-message")]
-        public async Task<IActionResult> DeleteMessageAsync([FromQuery] Guid idMessage)
+        public async Task<IActionResult> DeleteMessageAsync([FromQuery] Guid idFriendship)
         {
-            var result = await _messageHandler.DeleteMessageAsync(idMessage);
+            var result = await _messageHandler.DeleteMessageAsync(idFriendship);
             if (result.Success)
             {
                 return Ok(result);

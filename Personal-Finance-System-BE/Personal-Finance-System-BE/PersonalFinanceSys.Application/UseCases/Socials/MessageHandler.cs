@@ -98,12 +98,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             }
         }
 
-        public async Task<ApiResponse<string>> DeleteMessageAsync(Guid idMessage)
+        public async Task<ApiResponse<string>> DeleteMessageAsync(Guid idFriendship)
         {
             try
             {
-                await _messageRepository.DeleteMessageAsync(idMessage);
-                return ApiResponse<string>.SuccessResponse("Xóa tin nhắn thành công!", 200, string.Empty);
+                var friendship = await _friendshipRepository.GetExistFriendship(idFriendship);
+                if (friendship == null)
+                {
+                    return ApiResponse<string>.FailResponse("Không tìm thấy mối quan hệ bạn bè!", 404);
+                }
+
+                await _messageRepository.DeleteMessageAsync(idFriendship);
+                return ApiResponse<string>.SuccessResponse("Xóa toàn bộ tin nhắn thành công!", 200, string.Empty);
             }
             catch (Exception ex)
             {
@@ -117,7 +123,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             {
                 var friendship = await _friendshipRepository.GetExistFriendship(listMessageRequest.IdFriendship);
                 if (friendship == null){
-                    throw new Exception("Không tìm thấy mối quan hệ bạn bè!");
+                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy mối quan hệ bạn bè!", 404);
                 }
 
                 Guid idUser = (listMessageRequest.IdUser == friendship.IdUser)

@@ -35,12 +35,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<MessageDomain>(message);
         }
 
-        public async Task DeleteMessageAsync(Guid idMessage)
+        public async Task DeleteMessageAsync(Guid idFriendship)
         {
-            var message = await _context.Messages
-                .FindAsync(idMessage) ?? throw new NotFoundException("Không tìm thấy tin nhắn cần xóa!");
+            var messages = await _context.Messages
+                    .Where(m => m.IdFriendship == idFriendship)
+                    .ToListAsync();
 
-            _context.Messages.Remove(message);
+            if (messages == null || messages.Count == 0)
+            {
+                throw new NotFoundException("Không tìm thấy tin nhắn nào để xóa!");
+            }
+
+            _context.Messages.RemoveRange(messages);
             await _context.SaveChangesAsync();
         }
 
