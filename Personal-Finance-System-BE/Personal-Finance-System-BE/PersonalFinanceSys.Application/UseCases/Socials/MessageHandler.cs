@@ -5,6 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Notifications;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials
 {
@@ -111,25 +112,30 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             }
         }
 
-        public async Task<ApiResponse<MessageResponse>> GetListMessageAsync(Guid idFriendship)
+        public async Task<ApiResponse<MessageResponse>> GetListMessageAsync(ListMessageRequest listMessageRequest)
         {
             try
             {
-                var checkFriendshipExist = await _friendshipRepository.GetExistFriendship(idFriendship);
+                var checkFriendshipExist = await _friendshipRepository.GetExistFriendship(listMessageRequest.IdFriendship);
                 if (checkFriendshipExist == null){
                     throw new Exception("Không tìm thấy mối quan hệ bạn bè!");
                 }
 
-                var infRefUser = await _userRepository.GetUserByIdAsync(checkFriendshipExist.IdRef);
-                if (infRefUser == null){
-                    throw new Exception("Không tìm thấy thông tin người bạn!");
+                Guid idRef = (listMessageRequest.IdUser == checkFriendshipExist.IdUser) 
+                    ? checkFriendshipExist.IdRef 
+                    : checkFriendshipExist.IdUser;
+
+                var refInf = await _userRepository.GetUserByIdAsync(idRef);
+                if (refInf == null)
+                {
+                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy thông tin người dùng!", 404);
                 }
 
-                var messageDomains = await _messageRepository.GetListMessageAsync(idFriendship);
+                var urlAvatarRef = await _imageRepository.GetImageUrlByIdRefAsync(refInf.IdUser, ConstantTypeRef.TypeUser);
 
-                var UrlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(infRefUser.IdUser, ConstantTypeRef.TypeUser);
+                var messageDomains = await _messageRepository.GetListMessageAsync(listMessageRequest.IdFriendship);
 
-                var messageDetailResponse = messageDomains.Select(message => new MessageDetailResponse
+                var messageDetailResponses = messageDomains.Select(message => new MessageDetailResponse
                 {
                     IdMessage = message.IdMessage,
                     Content = message.Content,
@@ -139,10 +145,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
 
                 var result = new MessageResponse
                 {
-                    IdUser = infRefUser.IdUser,
-                    Name = infRefUser.Name,
-                    UrlAvatar = UrlAvatar,
-                    MessageDetailResponses = messageDetailResponse
+                    IdUser = refInf.IdUser,
+                    Name = refInf.Name,
+                    UrlAvatar = urlAvatarRef,
+                    MessageDetailResponses = messageDetailResponses
                 };
 
                 return ApiResponse<MessageResponse>.SuccessResponse("Lấy danh sách tin nhắn thành công!", 200, result);

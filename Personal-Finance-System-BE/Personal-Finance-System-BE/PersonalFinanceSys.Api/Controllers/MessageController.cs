@@ -16,11 +16,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _messageHandler = messageHandler;
         }
 
-        [Authorize]
         [HttpGet("list-message")]
-        public async Task<IActionResult> ListMessageAsync([FromQuery] Guid idFriendship)
+        public async Task<IActionResult> ListMessageAsync([FromQuery] ListMessageRequest request)
         {
-            var result = await _messageHandler.GetListMessageAsync(idFriendship);
+            var result = await _messageHandler.GetListMessageAsync(request);
             if (result.Success)
             {
                 return Ok(result);
@@ -28,6 +27,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("send-message")]
         public async Task<IActionResult> SendMessageAsync([FromBody] MessageRequest messageRequest)
         {
