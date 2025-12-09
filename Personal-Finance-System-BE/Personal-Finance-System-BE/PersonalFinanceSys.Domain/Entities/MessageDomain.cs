@@ -12,7 +12,7 @@
 
         public Guid? IdFriendship { get; set; }
 
-        public Guid? IdUser { get; set; }
+        public Guid IdUser { get; set; }
 
         public MessageDomain(){}
     }

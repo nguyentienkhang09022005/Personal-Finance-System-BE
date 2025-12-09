@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _messageHandler = messageHandler;
         }
 
+        [Authorize]
         [HttpGet("list-message")]
         public async Task<IActionResult> ListMessageAsync([FromQuery] ListMessageRequest request)
         {
@@ -41,9 +42,9 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
 
         [Authorize]
         [HttpDelete("delete-message")]
-        public async Task<IActionResult> DeleteMessageAsync([FromQuery] Guid idFriendship)
+        public async Task<IActionResult> DeleteMessageAsync([FromQuery] Guid idMessage)
         {
-            var result = await _messageHandler.DeleteMessageAsync(idFriendship);
+            var result = await _messageHandler.DeleteMessageAsync(idMessage);
             if (result.Success)
             {
                 return Ok(result);

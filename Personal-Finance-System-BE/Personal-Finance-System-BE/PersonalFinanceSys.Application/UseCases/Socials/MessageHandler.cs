@@ -111,7 +111,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             }
         }
 
-        public async Task<ApiResponse<ListMessageResponse>> GetListMessageAsync(ListMessageRequest listMessageRequest)
+        public async Task<ApiResponse<MessageResponse>> GetListMessageAsync(ListMessageRequest listMessageRequest)
         {
             try
             {
@@ -120,9 +120,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     throw new Exception("Không tìm thấy mối quan hệ bạn bè!");
                 }
 
-                Guid idUser = listMessageRequest.IdUser; 
-                
-                Guid idRef = (idUser == friendship.IdUser)
+                Guid idUser = (listMessageRequest.IdUser == friendship.IdUser)
                     ? friendship.IdRef
                     : friendship.IdUser;
 
@@ -130,45 +128,34 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 var userInf = await _userRepository.GetUserByIdAsync(idUser);
                 if (userInf == null)
                 {
-                    return ApiResponse<ListMessageResponse>.FailResponse("Không tìm thấy thông tin người dùng!", 404);
+                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy thông tin người dùng!", 404);
                 }
 
-                var urlAvatarUser = await _imageRepository.GetImageUrlByIdRefAsync(userInf.IdUser, ConstantTypeRef.TypeUser);
-
-                // Ref
-                var refInf = await _userRepository.GetUserByIdAsync(idRef);
-                if (refInf == null)
-                {
-                    return ApiResponse<ListMessageResponse>.FailResponse("Không tìm thấy thông tin bạn bè!", 404);
-                }
-
-                var urlAvatarRef = await _imageRepository.GetImageUrlByIdRefAsync(refInf.IdUser, ConstantTypeRef.TypeUser);
+                var urlAvatar = await _imageRepository.GetImageUrlByIdRefAsync(userInf.IdUser, ConstantTypeRef.TypeUser);
 
                 var messageDomains = await _messageRepository.GetListMessageAsync(listMessageRequest.IdFriendship);
 
                 var messageDetailResponses = messageDomains.Select(message => new MessageDetailResponse
                 {
                     IdMessage = message.IdMessage,
+                    IdSender = message.IdUser,
                     Content = message.Content,
                     SendAt = message.SendAt
                 }).ToList();
 
-                var result = new ListMessageResponse
+                var result = new MessageResponse
                 {
                     IdUser = userInf.IdUser,
-                    NameUser = userInf.Name,
-                    UrlAvatarUser = urlAvatarRef,
-                    IdRef = refInf.IdUser,
-                    NameRef = refInf.Name,
-                    UrlAvatarRef = urlAvatarRef,
+                    Name = userInf.Name,
+                    UrlAvatar = urlAvatar,
                     MessageDetailResponses = messageDetailResponses
                 };
 
-                return ApiResponse<ListMessageResponse>.SuccessResponse("Lấy danh sách tin nhắn thành công!", 200, result);
+                return ApiResponse<MessageResponse>.SuccessResponse("Lấy danh sách tin nhắn thành công!", 200, result);
             }
             catch (Exception ex)
             {
-                return ApiResponse<ListMessageResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+                return ApiResponse<MessageResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
     }
