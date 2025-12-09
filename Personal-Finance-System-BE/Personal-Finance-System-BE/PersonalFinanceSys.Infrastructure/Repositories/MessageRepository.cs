@@ -30,8 +30,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             message.IdMessage = Guid.NewGuid();
             message.SendAt = DateTime.UtcNow;
 
-            message.IsFriend = messageDomain.IdUser == friendship.IdRef;
-
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
             return _mapper.Map<MessageDomain>(message);

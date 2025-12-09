@@ -65,7 +65,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 {
                     IdMessage = savedMessage.IdMessage,
                     Content = savedMessage.Content,
-                    IsFriend = savedMessage.IsFriend,
                     SendAt = savedMessage.SendAt
                 };
 
@@ -112,23 +111,35 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
             }
         }
 
-        public async Task<ApiResponse<MessageResponse>> GetListMessageAsync(ListMessageRequest listMessageRequest)
+        public async Task<ApiResponse<ListMessageResponse>> GetListMessageAsync(ListMessageRequest listMessageRequest)
         {
             try
             {
-                var checkFriendshipExist = await _friendshipRepository.GetExistFriendship(listMessageRequest.IdFriendship);
-                if (checkFriendshipExist == null){
+                var friendship = await _friendshipRepository.GetExistFriendship(listMessageRequest.IdFriendship);
+                if (friendship == null){
                     throw new Exception("Không tìm thấy mối quan hệ bạn bè!");
                 }
 
-                Guid idRef = (listMessageRequest.IdUser == checkFriendshipExist.IdUser) 
-                    ? checkFriendshipExist.IdRef 
-                    : checkFriendshipExist.IdUser;
+                Guid idUser = listMessageRequest.IdUser; 
+                
+                Guid idRef = (idUser == friendship.IdUser)
+                    ? friendship.IdRef
+                    : friendship.IdUser;
 
+                // User
+                var userInf = await _userRepository.GetUserByIdAsync(idUser);
+                if (userInf == null)
+                {
+                    return ApiResponse<ListMessageResponse>.FailResponse("Không tìm thấy thông tin người dùng!", 404);
+                }
+
+                var urlAvatarUser = await _imageRepository.GetImageUrlByIdRefAsync(userInf.IdUser, ConstantTypeRef.TypeUser);
+
+                // Ref
                 var refInf = await _userRepository.GetUserByIdAsync(idRef);
                 if (refInf == null)
                 {
-                    return ApiResponse<MessageResponse>.FailResponse("Không tìm thấy thông tin người dùng!", 404);
+                    return ApiResponse<ListMessageResponse>.FailResponse("Không tìm thấy thông tin bạn bè!", 404);
                 }
 
                 var urlAvatarRef = await _imageRepository.GetImageUrlByIdRefAsync(refInf.IdUser, ConstantTypeRef.TypeUser);
@@ -139,23 +150,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 {
                     IdMessage = message.IdMessage,
                     Content = message.Content,
-                    IsFriend = message.IsFriend,
                     SendAt = message.SendAt
                 }).ToList();
 
-                var result = new MessageResponse
+                var result = new ListMessageResponse
                 {
-                    IdUser = refInf.IdUser,
-                    Name = refInf.Name,
-                    UrlAvatar = urlAvatarRef,
+                    IdUser = userInf.IdUser,
+                    NameUser = userInf.Name,
+                    UrlAvatarUser = urlAvatarRef,
+                    IdRef = refInf.IdUser,
+                    NameRef = refInf.Name,
+                    UrlAvatarRef = urlAvatarRef,
                     MessageDetailResponses = messageDetailResponses
                 };
 
-                return ApiResponse<MessageResponse>.SuccessResponse("Lấy danh sách tin nhắn thành công!", 200, result);
+                return ApiResponse<ListMessageResponse>.SuccessResponse("Lấy danh sách tin nhắn thành công!", 200, result);
             }
             catch (Exception ex)
             {
-                return ApiResponse<MessageResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+                return ApiResponse<ListMessageResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
     }

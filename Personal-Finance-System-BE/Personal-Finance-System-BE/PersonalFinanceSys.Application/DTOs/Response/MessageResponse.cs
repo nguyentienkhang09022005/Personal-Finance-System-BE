@@ -17,8 +17,23 @@
 
         public string Content { get; set; } = null!;
 
-        public bool? IsFriend { get; set; }
-
         public DateTime? SendAt { get; set; }
+    }
+
+    public class ListMessageResponse
+    {
+        public Guid IdUser { get; set; }
+
+        public string? NameUser { get; set; }
+
+        public string? UrlAvatarUser { get; set; }
+
+        public Guid IdRef { get; set; }
+
+        public string? NameRef { get; set; }
+
+        public string? UrlAvatarRef { get; set; }
+
+        public List<MessageDetailResponse>? MessageDetailResponses { get; set; }
     }
 }
