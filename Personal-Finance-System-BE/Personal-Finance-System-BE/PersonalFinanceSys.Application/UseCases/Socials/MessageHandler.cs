@@ -64,6 +64,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                 var messageDetail = new MessageDetailResponse
                 {
                     IdMessage = savedMessage.IdMessage,
+                    IdSender = userSender.IdUser,
                     Content = savedMessage.Content,
                     SendAt = savedMessage.SendAt
                 };
