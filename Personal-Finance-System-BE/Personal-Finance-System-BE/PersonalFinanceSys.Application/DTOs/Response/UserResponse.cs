@@ -14,7 +14,7 @@
 
         public string? Address { get; set; }
 
-        public string UrlAvatar { get; set; }
+        public string? UrlAvatar { get; set; }
 
         public bool? IsActive { get; set; }
 

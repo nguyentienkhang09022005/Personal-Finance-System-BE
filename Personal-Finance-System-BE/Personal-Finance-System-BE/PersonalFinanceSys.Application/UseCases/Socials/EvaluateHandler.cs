@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Request;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositories;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Socials
 {
@@ -11,16 +14,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
         private readonly IEvaluateRepository _evaluateRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPostRepository _postRepository;
+        private readonly IImageRepository _imageRepository;
         private readonly IMapper _mapper;
 
         public EvaluateHandler(IEvaluateRepository evaluateRepository, 
                                IUserRepository userRepository, 
                                IPostRepository postRepository, 
+                               IImageRepository imageRepository,
                                IMapper mapper)
         {
             _evaluateRepository = evaluateRepository;
             _userRepository = userRepository;
             _postRepository = postRepository;
+            _imageRepository = imageRepository;
             _mapper = mapper;
         }
 
@@ -115,13 +121,26 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     };
                 }
 
-                var evaluateResponses = evaluateDomains.Select(evaluate => new EvaluateResponse
+                var evaluateResponses = new List<EvaluateResponse>();
+
+                foreach (var evaluate in evaluateDomains)
                 {
-                    IdEvaluate = evaluate.IdEvaluate,
-                    Star = evaluate.Star,
-                    Comment = evaluate.Comment,
-                    CreateAt = evaluate.CreateAt
-                }).ToList();
+                    var avatarUser = await _imageRepository
+                        .GetImageUrlByIdRefAsync(evaluate.IdUser, ConstantTypeRef.TypeUser);
+
+                    var response = new EvaluateResponse
+                    {
+                        IdEvaluate = evaluate.IdEvaluate,
+                        idUser = evaluate.IdUser,
+                        Name = evaluate.IdUserNavigation?.Name,
+                        UrlAvatar = avatarUser ?? string.Empty,
+                        Star = evaluate.Star,
+                        Comment = evaluate.Comment,
+                        CreateAt = evaluate.CreateAt
+                    };
+
+                    evaluateResponses.Add(response);
+                }
 
                 var totalComments = evaluateResponses.Count;
                 var averageStars = evaluateResponses.Average(e => e.Star ?? 0);

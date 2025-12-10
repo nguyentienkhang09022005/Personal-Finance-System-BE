@@ -1,4 +1,6 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
+﻿using Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data.Entities;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
 {
     public class EvaluateDomain
     {
@@ -12,7 +14,9 @@
 
         public Guid? IdPost { get; set; }
 
-        public Guid? IdUser { get; set; }
+        public Guid IdUser { get; set; }
+
+        public virtual User? IdUserNavigation { get; set; }
 
         public EvaluateDomain(int star)
         {

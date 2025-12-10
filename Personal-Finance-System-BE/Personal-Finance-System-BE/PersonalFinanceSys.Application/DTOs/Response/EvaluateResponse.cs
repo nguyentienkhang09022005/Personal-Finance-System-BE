@@ -4,6 +4,12 @@
     {
         public Guid IdEvaluate { get; set; }
 
+        public Guid? idUser { get; set; }
+
+        public string? Name { get; set; }
+
+        public string? UrlAvatar { get; set; }
+
         public int? Star { get; set; }
 
         public string? Comment { get; set; }

@@ -71,7 +71,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<InvestmentDetailDomain>>(
                 await context.InvestmentDetails
                 .Include(d => d.IdAssetNavigation)
-                .ThenInclude(a => a.IdFundNavigation)
+                    .ThenInclude(a => a.IdFundNavigation)
                 .Where(d => d.IdAssetNavigation.IdFundNavigation.IdUser == idUser)
                 .AsNoTracking()
                 .ToListAsync());

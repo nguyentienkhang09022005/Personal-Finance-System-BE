@@ -59,6 +59,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
         {
             var evaluates = _context.Evaluates
                 .Where(e => e.IdPost == idPost)
+                .Include(e => e.IdUserNavigation)
                 .AsNoTracking()
                 .ToList();
             return _mapper.Map<List<EvaluateDomain>>(evaluates);
