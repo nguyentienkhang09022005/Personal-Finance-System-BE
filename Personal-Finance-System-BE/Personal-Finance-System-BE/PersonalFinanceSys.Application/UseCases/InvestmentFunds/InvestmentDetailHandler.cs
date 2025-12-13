@@ -258,13 +258,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByYearRequest.Id);
+                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(compareInvestmentDetailByYearRequest.IdAsset);
                 if (!checkAssetExist){
                     return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy tài sản!", 404);
                 }
 
                 var investmentDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndYearsAsync(
                     compareInvestmentDetailByYearRequest.IdUser,
+                    compareInvestmentDetailByYearRequest.IdAsset,
                     new[] { compareInvestmentDetailByYearRequest.Year1, compareInvestmentDetailByYearRequest.Year2 });
 
                 if (!investmentDetails.Any()){
@@ -309,13 +310,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByMonthRequest.IdAsset);
-                if (checkAssetExist){
+                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(compareInvestmentDetailByMonthRequest.IdAsset);
+                if (!checkAssetExist){
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy tài sản!", 404);
                 }
 
                 var investmentsDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndMonthsAsync(
                     compareInvestmentDetailByMonthRequest.IdUser,
+                    compareInvestmentDetailByMonthRequest.IdAsset,
                     new[]
                     {
                         (compareInvestmentDetailByMonthRequest.FirstMonth, compareInvestmentDetailByMonthRequest.FirstYear),

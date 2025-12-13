@@ -77,8 +77,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
                 .ToListAsync());
         }
 
-        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndMonthsAsync(Guid idUser,
-                                                                                                (int month, int year)[] periods)
+        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndMonthsAsync(Guid idUser, Guid idAsset, (int month, int year)[] periods)
         {
             await using var context = _contextFactory.CreateDbContext();
 
@@ -86,7 +85,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             var details = await context.InvestmentDetails
                 .Include(d => d.IdAssetNavigation)
                 .ThenInclude(a => a.IdFundNavigation)
-                .Where(d => d.IdAssetNavigation.IdFundNavigation.IdUser == idUser && d.CreateAt.HasValue)
+                .Where(d =>
+                    d.IdAsset == idAsset &&
+                    d.IdAssetNavigation.IdFundNavigation.IdUser == idUser && 
+                    d.CreateAt.HasValue)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -98,18 +100,18 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Repositor
             return _mapper.Map<List<InvestmentDetailDomain>>(filtered);
         }
 
-        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndYearsAsync(
-            Guid idUser,
-            int[] years)
+        public async Task<List<InvestmentDetailDomain>> GetInvestmentDetailsByUserAndYearsAsync(Guid idUser, Guid idAsset, int[] years)
         {
             await using var context = _contextFactory.CreateDbContext();
 
             var details = await context.InvestmentDetails
                 .Include(d => d.IdAssetNavigation)
-                .ThenInclude(a => a.IdFundNavigation)
-                .Where(d => d.IdAssetNavigation.IdFundNavigation.IdUser == idUser
-                            && d.CreateAt.HasValue
-                            && years.Contains(d.CreateAt.Value.Year))
+                    .ThenInclude(a => a.IdFundNavigation)
+                .Where(d =>
+                    d.IdAsset == idAsset &&
+                    d.IdAssetNavigation.IdFundNavigation.IdUser == idUser && 
+                    d.CreateAt.HasValue && 
+                    years.Contains(d.CreateAt.Value.Year))
                 .AsNoTracking()
                 .ToListAsync();
 

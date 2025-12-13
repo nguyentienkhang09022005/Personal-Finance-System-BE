@@ -8,6 +8,6 @@
 
         public Guid IdUser { get; set; }
 
-        public string? Id { get; set; }
+        public Guid IdAsset { get; set; }
     }
 }
