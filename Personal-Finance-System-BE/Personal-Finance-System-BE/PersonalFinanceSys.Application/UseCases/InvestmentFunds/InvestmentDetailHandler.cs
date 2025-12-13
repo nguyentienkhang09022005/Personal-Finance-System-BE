@@ -309,7 +309,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByMonthRequest.Id);
+                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByMonthRequest.IdAsset);
                 if (!checkAssetExist){
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy tài sản!", 404);
                 }
