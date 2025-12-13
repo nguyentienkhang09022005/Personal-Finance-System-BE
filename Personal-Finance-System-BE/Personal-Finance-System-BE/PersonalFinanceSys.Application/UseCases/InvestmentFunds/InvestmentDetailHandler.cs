@@ -310,7 +310,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 }
 
                 var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAsync(compareInvestmentDetailByMonthRequest.IdAsset);
-                if (!checkAssetExist){
+                if (checkAssetExist){
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy tài sản!", 404);
                 }
 
