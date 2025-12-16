@@ -266,7 +266,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Soc
                     IdRelated = friendshipDomain.IdRef,
                     NotificationType = ConstantNotificationType.FriendshipType,
                     Title = "Lời mời được chấp nhận",
-                    Content = $"Lời mời kết bạn của bạn đã được chấp nhận bởi người dùng {friendshipDomain.IdRef}.",
+                    Content = $"Lời mời kết bạn của bạn đã được chấp nhận bởi người dùng {friendshipDomain.IdRefNavigation?.Name}.",
                     RelatedType = ConstantNotificationType.FriendshipType,
                 };
 
