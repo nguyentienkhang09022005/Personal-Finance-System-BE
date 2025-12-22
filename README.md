@@ -131,33 +131,89 @@ src/
 ```
 
 🚀 Bắt đầu nhanh (Local Development)
-Yêu cầu
+📋 Yêu cầu hệ thống
 
-.NET 8.0 SDK
+.NET SDK 8.0
 PostgreSQL 15+
 Redis (chạy local hoặc Docker)
-Tài khoản Google Gemini API
-Tài khoản ZaloPay Sandbox (để test thanh toán)
+Google Gemini API Key
+ZaloPay Sandbox Account (để test thanh toán)
 
-Các bước chi tiết
-
-Clone repositoryBashgit clone https://github.com/nguyentienkhang09022005/Personal-Finance-System-BE.git
+⚙️ Các bước chạy project
+1️⃣ Clone repository
+git clone https://github.com/nguyentienkhang09022005/Personal-Finance-System-BE.git
 cd Personal-Finance-System-BE
-Cấu hình appsettings.Development.json
-Sao chép file mẫu và điền các key bí mật:Bashcp PersonalFinanceSys.Api/appsettings.Development.json.example PersonalFinanceSys.Api/appsettings.Development.json(Chỉnh sửa các giá trị như ConnectionString, Redis, Jwt Secret, Gemini ApiKey, ZaloPay credentials...)
-Chạy migrations để tạo databaseBashcd PersonalFinanceSys.Api
+
+2️⃣ Cấu hình môi trường (Environment)
+
+Sao chép file cấu hình mẫu:
+
+cp src/PersonalFinanceSys.Api/appsettings.Development.json.example \
+   src/PersonalFinanceSys.Api/appsettings.Development.json
+
+
+Mở file vừa tạo và chỉnh các giá trị cần thiết:
+
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=walleto_db;Username=postgres;Password=your_password"
+  },
+
+  "Jwt": {
+    "Key": "your-secret-key",
+    "Issuer": "Walleto",
+    "Audience": "Walleto.Client"
+  },
+
+  "Redis": {
+    "ConnectionString": "localhost:6379"
+  },
+
+  "Gemini": {
+    "ApiKey": "your-gemini-api-key"
+  },
+
+  "ZaloPay": {
+    "AppId": "your-app-id",
+    "Key1": "your-key1",
+    "Key2": "your-key2"
+  }
+}
+
+
+⚠️ Lưu ý:
+
+Không commit file chứa secret
+
+Nên dùng appsettings.Development.json cho môi trường local
+
+3️⃣ Chạy Redis (nếu chưa có)
+
+Dùng Docker (khuyến nghị):
+
+docker run -d --name redis -p 6379:6379 redis
+
+
+Hoặc đảm bảo Redis đang chạy trên localhost:6379.
+
+4️⃣ Chạy migration & tạo database
+cd src/PersonalFinanceSys.Api
 dotnet ef database update --project ../PersonalFinanceSys.Infrastructure
-Khởi động dự ánBashdotnet run --project PersonalFinanceSys.ApiAPI sẽ chạy tại: https://localhost:7001 (hoặc http://localhost:5000)
-Kiểm tra health checktextGET https://localhost:7001/health
+
+5️⃣ Khởi động backend API
+dotnet run --project PersonalFinanceSys.Api
+
+6️⃣ Kiểm tra Health Check
+GET https://localhost:7001/health
 
 📍 API Documentation
-Sau khi chạy, truy cập Swagger UI để xem đầy đủ endpoints:
-https://localhost:7079/swagger/index.html
+
+Sau khi chạy thành công, truy cập Swagger UI:
+
+https://localhost:7001/swagger
+
 🧪 Testing
-Đang bổ sung unit test & integration test:
-Bashdotnet test
-📄 License
-Dự án sử dụng MIT License – tự do sử dụng, sửa đổi và phân phối.
-🤝 Đóng góp
-Rất hoan nghênh mọi đóng góp!
-Vui lòng fork repo → tạo branch mới → commit → push → tạo Pull Request.
+
+Chạy toàn bộ unit test & integration test:
+
+dotnet test
