@@ -51,13 +51,23 @@
 
 ## 🏗️ Kiến trúc hệ thống
 
-Dự án tuân thủ nghiêm ngặt **Clean Architecture (Onion Architecture)**:
-PersonalFinanceSys/
-├── PersonalFinanceSys.Domain          → Entities, Value Objects
-├── PersonalFinanceSys.Application     → Use Cases, Interfaces, DTOs, Handlers
-├── PersonalFinanceSys.Infrastructure → EF Core, Repositories, External Services (Gemini, ZaloPay, SignalR)
-└── PersonalFinanceSys.Api             → Controllers, Middleware, Program.cs
+```text
+Dự án tuân thủ nghiêm ngặt Clean Architecture (Onion Architecture):
 
+PersonalFinanceSys/
+├── PersonalFinanceSys.Domain
+│   └── Entities, Value Objects
+│
+├── PersonalFinanceSys.Application
+│   └── Use Cases, Interfaces, DTOs, Handlers
+│
+├── PersonalFinanceSys.Infrastructure
+│   └── EF Core, Repositories, External Services
+│       (Google Gemini, ZaloPay, SignalR)
+│
+└── PersonalFinanceSys.Api
+    └── Controllers, Middleware, Program.cs
+```
 
 ### Các pattern quan trọng
 - Repository Pattern
@@ -84,25 +94,41 @@ PersonalFinanceSys/
 | Storage ảnh     | Cloudinary (có thể thay bằng AWS S3)                                       |
 
 ## 📦 Cấu trúc thư mục
+```text
 src/
 ├── PersonalFinanceSys.Domain/
 │   └── Entities/
+│
 ├── PersonalFinanceSys.Application/
 │   ├── DTOs/
 │   ├── Interfaces/
-│   ├── UseCases/           ← Auth, Transaction, Investment, AI, Payment, Social...
+│   ├── UseCases/
+│   │   ├── Auth/
+│   │   ├── Transaction/
+│   │   ├── Investment/
+│   │   ├── AI/
+│   │   ├── Payment/
+│   │   └── Social/
 │   └── Mappings/
+│
 ├── PersonalFinanceSys.Infrastructure/
-│   ├── Data/               ← AppDbContext, Migrations
+│   ├── Data/
+│   │   ├── AppDbContext.cs
+│   │   └── Migrations/
 │   ├── Repositories/
-│   └── Services/           ← GeminiService, ZaloPayService, SignalRService...
+│   └── Services/
+│       ├── GeminiService.cs
+│       ├── ZaloPayService.cs
+│       └── SignalRService.cs
+│
 ├── PersonalFinanceSys.Api/
 │   ├── Controllers/
-│   ├── Hubs/               ← SignalR Hubs
+│   ├── Hubs/
 │   └── Program.cs
+│
 └── tests/
-└── PersonalFinanceSys.Tests/
-
+    └── PersonalFinanceSys.Tests/
+```
 
 ## 🚀 Bắt đầu nhanh (Local Development)
 
