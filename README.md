@@ -52,3 +52,69 @@
 ## 🏗️ Kiến trúc hệ thống
 
 Dự án tuân thủ nghiêm ngặt **Clean Architecture (Onion Architecture)**:
+PersonalFinanceSys/
+├── PersonalFinanceSys.Domain          → Entities, Value Objects
+├── PersonalFinanceSys.Application     → Use Cases, Interfaces, DTOs, Handlers
+├── PersonalFinanceSys.Infrastructure → EF Core, Repositories, External Services (Gemini, ZaloPay, SignalR)
+└── PersonalFinanceSys.Api             → Controllers, Middleware, Program.cs
+
+
+### Các pattern quan trọng
+- Repository Pattern
+- Handler / Use Case Pattern (Thin Controller)
+- Data Aggregation cho AI
+- AutoMapper cho DTO mapping
+- Standardized ApiResponse<T>
+
+## 🛠️ Công nghệ sử dụng
+
+| Layer           | Technology                                                                 |
+|-----------------|----------------------------------------------------------------------------|
+| Runtime         | .NET 8.0                                                                   |
+| Web API         | ASP.NET Core                                                               |
+| ORM             | Entity Framework Core                                                      |
+| Database        | PostgreSQL                                                                 |
+| Cache / Realtime| Redis                                                                      |
+| Authentication  | JWT + Refresh Token + BCrypt                                               |
+| Realtime        | SignalR                                                                    |
+| AI              | Google Gemini API                                                          |
+| Payment         | ZaloPay SDK (HMAC-SHA256)                                                  |
+| Email           | FluentEmail / SendGrid                                                     |
+| Hosting         | Railway / Docker                                                           |
+| Storage ảnh     | Cloudinary (có thể thay bằng AWS S3)                                       |
+
+## 📦 Cấu trúc thư mục
+src/
+├── PersonalFinanceSys.Domain/
+│   └── Entities/
+├── PersonalFinanceSys.Application/
+│   ├── DTOs/
+│   ├── Interfaces/
+│   ├── UseCases/           ← Auth, Transaction, Investment, AI, Payment, Social...
+│   └── Mappings/
+├── PersonalFinanceSys.Infrastructure/
+│   ├── Data/               ← AppDbContext, Migrations
+│   ├── Repositories/
+│   └── Services/           ← GeminiService, ZaloPayService, SignalRService...
+├── PersonalFinanceSys.Api/
+│   ├── Controllers/
+│   ├── Hubs/               ← SignalR Hubs
+│   └── Program.cs
+└── tests/
+└── PersonalFinanceSys.Tests/
+
+
+## 🚀 Bắt đầu nhanh (Local Development)
+
+### Yêu cầu
+- .NET 8.0 SDK
+- PostgreSQL 15+
+- Redis
+- Tài khoản Google Gemini API
+- Tài khoản ZaloPay Sandbox (nếu test thanh toán)
+
+### Các bước
+
+1. **Clone repository**
+```bash
+https://github.com/nguyentienkhang09022005/Personal-Finance-System-BE.git
