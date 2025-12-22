@@ -130,17 +130,34 @@ src/
     └── PersonalFinanceSys.Tests/
 ```
 
-## 🚀 Bắt đầu nhanh (Local Development)
+🚀 Bắt đầu nhanh (Local Development)
+Yêu cầu
 
-### Yêu cầu
-- .NET 8.0 SDK
-- PostgreSQL 15+
-- Redis
-- Tài khoản Google Gemini API
-- Tài khoản ZaloPay Sandbox (nếu test thanh toán)
+.NET 8.0 SDK
+PostgreSQL 15+
+Redis (chạy local hoặc Docker)
+Tài khoản Google Gemini API
+Tài khoản ZaloPay Sandbox (để test thanh toán)
 
-### Các bước
+Các bước chi tiết
 
-1. **Clone repository**
-```bash
-https://github.com/nguyentienkhang09022005/Personal-Finance-System-BE.git
+Clone repositoryBashgit clone https://github.com/nguyentienkhang09022005/Personal-Finance-System-BE.git
+cd Personal-Finance-System-BE
+Cấu hình appsettings.Development.json
+Sao chép file mẫu và điền các key bí mật:Bashcp PersonalFinanceSys.Api/appsettings.Development.json.example PersonalFinanceSys.Api/appsettings.Development.json(Chỉnh sửa các giá trị như ConnectionString, Redis, Jwt Secret, Gemini ApiKey, ZaloPay credentials...)
+Chạy migrations để tạo databaseBashcd PersonalFinanceSys.Api
+dotnet ef database update --project ../PersonalFinanceSys.Infrastructure
+Khởi động dự ánBashdotnet run --project PersonalFinanceSys.ApiAPI sẽ chạy tại: https://localhost:7001 (hoặc http://localhost:5000)
+Kiểm tra health checktextGET https://localhost:7001/health
+
+📍 API Documentation
+Sau khi chạy, truy cập Swagger UI để xem đầy đủ endpoints:
+https://localhost:7079/swagger/index.html
+🧪 Testing
+Đang bổ sung unit test & integration test:
+Bashdotnet test
+📄 License
+Dự án sử dụng MIT License – tự do sử dụng, sửa đổi và phân phối.
+🤝 Đóng góp
+Rất hoan nghênh mọi đóng góp!
+Vui lòng fork repo → tạo branch mới → commit → push → tạo Pull Request.
