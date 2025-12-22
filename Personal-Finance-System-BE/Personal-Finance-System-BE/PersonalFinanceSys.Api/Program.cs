@@ -193,7 +193,7 @@ builder.Services.AddCors(options =>
         //policy.WithOrigins("http://localhost:3000", 
         //                   "http://127.0.0.1:5500", 
         //                   "https://portfolio-management-fi.vercel.app") 
-        policy.SetIsOriginAllowed(origin => true) 
+        policy.SetIsOriginAllowed(origin => true)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Allow send Cookie
@@ -246,7 +246,7 @@ builder.Services.AddAuthentication(options =>
             var path = context.HttpContext.Request.Path;
 
 
-            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs/notification") 
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs/notification")
                                                     || path.StartsWithSegments("/hubs/message")))
             {
                 context.Token = accessToken;
