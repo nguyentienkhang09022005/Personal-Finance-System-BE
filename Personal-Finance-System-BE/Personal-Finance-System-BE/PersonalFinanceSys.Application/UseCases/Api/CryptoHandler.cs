@@ -14,6 +14,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
         {
             Env.Load();
             _httpClient = httpClient;
+
+            if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+            {
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "PersonalFinanceSystem/1.0");
+            }
+
             _urlListCrypto = Env.GetString("URL__CRYPTO") ?? throw new Exception("Không tìm thấy key trong .env!");
             _urlInfCrypto = Env.GetString("URL__CRYPTOINF") ?? throw new Exception("Không tìm thấy key trong .env!");
             _apiKey = Env.GetString("API__KEYCRYPTO") ?? throw new Exception("Không tìm thấy key trong .env!");
@@ -23,26 +29,34 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
         {
             try
             {
-                string urlList = $"{_urlListCrypto}{_apiKey}";
+                string urlList = _urlListCrypto;
 
-                var response = await _httpClient.GetAsync(urlList);
+                string separator = urlList.Contains("?") ? "&" : "?";
+
+                string finalUrl = $"{urlList}{separator}x_cg_demo_api_key={_apiKey}";
+
+                var response = await _httpClient.GetAsync(finalUrl);
+
                 if (!response.IsSuccessStatusCode)
-                    return ApiResponse<List<CryptoResponse>>.FailResponse("Không thể kết nối đến máy chủ lấy danh sách crypto",
-                                                                              (int)response.StatusCode);
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return ApiResponse<List<CryptoResponse>>.FailResponse(
+                        $"Lỗi kết nối API Crypto: {response.ReasonPhrase}. Chi tiết: {errorContent}",
+                        (int)response.StatusCode);
+                }
 
-                // Chuyển đổi qua Json
                 var apiResult = await response.Content.ReadFromJsonAsync<List<CryptoResponse>>();
 
                 if (apiResult == null)
                 {
-                    return ApiResponse<List<CryptoResponse>>.FailResponse("Phản hồi API không hợp lệ!", 404);
+                    return ApiResponse<List<CryptoResponse>>.FailResponse("Dữ liệu trả về rỗng!", 404);
                 }
 
-                return ApiResponse<List<CryptoResponse>>.SuccessResponse("Gọi api thành công!", 200, apiResult);
+                return ApiResponse<List<CryptoResponse>>.SuccessResponse("Lấy danh sách thành công!", 200, apiResult);
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<CryptoResponse>>.FailResponse(ex.Message, 500);
+                return ApiResponse<List<CryptoResponse>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
 
@@ -51,20 +65,25 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
             try
             {
                 string urlInf = $"{_urlInfCrypto}{idCrypto}?x_cg_demo_api_key={_apiKey}";
-                var response = await _httpClient.GetAsync(urlInf);
-                if (!response.IsSuccessStatusCode)
-                    return ApiResponse<InfCryptoResponse>.FailResponse("Không thể kết nối đến máy chủ lấy danh sách crypto",
-                                                                              (int)response.StatusCode);
 
-                // Chuyển đổi qua Json
+                var response = await _httpClient.GetAsync(urlInf);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return ApiResponse<InfCryptoResponse>.FailResponse(
+                        $"Lỗi lấy chi tiết Crypto: {response.ReasonPhrase}. Chi tiết: {errorContent}",
+                        (int)response.StatusCode);
+                }
+
                 var apiResult = await response.Content.ReadFromJsonAsync<InfCryptoResponse>();
 
                 if (apiResult == null)
                 {
-                    return ApiResponse<InfCryptoResponse>.FailResponse("Phản hồi API không hợp lệ!", 404);
+                    return ApiResponse<InfCryptoResponse>.FailResponse("Dữ liệu trả về rỗng!", 404);
                 }
 
-                return ApiResponse<InfCryptoResponse>.SuccessResponse("Gọi api thành công!", 200, apiResult);
+                return ApiResponse<InfCryptoResponse>.SuccessResponse("Lấy chi tiết thành công!", 200, apiResult);
             }
             catch (Exception ex)
             {
