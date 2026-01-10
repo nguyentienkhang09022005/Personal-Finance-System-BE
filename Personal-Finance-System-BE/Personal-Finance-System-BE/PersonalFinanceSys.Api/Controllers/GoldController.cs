@@ -14,6 +14,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _goldHandler = goldHandler;
         }
 
+        [HttpGet("all-price-gold")]
+        public async Task<IActionResult> GetAllPriceGold()
+        {
+            var result = await _goldHandler.GetAllGoldPricesAsync();
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("price-gold-sjc")]
         public async Task<IActionResult> GetPriceGoldSjc()
         {

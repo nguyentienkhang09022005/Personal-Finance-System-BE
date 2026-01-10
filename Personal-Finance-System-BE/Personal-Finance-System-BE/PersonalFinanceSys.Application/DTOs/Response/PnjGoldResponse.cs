@@ -10,6 +10,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
 
     public class PnjGoldItemResponse
     {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
         [JsonPropertyName("buy_nhan_24k")]
         public decimal? BuyNhan24K { get; set; }
 

@@ -10,6 +10,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
 
     public class DojiGoldItemResponse
     {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
         [JsonPropertyName("buy_hn")]
         public decimal? BuyHaNoi { get; set; }
 

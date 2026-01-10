@@ -19,6 +19,42 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
             _urlPNJ = configuration["GoldSettings:UrlPNJ"] ?? throw new ArgumentNullException("GoldSettings:UrlPNJ");
         }
 
+        public async Task<ApiResponse<GoldResponse>> GetAllGoldPricesAsync()
+        {
+            try
+            {
+                var sjcTask = GetSJCGoldPricesAsync();
+                var dojiTask = GetDOJIGoldPricesAsync();
+                var pnjTask = GetPNJGoldPricesAsync();
+
+                await Task.WhenAll(sjcTask, dojiTask, pnjTask);
+
+                var sjcResult = await sjcTask;
+                var dojiResult = await dojiTask;
+                var pnjResult = await pnjTask;
+
+                var allGoldData = new GoldResponse
+                {
+                    SjcGold = sjcResult.Data?.Results,
+
+                    DojiGold = dojiResult.Data?.Results,
+
+                    PnjGold = pnjResult.Data?.Results
+                };
+
+                if (allGoldData.SjcGold == null && allGoldData.DojiGold == null && allGoldData.PnjGold == null)
+                {
+                    return ApiResponse<GoldResponse>.FailResponse("Không thể lấy dữ liệu từ bất kỳ nguồn nào.", 500);
+                }
+
+                return ApiResponse<GoldResponse>.SuccessResponse("Lấy tổng hợp giá vàng thành công!", 200, allGoldData);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<GoldResponse>.FailResponse($"Lỗi tổng hợp giá vàng: {ex.Message}", 500);
+            }
+        }
+
         public async Task<ApiResponse<SjcGoldResponse>> GetSJCGoldPricesAsync()
         {
             try
@@ -35,10 +71,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
                 }
 
                 var apiResult = await response.Content.ReadFromJsonAsync<SjcGoldResponse>();
-
+                
                 if (apiResult == null)
                 {
                     return ApiResponse<SjcGoldResponse>.FailResponse("Dữ liệu giá vàng SJC rỗng!", 404);
+                }
+
+                foreach (var item in apiResult.Results)
+                {
+                    item.Id = "SJC";
+                    item.Name = "Vàng SJC";
                 }
 
                 return ApiResponse<SjcGoldResponse>.SuccessResponse("Lấy giá vàng SJC thành công!", 200, apiResult);
@@ -65,10 +107,16 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
                 }
 
                 var apiResult = await response.Content.ReadFromJsonAsync<DojiGoldResponse>();
-
+                
                 if (apiResult == null)
                 {
                     return ApiResponse<DojiGoldResponse>.FailResponse("Dữ liệu giá vàng DOJI rỗng!", 404);
+                }
+
+                foreach (var item in apiResult.Results)
+                {
+                    item.Id = "DOJI";
+                    item.Name = "Vàng DOJI";
                 }
 
                 return ApiResponse<DojiGoldResponse>.SuccessResponse("Lấy giá vàng DOJI thành công!", 200, apiResult);
@@ -99,6 +147,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
                 if (apiResult == null)
                 {
                     return ApiResponse<PnjGoldResponse>.FailResponse("Dữ liệu giá vàng PNJ rỗng!", 404);
+                }
+
+                foreach (var item in apiResult.Results)
+                {
+                    item.Id = "PNJ";
+                    item.Name = "Vàng PNJ";
                 }
 
                 return ApiResponse<PnjGoldResponse>.SuccessResponse("Lấy giá vàng PNJ thành công!", 200, apiResult);

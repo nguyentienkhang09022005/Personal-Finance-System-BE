@@ -1,4 +1,6 @@
-﻿namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response
+﻿using System.Text.Json.Serialization;
+
+namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response
 {
     public class InvestmentAssetResponse
     {
@@ -8,12 +10,22 @@
 
         public decimal TotalProfitAndLoss { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<AverageFinanceAssetResponse> AverageFinanceAssets { get; set; }
 
-        public List<ListInvestmentAssetResponse> listInvestmentAssetResponse { get; set; }
+        public List<ListInvestmentAssetCryptoResponse> listInvestmentAssetResponse { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public List<SjcGoldItemResponse>? SjcGoldResponse { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public List<DojiGoldItemResponse>? DojiGoldResponse { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public List<PnjGoldItemResponse>? PnjGoldResponse { get; set; }
     }
 
-    public class ListInvestmentAssetResponse
+    public class ListInvestmentAssetCryptoResponse
     {
         public Guid IdAsset { get; set; }
 

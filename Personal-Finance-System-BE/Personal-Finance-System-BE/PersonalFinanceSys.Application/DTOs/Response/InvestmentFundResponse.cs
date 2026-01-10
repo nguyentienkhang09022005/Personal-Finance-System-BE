@@ -10,7 +10,7 @@
 
         public DateTime? CreateAt { get; set; }
 
-        public List<ListInvestmentAssetResponse> listInvestmentAssetResponses { get; set; }
+        public List<ListInvestmentAssetCryptoResponse> listInvestmentAssetResponses { get; set; }
     }
 
     public class CalculateTotalFinanceAndProfitResponse
@@ -28,8 +28,9 @@
     public class AverageFinanceAssetResponse
     {
         public string AssetName { get; set; }
+
         public decimal AverageFinance { get; set; }  
+
         public decimal PercentageInPortfolio { get; set; }
     }
-
 }

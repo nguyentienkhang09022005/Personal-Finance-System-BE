@@ -6,7 +6,7 @@
 
         public required string AssetName { get; set; }
 
-        public required string AssetSymbol { get; set; }
+        public string AssetSymbol { get; set; }
 
         public Guid IdFund { get; set; }
     }

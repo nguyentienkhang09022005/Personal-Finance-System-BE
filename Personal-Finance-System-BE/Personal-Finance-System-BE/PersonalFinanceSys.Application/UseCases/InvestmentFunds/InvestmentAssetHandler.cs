@@ -5,6 +5,7 @@ using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.Interfaces;
 using Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api;
 using Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities;
+using SendGrid;
 using SendGrid.Helpers.Errors.Model;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.InvestmentFund
@@ -14,26 +15,29 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         private readonly IInvestmentAssetRepository _investmentAssetRepository;
         private readonly IInvestmentFundRepository _investmentFundRepository;
         private readonly CryptoHandler _cryptoHandler;
+        private readonly GoldHandler _goldHandler;
         private readonly InvestmentDetailHandler _investmentDetailHandler;
         private readonly IMapper _mapper;
         private readonly ILogger<InvestmentAssetHandler> _logger;
 
         public InvestmentAssetHandler(IInvestmentAssetRepository investmentAssetRepository, 
-                                      IMapper mapper,
                                       IInvestmentFundRepository investmentFundRepository,
                                       CryptoHandler cryptoHandler,
+                                      GoldHandler goldHandler,
                                       InvestmentDetailHandler investmentDetailHandler,
-                                      ILogger<InvestmentAssetHandler> logger)
+                                      ILogger<InvestmentAssetHandler> logger,
+                                      IMapper mapper)
         {
             _investmentAssetRepository = investmentAssetRepository;
-            _mapper = mapper;
             _investmentFundRepository = investmentFundRepository;
             _cryptoHandler = cryptoHandler;
+            _goldHandler = goldHandler;
             _investmentDetailHandler = investmentDetailHandler;
             _logger = logger;
+            _mapper = mapper;
         }
 
-        public async Task<ApiResponse<List<ListInvestmentAssetResponse>>> ListInvestmentAssetAsync(Guid idUser)
+        public async Task<ApiResponse<InvestmentAssetResponse>> ListInvestmentAssetAsync(Guid idUser)
         {
             try
             {
@@ -41,19 +45,37 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                 var listCryptoAsync = await _cryptoHandler.GetListCryptoAsync();
                 if (listCryptoAsync?.Data == null)
-                    return ApiResponse<List<ListInvestmentAssetResponse>>.FailResponse("Không lấy được danh sách crypto!", 500);
+                    return ApiResponse<InvestmentAssetResponse>.FailResponse("Không lấy được danh sách crypto!", 500);
+
+                var listGoldAsync = await _goldHandler.GetAllGoldPricesAsync();
+                if (listGoldAsync?.Data == null)
+                    return ApiResponse<InvestmentAssetResponse>.FailResponse("Không lấy được danh sách vàng!", 500);
 
                 var cryptoDict = listCryptoAsync.Data.ToDictionary(c => c.Id, c => c);
 
-                var listResponse = MapListInvestmentAssetResponse(listInvestmentAsset, cryptoDict);
-                
-                return ApiResponse<List<ListInvestmentAssetResponse>>.SuccessResponse(
-                    "Lấy danh sách tài sản của người dùng thành công!", 
-                    200, 
-                    listResponse);
+                var goldIds = new HashSet<string> { "SJC", "DOJI", "PNJ" };
+                var listAssetForCryptoView = listInvestmentAsset
+                    .Where(a => !goldIds.Contains(a.Id.ToUpper()))
+                    .ToList();
+
+                var listResponse = MapListInvestmentAssetResponse(listAssetForCryptoView, cryptoDict);
+
+                var response = new InvestmentAssetResponse
+                {
+                    listInvestmentAssetResponse = listResponse,
+                };
+
+                MapGoldDataToResponse(response, listInvestmentAsset, listGoldAsync.Data);
+
+                return ApiResponse<InvestmentAssetResponse>.SuccessResponse(
+                    "Lấy danh sách tài sản của người dùng thành công!",
+                    200,
+                    response);
+
             }
-            catch (Exception ex){
-                return ApiResponse<List<ListInvestmentAssetResponse>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
+            catch (Exception ex)
+            {
+                return ApiResponse<InvestmentAssetResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
 
@@ -69,8 +91,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 if (listCryptoAsync?.Data == null)
                     return ApiResponse<InvestmentAssetResponse>.FailResponse("Không lấy được danh sách crypto!", 500);
 
-                var cryptoDict = listCryptoAsync.Data.ToDictionary(c => c.Id, c => c);
+                var listGoldAsync = await _goldHandler.GetAllGoldPricesAsync();
+                if (listGoldAsync?.Data == null)
+                    return ApiResponse<InvestmentAssetResponse>.FailResponse("Không lấy được danh sách vàng!", 500);
 
+                var cryptoDict = listCryptoAsync.Data.ToDictionary(c => c.Id, c => c);
 
                 // Lấy toàn bộ detail của từng asset
                 var assetDetails = await LoadAllAssetDetailsAsync(listInvestmentAsset);
@@ -88,7 +113,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 // Tính trung bình tài sản và phần trăm trong quỹ
                 var avgFinanceList = CalculateAverageFinanceAssetInFund(listInvestmentAsset, assetDetails);
 
-                var listResponse = MapListInvestmentAssetResponse(listInvestmentAsset, cryptoDict);
+                var goldIds = new HashSet<string> { "SJC", "DOJI", "PNJ" };
+                var listAssetForCryptoView = listInvestmentAsset
+                    .Where(a => !goldIds.Contains(a.Id.ToUpper()))
+                    .ToList();
+
+                var listResponse = MapListInvestmentAssetResponse(listAssetForCryptoView, cryptoDict);
 
                 var response = new InvestmentAssetResponse
                 {
@@ -98,6 +128,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     listInvestmentAssetResponse = listResponse,
                     AverageFinanceAssets = avgFinanceList
                 };
+                MapGoldDataToResponse(response, listInvestmentAsset, listGoldAsync.Data);
+
                 return ApiResponse<InvestmentAssetResponse>.SuccessResponse("Lấy thông tin chi tiết quỹ thành công!", 200, response);
             }
             catch (Exception ex)
@@ -217,14 +249,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             };
         }
 
-        private List<ListInvestmentAssetResponse> MapListInvestmentAssetResponse(List<InvestmentAssetDomain> listAssets,
+        private List<ListInvestmentAssetCryptoResponse> MapListInvestmentAssetResponse(List<InvestmentAssetDomain> listAssets,
             Dictionary<string, CryptoResponse> cryptoDict)
         {
             return listAssets.Select(i =>
             {
                 cryptoDict.TryGetValue(i.Id, out var matchedCrypto);
 
-                return new ListInvestmentAssetResponse
+                return new ListInvestmentAssetCryptoResponse
                 {
                     IdAsset = i.IdAsset,
                     Id = i.Id,
@@ -237,6 +269,39 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     Url = matchedCrypto?.Image
                 };
             }).ToList();
+        }
+
+        private void MapGoldDataToResponse(InvestmentAssetResponse response,
+                                           List<InvestmentAssetDomain> userAssets,
+                                           GoldResponse? goldData)
+        {
+            if (goldData == null) return;
+
+            var userAssetIds = userAssets.Select(a => a.Id.ToUpper()).ToHashSet();
+
+            if (goldData.SjcGold != null && userAssetIds.Contains("SJC"))
+            {
+                response.SjcGoldResponse = goldData.SjcGold;
+            }else
+            {
+                response.SjcGoldResponse = null; 
+            }
+
+            if (goldData.DojiGold != null && userAssetIds.Contains("DOJI"))
+            {
+                response.DojiGoldResponse = goldData.DojiGold;
+            }else
+            {
+                response.DojiGoldResponse = null;
+            }
+
+            if (goldData.PnjGold != null && userAssetIds.Contains("PNJ"))
+            {
+                response.PnjGoldResponse = goldData.PnjGold;
+            }else
+            {
+                response.PnjGoldResponse = null;
+            }
         }
 
         public async Task<ApiResponse<string>> CreateInvestmentAssetHandleAsync(InvestmentAssetRequest investmentAssetRequest)

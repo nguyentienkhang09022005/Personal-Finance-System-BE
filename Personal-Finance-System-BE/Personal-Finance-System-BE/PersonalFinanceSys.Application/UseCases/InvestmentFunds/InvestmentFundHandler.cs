@@ -77,17 +77,17 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             );
         }
 
-        private List<ListInvestmentAssetResponse> MapListInvestmentAssetResponse(IEnumerable<InvestmentAssetDomain> listAssets,
+        private List<ListInvestmentAssetCryptoResponse> MapListInvestmentAssetResponse(IEnumerable<InvestmentAssetDomain> listAssets,
             Dictionary<string, CryptoResponse> cryptoDict)
         {
             if (listAssets == null)
-                return new List<ListInvestmentAssetResponse>();
+                return new List<ListInvestmentAssetCryptoResponse>();
 
             return listAssets.Select(i =>
             {
                 cryptoDict.TryGetValue(i.Id, out var matchedCrypto);
 
-                return new ListInvestmentAssetResponse
+                return new ListInvestmentAssetCryptoResponse
                 {
                     IdAsset = i.IdAsset,
                     Id = i.Id,
@@ -101,19 +101,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 };
             }).ToList();
         }
-
-        // Hàm lấy danh sách quỹ cá nhân qua idUser
-        //public async Task<ApiResponse<List<InvestmentFundResponse>>> GetListInvestmentFundHandleAsync(Guid idUser)
-        //{
-        //    bool userExists = await _userRepository.ExistUserAsync(idUser);
-        //    if (!userExists)
-        //        return ApiResponse<List<InvestmentFundResponse>>.FailResponse("Không tìm thấy người dùng!", 404);
-
-        //    var funds = await _investmentFundRepository.GetListInvesmentFundDomains(idUser);
-
-        //    var fundResposne = _mapper.Map<List<InvestmentFundResponse>>(funds);
-        //    return ApiResponse<List<InvestmentFundResponse>>.SuccessResponse("Lấy danh sách quỹ của người dùng thành công!", 200, fundResposne);
-        //}
 
         // Hàm tạo quỹ cá nhân
         public async Task<ApiResponse<InvestmentFundResponse>> CreateInvestmentHandleAsync(InvestmentFundCreationRequest investmentFundCreationRequest)
