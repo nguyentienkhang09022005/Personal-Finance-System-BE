@@ -38,32 +38,34 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                 var transactions = await _transactionRepository.GetListTransactionAsync(idUser);
                 var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
 
-                var collectTransactions = transactionResponses // Lọc ra loại Thu
+                decimal totalCollect = transactionResponses
                     .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeCollect)
-                    .ToList();
+                    .Sum(t => t.Amount);
 
-                var expenseTransactions = transactionResponses // Lọc ra loại Thu
+                decimal totalExpense = transactionResponses
                     .Where(t => t.TransactionType == ConstrantCollectAndExpense.TypeExpense)
-                    .ToList();
+                    .Sum(t => t.Amount);
 
-                decimal totalCollect = collectTransactions == null ? 0 : collectTransactions.Sum(t => t.Amount); // Tổng tiền nhận vào
-                decimal totalExpense = expenseTransactions == null ? 0 : expenseTransactions.Sum(t => t.Amount); // Tổng tiền chi ra
-
-                decimal totalCollectAndExpense = totalCollect - totalExpense;
+                decimal currentCashBalance = totalCollect - totalExpense;
 
                 // Fund
-                decimal profitResponse = await _investmentDetailHandler.InvestmentAssetProfitByUserHandleAsync(idUser);
+                decimal cryptoValue = await _investmentDetailHandler.InvestmentAssetProfitByUserHandleAsync(idUser);
 
                 // Tổng tài chính
-                decimal totalAmount = totalCollectAndExpense + profitResponse;
+                decimal totalNetWorth = currentCashBalance + cryptoValue;
+
+                decimal positiveCash = currentCashBalance > 0 ? currentCashBalance : 0;
+                decimal positiveCrypto = cryptoValue > 0 ? cryptoValue : 0;
+                decimal totalPositiveAssets = positiveCash + positiveCrypto;
 
                 var userFinanceResponse = new UserFinanceResponse
                 {
-                    totalAmount = totalAmount,
-                    cash = totalCollect,
-                    cashPercent = totalAmount == 0 ? 0 : (totalCollect / totalAmount) * 100,
-                    crypto = profitResponse,
-                    cryptoPercent = totalAmount == 0 ? 0 : (profitResponse / totalAmount) * 100
+                    totalAmount = totalNetWorth,
+                    cash = currentCashBalance,
+                    cashPercent = totalPositiveAssets == 0 ? 0 : (positiveCash / totalPositiveAssets) * 100,
+
+                    crypto = cryptoValue,
+                    cryptoPercent = totalPositiveAssets == 0 ? 0 : (positiveCrypto / totalPositiveAssets) * 100
                 };
 
                 return ApiResponse<UserFinanceResponse>.SuccessResponse("Lấy danh sách tài chính thành công!", 200, userFinanceResponse);
