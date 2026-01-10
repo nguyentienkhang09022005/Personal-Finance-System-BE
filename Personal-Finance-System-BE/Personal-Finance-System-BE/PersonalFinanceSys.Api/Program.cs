@@ -47,6 +47,10 @@ builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentV
 builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
 builder.Configuration["GeminiSettings:ApiKey"] = Environment.GetEnvironmentVariable("APIKEY__GEMINI");
 builder.Configuration["GeminiSettings:BaseUrl"] = Environment.GetEnvironmentVariable("GEMINI__APIURL");
+builder.Configuration["GoldSettings:ApiKey"] = Environment.GetEnvironmentVariable("API__KEYGOLD");
+builder.Configuration["GoldSettings:UrlSJC"] = Environment.GetEnvironmentVariable("URL__SJC");
+builder.Configuration["GoldSettings:UrlDOJI"] = Environment.GetEnvironmentVariable("URL__DOJI");
+builder.Configuration["GoldSettings:UrlPNJ"] = Environment.GetEnvironmentVariable("URL__PNJ");
 
 
 
@@ -148,6 +152,7 @@ builder.Services.AddScoped<FavoriteHandler>();
 builder.Services.AddScoped<EvaluateHandler>();
 builder.Services.AddScoped<FriendshipHandler>();
 builder.Services.AddScoped<MessageHandler>();
+builder.Services.AddScoped<GoldHandler>();
 
 
 // Mapper Registration
