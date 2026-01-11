@@ -1,11 +1,13 @@
-﻿using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
+﻿using Personal_Finance_System_BE.PersonalFinanceSys.Application.Constrant;
+using Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Response;
+using System.Text.Json;
 
 namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
 {
     public class GoldHandler
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiGold;
+        private readonly string _apiKey;
         private readonly string _urlSJC;
         private readonly string _urlDOJI;
         private readonly string _urlPNJ;
@@ -13,7 +15,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
         public GoldHandler(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _apiGold = configuration["GoldSettings:ApiKey"] ?? throw new ArgumentNullException("GoldSettings:ApiKey");
+            _apiKey = configuration["GoldSettings:ApiKey"] ?? throw new ArgumentNullException("GoldSettings:ApiKey");
             _urlSJC = configuration["GoldSettings:UrlSJC"] ?? throw new ArgumentNullException("GoldSettings:UrlSJC");
             _urlDOJI = configuration["GoldSettings:UrlDOJI"] ?? throw new ArgumentNullException("GoldSettings:UrlDOJI");
             _urlPNJ = configuration["GoldSettings:UrlPNJ"] ?? throw new ArgumentNullException("GoldSettings:UrlPNJ");
@@ -23,31 +25,19 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
         {
             try
             {
-                var sjcTask = GetSJCGoldPricesAsync();
-                var dojiTask = GetDOJIGoldPricesAsync();
-                var pnjTask = GetPNJGoldPricesAsync();
+                var response = new GoldResponse();
 
-                await Task.WhenAll(sjcTask, dojiTask, pnjTask);
+                var taskSjc = FetchAndMapSjcAsync();
+                var taskDoji = FetchAndMapDojiAsync();
+                var taskPnj = FetchAndMapPnjAsync();
 
-                var sjcResult = await sjcTask;
-                var dojiResult = await dojiTask;
-                var pnjResult = await pnjTask;
+                await Task.WhenAll(taskSjc, taskDoji, taskPnj);
 
-                var allGoldData = new GoldResponse
-                {
-                    SjcGold = sjcResult.Data?.Results,
+                response.SjcGold = await taskSjc;
+                response.DojiGold = await taskDoji;
+                response.PnjGold = await taskPnj;
 
-                    DojiGold = dojiResult.Data?.Results,
-
-                    PnjGold = pnjResult.Data?.Results
-                };
-
-                if (allGoldData.SjcGold == null && allGoldData.DojiGold == null && allGoldData.PnjGold == null)
-                {
-                    return ApiResponse<GoldResponse>.FailResponse("Không thể lấy dữ liệu từ bất kỳ nguồn nào.", 500);
-                }
-
-                return ApiResponse<GoldResponse>.SuccessResponse("Lấy tổng hợp giá vàng thành công!", 200, allGoldData);
+                return ApiResponse<GoldResponse>.SuccessResponse("Lấy tổng hợp giá vàng thành công!", 200, response);
             }
             catch (Exception ex)
             {
@@ -55,112 +45,123 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Api
             }
         }
 
-        public async Task<ApiResponse<SjcGoldResponse>> GetSJCGoldPricesAsync()
+        private async Task<List<GoldItemResponse>> FetchAndMapSjcAsync()
         {
             try
             {
-                var finalUrl = $"{_urlSJC}?api_key={_apiGold}";
-                var response = await _httpClient.GetAsync(finalUrl);
+                var root = await GetJsonRootAsync(_urlSJC);
+                if (root.ValueKind == JsonValueKind.Undefined) return new List<GoldItemResponse>();
 
-                if (!response.IsSuccessStatusCode)
+                var resultItem = root.GetProperty("results")[0];
+                var timestamp = resultItem.GetProperty("datetime").GetString();
+                var updateTime = UnixTimeStampToDateTime(long.Parse(timestamp ?? "0"));
+            
+                var list = new List<GoldItemResponse>();
+                foreach (var kvp in ConstantTypeGold.SjcMapping)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    return ApiResponse<SjcGoldResponse>.FailResponse(
-                        $"Lỗi lấy giá vàng SJC: {response.ReasonPhrase}. Chi tiết: {errorContent}",
-                        (int)response.StatusCode);
+                    list.Add(new GoldItemResponse
+                    {
+                        Id = "SJC_" + kvp.Key,
+                        Name = kvp.Value,
+                        Type = kvp.Key,
+                        Location = "Toàn quốc",
+                        BuyPrice = ParseDecimal(resultItem, $"buy_{kvp.Key}"),
+                        SellPrice = ParseDecimal(resultItem, $"sell_{kvp.Key}"),
+                        LastUpdated = updateTime
+                    });
                 }
-
-                var apiResult = await response.Content.ReadFromJsonAsync<SjcGoldResponse>();
-                
-                if (apiResult == null)
-                {
-                    return ApiResponse<SjcGoldResponse>.FailResponse("Dữ liệu giá vàng SJC rỗng!", 404);
-                }
-
-                foreach (var item in apiResult.Results)
-                {
-                    item.Id = "SJC";
-                    item.Name = "Vàng SJC";
-                }
-
-                return ApiResponse<SjcGoldResponse>.SuccessResponse("Lấy giá vàng SJC thành công!", 200, apiResult);
+                return list;
             }
-            catch (Exception ex)
-            {
-                return ApiResponse<SjcGoldResponse>.FailResponse($"Lỗi hệ thống SJC: {ex.Message}", 500);
-            }
+            catch { return new List<GoldItemResponse>(); }
         }
 
-        public async Task<ApiResponse<DojiGoldResponse>> GetDOJIGoldPricesAsync()
+        private async Task<List<GoldItemResponse>> FetchAndMapDojiAsync()
         {
             try
             {
-                var finalUrl = $"{_urlDOJI}?api_key={_apiGold}";
-                var response = await _httpClient.GetAsync(finalUrl);
+                var root = await GetJsonRootAsync(_urlDOJI);
+                if (root.ValueKind == JsonValueKind.Undefined) return new List<GoldItemResponse>();
 
-                if (!response.IsSuccessStatusCode)
+                var resultItem = root.GetProperty("results")[0];
+                var timestamp = resultItem.GetProperty("datetime").GetString();
+                var updateTime = UnixTimeStampToDateTime(long.Parse(timestamp ?? "0"));
+
+                var list = new List<GoldItemResponse>();
+                foreach (var kvp in ConstantTypeGold.DojiLocationMapping)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    return ApiResponse<DojiGoldResponse>.FailResponse(
-                        $"Lỗi lấy giá vàng DOJI: {response.ReasonPhrase}. Chi tiết: {errorContent}",
-                        (int)response.StatusCode);
+                    list.Add(new GoldItemResponse
+                    {
+                        Id = "DOJI_" + kvp.Key,
+                        Name = "Vàng AVPL / SJC (Lẻ)",
+                        Type = kvp.Key,
+                        Location = kvp.Value,
+                        BuyPrice = ParseDecimal(resultItem, $"buy_{kvp.Key}"),
+                        SellPrice = ParseDecimal(resultItem, $"sell_{kvp.Key}"),
+                        LastUpdated = updateTime
+                    });
                 }
-
-                var apiResult = await response.Content.ReadFromJsonAsync<DojiGoldResponse>();
-                
-                if (apiResult == null)
-                {
-                    return ApiResponse<DojiGoldResponse>.FailResponse("Dữ liệu giá vàng DOJI rỗng!", 404);
-                }
-
-                foreach (var item in apiResult.Results)
-                {
-                    item.Id = "DOJI";
-                    item.Name = "Vàng DOJI";
-                }
-
-                return ApiResponse<DojiGoldResponse>.SuccessResponse("Lấy giá vàng DOJI thành công!", 200, apiResult);
+                return list;
             }
-            catch (Exception ex)
-            {
-                return ApiResponse<DojiGoldResponse>.FailResponse($"Lỗi hệ thống DOJI: {ex.Message}", 500);
-            }
+            catch { return new List<GoldItemResponse>(); }
         }
 
-        public async Task<ApiResponse<PnjGoldResponse>> GetPNJGoldPricesAsync()
+        private async Task<List<GoldItemResponse>> FetchAndMapPnjAsync()
         {
             try
             {
-                var finalUrl = $"{_urlPNJ}?api_key={_apiGold}";
-                var response = await _httpClient.GetAsync(finalUrl);
+                var root = await GetJsonRootAsync(_urlPNJ);
+                if (root.ValueKind == JsonValueKind.Undefined) return new List<GoldItemResponse>();
 
-                if (!response.IsSuccessStatusCode)
+                var resultItem = root.GetProperty("results")[0];
+                var timestamp = resultItem.GetProperty("datetime").GetString();
+                var updateTime = UnixTimeStampToDateTime(long.Parse(timestamp ?? "0"));
+
+                var list = new List<GoldItemResponse>();
+                foreach (var kvp in ConstantTypeGold.PnjMapping)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    return ApiResponse<PnjGoldResponse>.FailResponse(
-                        $"Lỗi lấy giá vàng PNJ: {response.ReasonPhrase}. Chi tiết: {errorContent}",
-                        (int)response.StatusCode);
+                    list.Add(new GoldItemResponse
+                    {
+                        Id = "PNJ_" + kvp.Key,
+                        Name = kvp.Value,
+                        Type = kvp.Key,
+                        Location = "Toàn quốc",
+                        BuyPrice = ParseDecimal(resultItem, $"buy_{kvp.Key}"),
+                        SellPrice = ParseDecimal(resultItem, $"sell_{kvp.Key}"),
+                        LastUpdated = updateTime
+                    });
                 }
-
-                var apiResult = await response.Content.ReadFromJsonAsync<PnjGoldResponse>();
-
-                if (apiResult == null)
-                {
-                    return ApiResponse<PnjGoldResponse>.FailResponse("Dữ liệu giá vàng PNJ rỗng!", 404);
-                }
-
-                foreach (var item in apiResult.Results)
-                {
-                    item.Id = "PNJ";
-                    item.Name = "Vàng PNJ";
-                }
-
-                return ApiResponse<PnjGoldResponse>.SuccessResponse("Lấy giá vàng PNJ thành công!", 200, apiResult);
+                return list;
             }
-            catch (Exception ex)
+            catch { return new List<GoldItemResponse>(); }
+        }
+        private async Task<JsonElement> GetJsonRootAsync(string url)
+        {
+            var finalUrl = $"{url}?api_key={_apiKey}";
+            var response = await _httpClient.GetAsync(finalUrl);
+            if (!response.IsSuccessStatusCode) return default;
+
+            var content = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(content);
+            return doc.RootElement.Clone();
+        }
+
+        private decimal ParseDecimal(JsonElement element, string key)
+        {
+            if (element.TryGetProperty(key, out var prop))
             {
-                return ApiResponse<PnjGoldResponse>.FailResponse($"Lỗi hệ thống PNJ: {ex.Message}", 500);
+                var valueStr = prop.GetString();
+                if (decimal.TryParse(valueStr, out var result))
+                {
+                    return result;
+                }
             }
+            return 0;
+        }
+
+        private DateTime UnixTimeStampToDateTime(long unixTimeStamp)
+        {
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            return dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
         }
     }
 }

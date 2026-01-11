@@ -14,6 +14,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Domain.Entities
 
         public Guid? IdFund { get; set; }
 
+        public string? AssetType { get; set; }
+
+        public string? MappingKey { get; set; }
+
         public InvestmentAssetDomain() {}
     }
 }

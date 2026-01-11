@@ -7,6 +7,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Data;
 
 public partial class PersonFinanceSysDbContext : DbContext
 {
+    public PersonFinanceSysDbContext()
+    {
+    }
+
     public PersonFinanceSysDbContext(DbContextOptions<PersonFinanceSysDbContext> options)
         : base(options)
     {
@@ -53,6 +57,10 @@ public partial class PersonFinanceSysDbContext : DbContext
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=ep-odd-wave-a1mzcz0k-pooler.ap-southeast-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_GuPr1xNw6OEy;SSL Mode=Require;Trust Server Certificate=true;Channel Binding=Require;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -234,10 +242,17 @@ public partial class PersonFinanceSysDbContext : DbContext
             entity.Property(e => e.AssetSymbol)
                 .HasMaxLength(20)
                 .HasColumnName("asset_symbol");
+            entity.Property(e => e.AssetType)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'CRYPTO'::character varying")
+                .HasColumnName("asset_type");
             entity.Property(e => e.Id)
                 .HasMaxLength(50)
                 .HasColumnName("id");
             entity.Property(e => e.IdFund).HasColumnName("id_fund");
+            entity.Property(e => e.MappingKey)
+                .HasMaxLength(50)
+                .HasColumnName("mapping_key");
 
             entity.HasOne(d => d.IdFundNavigation).WithMany(p => p.InvestmentAssets)
                 .HasForeignKey(d => d.IdFund)

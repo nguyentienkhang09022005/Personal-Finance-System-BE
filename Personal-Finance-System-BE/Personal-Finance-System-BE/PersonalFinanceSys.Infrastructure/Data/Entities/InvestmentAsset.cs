@@ -15,6 +15,10 @@ public partial class InvestmentAsset
 
     public Guid IdFund { get; set; }
 
+    public string? AssetType { get; set; }
+
+    public string? MappingKey { get; set; }
+
     public virtual InvestmentFund? IdFundNavigation { get; set; }
 
     public virtual ICollection<InvestmentDetail> InvestmentDetails { get; set; } = new List<InvestmentDetail>();

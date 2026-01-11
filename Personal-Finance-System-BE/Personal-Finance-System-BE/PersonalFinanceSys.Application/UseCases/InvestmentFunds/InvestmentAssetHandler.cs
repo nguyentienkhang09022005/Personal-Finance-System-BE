@@ -53,7 +53,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                 var cryptoDict = listCryptoAsync.Data.ToDictionary(c => c.Id, c => c);
 
-                var goldIds = new HashSet<string> { "SJC", "DOJI", "PNJ" };
+                var goldIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "SJC_1l", "SJC_1c", "SJC_5c", "SJC_nhan1c",
+                    "SJC_nutrang_9999", "SJC_nutrang_99", "SJC_nutrang_75"
+                }; 
                 var listAssetForCryptoView = listInvestmentAsset
                     .Where(a => !goldIds.Contains(a.Id.ToUpper()))
                     .ToList();
@@ -62,7 +66,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                 var response = new InvestmentAssetResponse
                 {
-                    listInvestmentAssetResponse = listResponse,
+                    listInvestmentAssetResponse = listResponse
                 };
 
                 MapGoldDataToResponse(response, listInvestmentAsset, listGoldAsync.Data);
@@ -113,7 +117,11 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 // Tính trung bình tài sản và phần trăm trong quỹ
                 var avgFinanceList = CalculateAverageFinanceAssetInFund(listInvestmentAsset, assetDetails);
 
-                var goldIds = new HashSet<string> { "SJC", "DOJI", "PNJ" };
+                var goldIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "SJC_1l", "SJC_1c", "SJC_5c", "SJC_nhan1c",
+                    "SJC_nutrang_9999", "SJC_nutrang_99", "SJC_nutrang_75"
+                };
                 var listAssetForCryptoView = listInvestmentAsset
                     .Where(a => !goldIds.Contains(a.Id.ToUpper()))
                     .ToList();
@@ -262,6 +270,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     Id = i.Id,
                     AssetName = i.AssetName,
                     AssetSymbol = i.AssetSymbol,
+                    AssetType = i.AssetType,
+                    MappingKey = i.MappingKey,
                     CurrentPrice = matchedCrypto?.CurrentPrice ?? 0,
                     MarketCap = matchedCrypto?.MarketCap ?? 0,
                     TotalVolume = matchedCrypto?.TotalVolume ?? 0,
@@ -275,36 +285,27 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                                            List<InvestmentAssetDomain> userAssets,
                                            GoldResponse? goldData)
         {
-            if (goldData == null) return;
-
-            var userAssetIds = userAssets.Select(a => a.Id.ToUpper()).ToHashSet();
-
-            if (goldData.SjcGold != null && userAssetIds.Contains("SJC"))
+            if (goldData?.SjcGold == null || userAssets == null || !userAssets.Any())
             {
-                response.SjcGoldResponse = goldData.SjcGold;
-            }else
-            {
-                response.SjcGoldResponse = null; 
+                return;
             }
 
-            if (goldData.DojiGold != null && userAssetIds.Contains("DOJI"))
-            {
-                response.DojiGoldResponse = goldData.DojiGold;
-            }else
-            {
-                response.DojiGoldResponse = null;
-            }
+            var userAssetIds = userAssets
+                .Where(a => !string.IsNullOrEmpty(a.Id))
+                .Select(a => a.Id)
+                .ToHashSet();
 
-            if (goldData.PnjGold != null && userAssetIds.Contains("PNJ"))
+            var investedSjcGold = goldData.SjcGold
+                .Where(goldItem => userAssetIds.Contains(goldItem.Id))
+                .ToList();
+
+            if (investedSjcGold.Any())
             {
-                response.PnjGoldResponse = goldData.PnjGold;
-            }else
-            {
-                response.PnjGoldResponse = null;
+                response.SjcGoldResponse = investedSjcGold;
             }
         }
 
-        public async Task<ApiResponse<string>> CreateInvestmentAssetHandleAsync(InvestmentAssetRequest investmentAssetRequest)
+        public async Task<ApiResponse<string>> CreateInvestmentAssetCryptoHandleAsync(InvestmentAssetRequest investmentAssetRequest)
         {
             try
             {
@@ -318,6 +319,32 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     return ApiResponse<string>.FailResponse("Tài sản này đã có trong quỹ!", 409);
 
                 var investmentAssetDomain = _mapper.Map<InvestmentAssetDomain>(investmentAssetRequest);
+                investmentAssetDomain.AssetType = "CRYPTO";
+                var savedInvestmentAsset = await _investmentAssetRepository.AddInvestmentAssetAsync(investmentAssetDomain);
+
+                return ApiResponse<string>.SuccessResponse("Tạo tài sản cho quỹ thành công!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
+        }
+
+        public async Task<ApiResponse<string>> CreateInvestmentAssetGoldHandleAsync(InvestmentAssetGoldRequest investmentAssetGoldRequest)
+        {
+            try
+            {
+                bool fundExist = await _investmentFundRepository.CheckExistInvestmentFund(investmentAssetGoldRequest.IdFund);
+                if (!fundExist)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy quỹ!", 404);
+
+                bool assetExist = await _investmentAssetRepository.CheckExistInvestmentAssetByIdAndIdFundAsync(investmentAssetGoldRequest.Id,
+                                                                                                               investmentAssetGoldRequest.IdFund);
+                if (assetExist)
+                    return ApiResponse<string>.FailResponse("Tài sản này đã có trong quỹ!", 409);
+
+                var investmentAssetDomain = _mapper.Map<InvestmentAssetDomain>(investmentAssetGoldRequest);
+                investmentAssetDomain.AssetType = "GOLD";
                 var savedInvestmentAsset = await _investmentAssetRepository.AddInvestmentAssetAsync(investmentAssetDomain);
 
                 return ApiResponse<string>.SuccessResponse("Tạo tài sản cho quỹ thành công!", 200, string.Empty);

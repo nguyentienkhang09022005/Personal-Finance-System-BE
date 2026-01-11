@@ -18,6 +18,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Infrastructure.Mapping
 
             // Request -> Domain
             CreateMap<InvestmentAssetRequest, InvestmentAssetDomain>();
+
+            CreateMap<InvestmentAssetGoldRequest, InvestmentAssetDomain>();
         }
     }
 }

@@ -16,13 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
         public List<ListInvestmentAssetCryptoResponse> listInvestmentAssetResponse { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<SjcGoldItemResponse>? SjcGoldResponse { get; set; }
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<DojiGoldItemResponse>? DojiGoldResponse { get; set; }
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<PnjGoldItemResponse>? PnjGoldResponse { get; set; }
+        public List<GoldItemResponse>? SjcGoldResponse { get; set; }
     }
 
     public class ListInvestmentAssetCryptoResponse
@@ -34,6 +28,10 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
         public string? AssetName { get; set; }
 
         public string? AssetSymbol { get; set; }
+
+        public string? AssetType { get; set; }
+
+        public string? MappingKey { get; set; }
 
         public decimal CurrentPrice { get; set; }
 
