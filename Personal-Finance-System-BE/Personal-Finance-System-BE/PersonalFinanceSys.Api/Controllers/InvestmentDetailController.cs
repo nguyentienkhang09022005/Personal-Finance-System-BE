@@ -41,6 +41,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("compare-investment-detail-by-month")]
         public async Task<IActionResult> CompareInvestmentDetailByMonthAsync([FromBody] CompareInvestmentDetailByMonthRequest compareInvestmentDetailByMonthRequest)
         {
@@ -52,6 +53,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("compare-investment-detail-by-year")]
         public async Task<IActionResult> CompareInvestmentDetailByYearAsync([FromBody] CompareInvestmentDetailByYearRequest compareInvestmentDetailByYearRequest)
         {

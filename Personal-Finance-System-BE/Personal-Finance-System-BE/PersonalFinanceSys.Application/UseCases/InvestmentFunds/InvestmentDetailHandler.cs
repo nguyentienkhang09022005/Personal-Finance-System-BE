@@ -334,13 +334,40 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             try
             {
                 var checkUserExist = await _userRepository.ExistUserAsync(compareInvestmentDetailByYearRequest.IdUser);
-                if (!checkUserExist){
+                if (!checkUserExist)
+                {
                     return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(compareInvestmentDetailByYearRequest.IdAsset);
-                if (!checkAssetExist){
+                var investmentAsset = await _investmentAssetRepository.GetInfInvestmentAssetAsync(compareInvestmentDetailByYearRequest.IdAsset);
+                if (investmentAsset == null)
+                {
                     return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không tìm thấy tài sản!", 404);
+                }
+
+                decimal currentPriceVND = 0;
+
+                if (IsGoldAsset(investmentAsset))
+                {
+                    var goldPrices = await _goldHandler.GetAllGoldPricesAsync();
+                    if (goldPrices?.Data?.SjcGold == null)
+                        return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không lấy được danh sách giá vàng!", 500);
+
+                    var matchedGold = goldPrices.Data.SjcGold.FirstOrDefault(g =>
+                        string.Equals(g.Id, investmentAsset.Id, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedGold == null)
+                        return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse($"Không tìm thấy giá vàng cho mã: {investmentAsset.Id}", 404);
+
+                    currentPriceVND = matchedGold.BuyPrice;
+                }
+                else
+                {
+                    var priceResponse = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+                    if (priceResponse == null || priceResponse.Data == null)
+                        return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không lấy được giá crypto!", 500);
+
+                    currentPriceVND = priceResponse.Data.MarketData.CurrentPrice.VND;
                 }
 
                 var investmentDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndYearsAsync(
@@ -348,7 +375,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     compareInvestmentDetailByYearRequest.IdAsset,
                     new[] { compareInvestmentDetailByYearRequest.Year1, compareInvestmentDetailByYearRequest.Year2 });
 
-                if (!investmentDetails.Any()){
+                if (!investmentDetails.Any())
+                {
                     return ApiResponse<CompareInvestmentDetailByYearResponse>.FailResponse("Không có giao dịch đầu tư loại tài sản trong 2 năm này!", 404);
                 }
 
@@ -356,15 +384,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     .GroupBy(t => t.CreateAt?.Year)
                     .ToDictionary(g => g.Key!.Value, g => g.ToList());
 
-                // Lấy giao dịch đầu tư của từng năm
                 groupByYear.TryGetValue(compareInvestmentDetailByYearRequest.Year1, out var year1Details);
                 groupByYear.TryGetValue(compareInvestmentDetailByYearRequest.Year2, out var year2Details);
 
                 year1Details ??= new List<InvestmentDetailDomain>();
                 year2Details ??= new List<InvestmentDetailDomain>();
 
-                var year1Summary = CalculateYearlyInvestmentSummary(year1Details, compareInvestmentDetailByYearRequest.Year1);
-                var year2Summary = CalculateYearlyInvestmentSummary(year2Details, compareInvestmentDetailByYearRequest.Year2);
+                var year1Summary = CalculateYearlyInvestmentSummary(year1Details, compareInvestmentDetailByYearRequest.Year1, currentPriceVND);
+                var year2Summary = CalculateYearlyInvestmentSummary(year2Details, compareInvestmentDetailByYearRequest.Year2, currentPriceVND);
 
                 var compareResponse = new CompareInvestmentDetailByYearResponse
                 {
@@ -386,13 +413,39 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             try
             {
                 var checkUserExist = await _userRepository.ExistUserAsync(compareInvestmentDetailByMonthRequest.IdUser);
-                if (!checkUserExist){
+                if (!checkUserExist)
+                {
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                var checkAssetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(compareInvestmentDetailByMonthRequest.IdAsset);
-                if (!checkAssetExist){
+                var investmentAsset = await _investmentAssetRepository.GetInfInvestmentAssetAsync(compareInvestmentDetailByMonthRequest.IdAsset);
+                if (investmentAsset == null)
+                {
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không tìm thấy tài sản!", 404);
+                }
+
+                decimal currentPriceVND = 0;
+                if (IsGoldAsset(investmentAsset))
+                {
+                    var goldPrices = await _goldHandler.GetAllGoldPricesAsync();
+                    if (goldPrices?.Data?.SjcGold == null)
+                        return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không lấy được danh sách giá vàng!", 500);
+
+                    var matchedGold = goldPrices.Data.SjcGold.FirstOrDefault(g =>
+                        string.Equals(g.Id, investmentAsset.Id, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedGold == null)
+                        return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse($"Không tìm thấy giá vàng cho mã: {investmentAsset.Id}", 404);
+
+                    currentPriceVND = matchedGold.BuyPrice;
+                }
+                else
+                {
+                    var priceResponse = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+                    if (priceResponse == null || priceResponse.Data == null)
+                        return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không lấy được giá crypto!", 500);
+
+                    currentPriceVND = priceResponse.Data.MarketData.CurrentPrice.VND;
                 }
 
                 var investmentsDetails = await _investmentDetailRepository.GetInvestmentDetailsByUserAndMonthsAsync(
@@ -404,7 +457,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                         (compareInvestmentDetailByMonthRequest.SecondMonth, compareInvestmentDetailByMonthRequest.SecondYear)
                     });
 
-                if (!investmentsDetails.Any()){
+                if (!investmentsDetails.Any())
+                {
                     return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse("Không có giao dịch đầu tư loại tài sản trong 2 tháng này!", 404);
                 }
 
@@ -412,7 +466,6 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                     .GroupBy(t => new { t.CreateAt!.Value.Month, t.CreateAt!.Value.Year })
                     .ToDictionary(g => (g.Key!.Month, g.Key!.Year), g => g.ToList());
 
-                // Lấy giao dịch đầu tư của từng tháng và năm
                 groupByMonthYear.TryGetValue(
                     (compareInvestmentDetailByMonthRequest.FirstMonth, compareInvestmentDetailByMonthRequest.FirstYear),
                     out var month1List);
@@ -424,13 +477,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 month1List ??= new List<InvestmentDetailDomain>();
                 month2List ??= new List<InvestmentDetailDomain>();
 
-                // Tính tổng mua và bán của mỗi tháng và năm
                 var summaryMonth1 = CalculateMonthlyInvestmentSummary(month1List,
                                                                      compareInvestmentDetailByMonthRequest.FirstMonth,
-                                                                     compareInvestmentDetailByMonthRequest.FirstYear);
+                                                                     compareInvestmentDetailByMonthRequest.FirstYear,
+                                                                     currentPriceVND);
                 var summaryMonth2 = CalculateMonthlyInvestmentSummary(month2List,
                                                                      compareInvestmentDetailByMonthRequest.SecondMonth,
-                                                                     compareInvestmentDetailByMonthRequest.SecondYear);
+                                                                     compareInvestmentDetailByMonthRequest.SecondYear,
+                                                                     currentPriceVND);
 
                 var compareResponse = new CompareInvestmentDetailByMonthResponse
                 {
@@ -440,13 +494,14 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
                 return ApiResponse<CompareInvestmentDetailByMonthResponse>.SuccessResponse("So sánh giao dịch đầu tư giữa hai tháng thành công!", 200, compareResponse);
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 return ApiResponse<CompareInvestmentDetailByMonthResponse>.FailResponse(ex.Message, 500);
             }
         }
 
-        private MonthlyInvestmentDetailSummary CalculateMonthlyInvestmentSummary(List<InvestmentDetailDomain> details, 
-                                                                                 int month, int year)
+        private MonthlyInvestmentDetailSummary CalculateMonthlyInvestmentSummary(List<InvestmentDetailDomain> details,
+                                                                                 int month, int year, decimal currentPriceVND)
         {
             var summary = new MonthlyInvestmentDetailSummary
             {
@@ -468,11 +523,12 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             };
 
             summary.SpreadBuyAndSellByMonth = summary.TotalBuy - summary.TotalSell;
+
             return summary;
         }
 
-        private YearlyInvestmentDetailSummary CalculateYearlyInvestmentSummary(List<InvestmentDetailDomain> details, 
-                                                                               int year)
+        private YearlyInvestmentDetailSummary CalculateYearlyInvestmentSummary(List<InvestmentDetailDomain> details,
+                                                                               int year, decimal currentPriceVND)
         {
             var summary = new YearlyInvestmentDetailSummary
             {
@@ -493,6 +549,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             };
 
             summary.SpreadBuyAndSellByYear = summary.TotalBuy - summary.TotalSell;
+
             return summary;
         }
     }
