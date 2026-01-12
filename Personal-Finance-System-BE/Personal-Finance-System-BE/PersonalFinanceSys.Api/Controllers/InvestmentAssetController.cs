@@ -16,6 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             _investmentAssetHandler = investmentAssetHandler;
         }
 
+        [Authorize]
         [HttpGet("list-investment-asset")]
         public async Task<IActionResult> GetListInvestmentAssetByFund([FromQuery] Guid idFund)
         {
@@ -27,6 +28,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-investment-asset-by-user")]
         public async Task<IActionResult> GetListInvestmentAssetByUser([FromQuery] Guid idUser)
         {
@@ -38,6 +40,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-investment-asset-crypto")]
         public async Task<IActionResult> AddInvestmentAssetCrypto([FromBody]InvestmentAssetRequest investmentAssetRequest)
         {
@@ -49,6 +52,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("create-investment-asset-gold")]
         public async Task<IActionResult> AddInvestmentAssetGold([FromBody] InvestmentAssetGoldRequest investmentAssetGoldRequest)
         {

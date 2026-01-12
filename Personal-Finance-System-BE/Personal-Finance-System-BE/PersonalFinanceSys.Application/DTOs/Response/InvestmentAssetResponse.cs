@@ -16,7 +16,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
         public List<ListInvestmentAssetCryptoResponse> listInvestmentAssetResponse { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<GoldItemResponse>? SjcGoldResponse { get; set; }
+        public List<ListInvestmentAssetGoldResponse>? SjcGoldResponse { get; set; }
     }
 
     public class ListInvestmentAssetCryptoResponse
@@ -42,5 +42,24 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.DTOs.Respons
         public decimal PriceChangePercentage24h { get; set; }
 
         public string? Url { get; set; }
+    }
+
+    public class ListInvestmentAssetGoldResponse
+    {
+        public Guid IdAsset { get; set; }
+
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Type { get; set; }
+
+        public decimal BuyPrice { get; set; }
+
+        public decimal SellPrice { get; set; }
+
+        public string Location { get; set; }
+
+        public DateTime LastUpdated { get; set; }
     }
 }

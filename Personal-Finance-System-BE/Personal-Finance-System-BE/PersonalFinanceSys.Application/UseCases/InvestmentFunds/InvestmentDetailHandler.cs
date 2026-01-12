@@ -16,18 +16,21 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly CryptoHandler _cryptoHandler;
+        private readonly GoldHandler _goldHandler;
 
         public InvestmentDetailHandler(IInvestmentDetailRepository investmentDetailRepository, 
                                        IInvestmentAssetRepository investmentAssetRepository, 
                                        IUserRepository userRepository,
                                        IMapper mapper,
-                                       CryptoHandler cryptoHandler)
+                                       CryptoHandler cryptoHandler,
+                                       GoldHandler goldHandler)
         {
             _investmentDetailRepository = investmentDetailRepository;
             _investmentAssetRepository = investmentAssetRepository;
             _userRepository = userRepository;
             _mapper = mapper;
             _cryptoHandler = cryptoHandler;
+            _goldHandler = goldHandler;
         }
 
         public async Task<ApiResponse<InvestmentDetailResponse>> GetInfInvestmentAssetHandleAsync(Guid idAsset)
@@ -37,16 +40,36 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                 var investmentAsset = await _investmentAssetRepository.GetInfInvestmentAssetAsync(idAsset);
                 var listInvestmentDetail = await _investmentDetailRepository.GetListInvestmentDetailAsync(idAsset);
 
-                var priceResponse = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+                decimal currentPriceVND = 0;
 
-                if (priceResponse == null || priceResponse.Data == null)
-                    return ApiResponse<InvestmentDetailResponse>.FailResponse("Không lấy được giá crypto!", 500);
+                if (IsGoldAsset(investmentAsset))
+                {
+                    var goldPrices = await _goldHandler.GetAllGoldPricesAsync();
+                    if (goldPrices?.Data?.SjcGold == null)
+                        return ApiResponse<InvestmentDetailResponse>.FailResponse("Không lấy được danh sách giá vàng!", 500);
 
-                decimal currentPriceVND = priceResponse.Data.MarketData.CurrentPrice.VND;
+                    var matchedGold = goldPrices.Data.SjcGold.FirstOrDefault(g =>
+                        string.Equals(g.Id, investmentAsset.Id, StringComparison.OrdinalIgnoreCase));
 
-                decimal ValueTotalAsset = CalculateValueTotalAsset(listInvestmentDetail, currentPriceVND);
-                decimal AverageNetCost = CalculateAverageNetCost(listInvestmentDetail);
-                decimal TotalProfitAndLoss = CalculateTotalProfitAndLoss(listInvestmentDetail, currentPriceVND);
+                    if (matchedGold == null)
+                    {
+                        return ApiResponse<InvestmentDetailResponse>.FailResponse($"Không tìm thấy giá vàng cho mã: {investmentAsset.Id}", 404);
+                    }
+
+                    currentPriceVND = matchedGold.BuyPrice;
+                }
+                else
+                {
+                    var priceResponse = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+                    if (priceResponse == null || priceResponse.Data == null)
+                        return ApiResponse<InvestmentDetailResponse>.FailResponse("Không lấy được giá crypto!", 500);
+
+                    currentPriceVND = priceResponse.Data.MarketData.CurrentPrice.VND;
+                }
+
+                    decimal ValueTotalAsset = CalculateValueTotalAsset(listInvestmentDetail, currentPriceVND);
+                    decimal AverageNetCost = CalculateAverageNetCost(listInvestmentDetail);
+                    decimal TotalProfitAndLoss = CalculateTotalProfitAndLoss(listInvestmentDetail, currentPriceVND);
 
                 var listResponse = listInvestmentDetail.Select(i =>
                 {
@@ -83,6 +106,23 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
             {
                 return ApiResponse<InvestmentDetailResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500);
             }
+        }
+
+        private bool IsGoldAsset(InvestmentAssetDomain asset)
+        {
+            if (!string.IsNullOrEmpty(asset.AssetType) &&
+                asset.AssetType.Equals("GOLD", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(asset.Id) &&
+                asset.Id.StartsWith("SJC", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private decimal CalculateValueTotalAsset(List<InvestmentDetailDomain> details, decimal currentPriceVND)
@@ -200,9 +240,8 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
         {
             try
             {
-                // Check tài sản tồn tại
-                bool assetExist = await _investmentAssetRepository.CheckExistInvestmentAssetAsync(investmentDetailRequest.IdAsset);
-                if (!assetExist)
+                var investmentAsset = await _investmentAssetRepository.GetInfInvestmentAssetAsync(investmentDetailRequest.IdAsset);
+                if (investmentAsset == null)
                     return ApiResponse<string>.FailResponse("Không tìm thấy tài sản!", 404);
 
                 if (string.Equals(investmentDetailRequest.Type, ConstrantBuyAndSell.TypeSell, StringComparison.OrdinalIgnoreCase))
@@ -222,6 +261,47 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
                             $"Số lượng bán ({quantityToSell}) vượt quá số lượng hiện có ({netQuantityAvailable}).",
                             400); 
                     }
+                }
+
+                if (IsGoldAsset(investmentAsset))
+                {
+                    var goldPrices = await _goldHandler.GetAllGoldPricesAsync();
+                    if (goldPrices?.Data?.SjcGold != null)
+                    {
+                        var matchedGold = goldPrices.Data.SjcGold.FirstOrDefault(g =>
+                            string.Equals(g.Id, investmentAsset.Id, StringComparison.OrdinalIgnoreCase));
+
+                        if (matchedGold != null)
+                        {
+                            if (investmentDetailRequest.Price == 0) 
+                            {
+                                if (string.Equals(investmentDetailRequest.Type, ConstrantBuyAndSell.TypeBuy, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    investmentDetailRequest.Price = matchedGold.SellPrice;
+                                }
+                                else if (string.Equals(investmentDetailRequest.Type, ConstrantBuyAndSell.TypeSell, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    investmentDetailRequest.Price = matchedGold.BuyPrice;
+                                }
+                            }
+                        }
+                    }
+                }
+                else 
+                {
+                     if (investmentDetailRequest.Price == 0)
+                     {
+                         var cryptoPrice = await _cryptoHandler.GetCurrentPriceCryptoAsync(investmentAsset.Id);
+                         if (cryptoPrice?.Data != null)
+                         {
+                             investmentDetailRequest.Price = cryptoPrice.Data.MarketData.CurrentPrice.VND;
+                         }
+                     }
+                }
+
+                if (investmentDetailRequest.Expense == 0)
+                {
+                    investmentDetailRequest.Expense = investmentDetailRequest.Price * investmentDetailRequest.Quantity;
                 }
 
                 var investmentDetailDomain = _mapper.Map<InvestmentDetailDomain>(investmentDetailRequest);
