@@ -11,5 +11,9 @@
         public decimal crypto { get; set; }
 
         public decimal cryptoPercent { get; set; }
+
+        public decimal gold { get; set; }
+
+        public decimal goldPercent { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
                     return ApiResponse<UserFinanceResponse>.FailResponse("Không tìm thấy người dùng!", 404);
                 }
 
-                // Transaction
+                // Transaction (Tính tiền mặt)
                 var transactions = await _transactionRepository.GetListTransactionAsync(idUser);
                 var transactionResponses = _mapper.Map<List<TransactionResponse>>(transactions);
 
@@ -48,24 +48,32 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Use
 
                 decimal currentCashBalance = totalCollect - totalExpense;
 
-                // Fund
-                decimal cryptoValue = await _investmentDetailHandler.InvestmentAssetProfitByUserHandleAsync(idUser);
+                // Fund (Tính giá trị Crypto và Gold tách biệt)
+                var (currentCryptoValue, currentGoldValue) = await _investmentDetailHandler.GetAssetAllocationByUserAsync(idUser);
 
-                // Tổng tài chính
-                decimal totalNetWorth = currentCashBalance + cryptoValue;
+                decimal totalNetWorth = currentCashBalance + currentCryptoValue + currentGoldValue;
 
                 decimal positiveCash = currentCashBalance > 0 ? currentCashBalance : 0;
-                decimal positiveCrypto = cryptoValue > 0 ? cryptoValue : 0;
-                decimal totalPositiveAssets = positiveCash + positiveCrypto;
+                decimal positiveCrypto = currentCryptoValue > 0 ? currentCryptoValue : 0;
+                decimal positiveGold = currentGoldValue > 0 ? currentGoldValue : 0;
+
+                decimal totalPositiveAssets = positiveCash + positiveCrypto + positiveGold;
 
                 var userFinanceResponse = new UserFinanceResponse
                 {
                     totalAmount = totalNetWorth,
-                    cash = currentCashBalance,
-                    cashPercent = totalPositiveAssets == 0 ? 0 : (positiveCash / totalPositiveAssets) * 100,
 
-                    crypto = cryptoValue,
-                    cryptoPercent = totalPositiveAssets == 0 ? 0 : (positiveCrypto / totalPositiveAssets) * 100
+                    // Cash
+                    cash = currentCashBalance,
+                    cashPercent = totalPositiveAssets == 0 ? 0 : Math.Round((positiveCash / totalPositiveAssets) * 100, 2),
+
+                    // Crypto
+                    crypto = currentCryptoValue,
+                    cryptoPercent = totalPositiveAssets == 0 ? 0 : Math.Round((positiveCrypto / totalPositiveAssets) * 100, 2),
+
+                    // Gold
+                    gold = currentGoldValue,
+                    goldPercent = totalPositiveAssets == 0 ? 0 : Math.Round((positiveGold / totalPositiveAssets) * 100, 2)
                 };
 
                 return ApiResponse<UserFinanceResponse>.SuccessResponse("Lấy danh sách tài chính thành công!", 200, userFinanceResponse);

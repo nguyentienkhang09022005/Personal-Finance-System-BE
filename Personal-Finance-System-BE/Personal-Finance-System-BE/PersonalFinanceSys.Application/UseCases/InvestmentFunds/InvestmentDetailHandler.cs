@@ -552,5 +552,68 @@ namespace Personal_Finance_System_BE.PersonalFinanceSys.Application.UseCases.Inv
 
             return summary;
         }
+
+        public async Task<(decimal TotalCryptoValue, decimal TotalGoldValue)> GetAssetAllocationByUserAsync(Guid idUser)
+        {
+            decimal totalCryptoValue = 0;
+            decimal totalGoldValue = 0;
+
+            try
+            {
+                var investmentAssets = await _investmentAssetRepository.GetAllAssetsByUserAsync(idUser);
+                var investmentDetails = await _investmentDetailRepository.GetAllDetailsByUserAsync(idUser);
+
+                Dictionary<string, GoldItemResponse> goldPriceDict = new Dictionary<string, GoldItemResponse>(StringComparer.OrdinalIgnoreCase);
+                var goldPrices = await _goldHandler.GetAllGoldPricesAsync();
+
+                if (goldPrices?.Data?.SjcGold != null)
+                {
+                    foreach (var g in goldPrices.Data.SjcGold)
+                    {
+                        if (!goldPriceDict.ContainsKey(g.Id)) goldPriceDict[g.Id] = g;
+                    }
+                }
+                // DOJI/PNJ (future)
+
+                var detailsByAsset = investmentDetails
+                    .Where(d => d.IdAsset.HasValue)
+                    .GroupBy(d => d.IdAsset!.Value)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                foreach (var asset in investmentAssets)
+                {
+                    if (!detailsByAsset.TryGetValue(asset.IdAsset, out var assetDetails))
+                        continue;
+
+                    decimal totalBuyQty = assetDetails.Where(d => d.Type == ConstrantBuyAndSell.TypeBuy).Sum(d => d.Quantity);
+                    decimal totalSellQty = assetDetails.Where(d => d.Type == ConstrantBuyAndSell.TypeSell).Sum(d => d.Quantity);
+                    decimal remainingQty = totalBuyQty - totalSellQty;
+
+                    if (remainingQty <= 0) continue;
+
+                    if (IsGoldAsset(asset))
+                    {
+                        if (goldPriceDict.TryGetValue(asset.Id, out var goldItem))
+                        {
+                            totalGoldValue += remainingQty * goldItem.BuyPrice;
+                        }
+                    }
+                    else
+                    {
+                        var priceResult = await _cryptoHandler.GetCurrentPriceCryptoAsync(asset.Id);
+                        if (priceResult?.Data != null)
+                        {
+                            totalCryptoValue += remainingQty * priceResult.Data.MarketData.CurrentPrice.VND;
+                        }
+                    }
+                }
+
+                return (totalCryptoValue, totalGoldValue);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi tính toán phân bổ tài sản: " + ex.Message, ex);
+            }
+        }
     }
 }
